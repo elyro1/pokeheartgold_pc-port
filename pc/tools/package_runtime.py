@@ -19,10 +19,13 @@ HOST_LIBRARIES = re.compile(
 
 def linux_libraries(executables):
     libraries = {}
+    environment = {key: value for key, value in os.environ.items()
+                   if not key.startswith("LD_")}
+    environment["LC_ALL"] = "C"
     for executable in executables:
         result = subprocess.run(["ldd", str(executable)], capture_output=True,
                                 text=True, encoding="utf-8", check=True,
-                                env={**os.environ, "LC_ALL": "C"})
+                                env=environment)
         for line in result.stdout.splitlines():
             if "=> not found" in line:
                 raise ValueError(f"Unresolved runtime dependency: {line.strip()}")
@@ -35,7 +38,24 @@ def linux_libraries(executables):
     return libraries
 
 
-def package(build, output, game, platform, dll_dirs=(), objdump="objdump"):
+def relocate_linux_libraries(directory, patchelf):
+    # Distribution libraries can carry their own absolute RUNPATH, which blocks
+    # inheritance of the executable's RPATH (e.g. Ubuntu's libpulse.so.0).
+    # Every bundled library must find its own dependencies in this same folder.
+    for library in sorted(directory.iterdir()):
+        subprocess.run([patchelf, "--set-rpath", "$ORIGIN", str(library)], check=True)
+
+
+def verify_linux_runtime(output, names):
+    directory = (output / "lib").resolve()
+    dependencies = linux_libraries([*[output / name for name in names],
+                                    *sorted(directory.iterdir())])
+    for name, source in dependencies.items():
+        if source.resolve() != directory / name:
+            raise ValueError(f"Runtime dependency resolved outside package: {name} => {source}")
+
+
+def package(build, output, game, platform, dll_dirs=(), objdump="objdump", patchelf="patchelf"):
     # Only fresh directories are accepted, so releases cannot accidentally include
     # saves, extracted ROMs, stale libraries, or local configuration from a run.
     if output.exists() and any(output.iterdir()):
@@ -54,6 +74,8 @@ def package(build, output, game, platform, dll_dirs=(), objdump="objdump"):
         (output / "lib").mkdir()
         for name, source in libraries.items():
             shutil.copy2(source, output / "lib" / name)
+        relocate_linux_libraries(output / "lib", patchelf)
+        verify_linux_runtime(output, names)
     header = (ROOT / (game + ".us/rom_header_template.sbin")).read_bytes()[:0x160]
     if len(header) != 0x160:
         raise ValueError("Incomplete ROM header template")
@@ -73,10 +95,11 @@ def main():
     parser.add_argument("--platform", choices=["linux", "win64"], required=True)
     parser.add_argument("--dll-dir", type=Path, action="append", default=[])
     parser.add_argument("--objdump", default="objdump")
+    parser.add_argument("--patchelf", default="patchelf")
     args = parser.parse_args()
     try:
         package(args.build.resolve(), args.output.resolve(), args.game, args.platform,
-                args.dll_dir, args.objdump)
+                args.dll_dir, args.objdump, args.patchelf)
     except (OSError, ValueError, subprocess.CalledProcessError) as error:
         parser.exit(1, f"Runtime packaging failed: {error}\n")
 

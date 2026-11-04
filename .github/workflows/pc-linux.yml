@@ -16,18 +16,28 @@ jobs:
       - name: Install build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential git python3 meson ninja-build nasm \
-            flex bison pkg-config libsdl2-dev libenet-dev libsoundtouch-dev
+          sudo apt-get install -y build-essential git python3 meson ninja-build nasm patchelf \
+            flex bison pkg-config libsdl2-dev libenet-dev libsoundtouch-dev \
+            libegl1 libgl1-mesa-dri
       - name: Check generators and runtime packaging
         run: python3 -m unittest discover -s pc/tools/tests
       - name: Build executable and asset extractor
         run: |
           make -f Makefile.pc linux GAME_VERSION=HEARTGOLD JOBS=4
           meson compile -C build/pc/heartgold -j 4 hg-extract
+      - name: Check native configuration text
+        run: meson test -C build/pc/heartgold --print-errorlogs
       - name: Stage runtime files and shared libraries
         run: >-
           python3 pc/tools/package_runtime.py --platform linux --game heartgold
           --build build/pc/heartgold --output build/pc/heartgold/package
+      - name: Smoke test packaged runtime
+        run: |
+          smoke_dir=$(mktemp -d)
+          cp -a build/pc/heartgold/package/. "$smoke_dir/"
+          env -u LD_LIBRARY_PATH -u LD_PRELOAD \
+            HG_PC_GAME_FRAMES=120 SDL_VIDEODRIVER=offscreen SDL_AUDIODRIVER=dummy \
+            LIBGL_ALWAYS_SOFTWARE=1 timeout 30s "$smoke_dir/hg-game"
       - uses: actions/upload-artifact@v4
         with:
           name: linux-HEARTGOLD

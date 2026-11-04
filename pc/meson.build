@@ -56,6 +56,13 @@ extractor = executable('hg-extract', 'asset_extract.cpp', 'runtime_directory.cpp
   name_suffix: build_target == 'win64' ? 'exe' : [],
   dependencies: [sdk] + runtime_dependencies)
 
+if build_target == 'linux'
+  config_text_test = executable('hg-config-text-test', 'tests/config_text.c',
+    dependencies: sdk, native: true, link_language: 'cpp',
+    build_by_default: false)
+  test('config UTF-16 text', config_text_test)
+endif
+
 # Native game sources and reviewed assembly constants.
 game_sources = run_command(python, files('tools/game_sources.py'), check: true).stdout().strip().split('\n')
 native_data_sources = run_command(python, files('tools/fixed_data.py'), '--list-sources', check: true).stdout().strip().split('\n')

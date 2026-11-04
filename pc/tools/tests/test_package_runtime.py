@@ -1,5 +1,7 @@
 """Verify redistributable staging and startup from outside the package folder."""
 from pathlib import Path
+import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -7,7 +9,7 @@ import unittest
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from package_runtime import linux_libraries, package
+from package_runtime import linux_libraries, package, verify_linux_runtime
 
 
 class PackageRuntimeTests(unittest.TestCase):
@@ -43,7 +45,10 @@ class PackageRuntimeTests(unittest.TestCase):
             library = root / "libSDL2.so"
             library.write_bytes(b"library")
             for game, code in (("heartgold", b"IPKE"), ("soulsilver", b"IPGE")):
-                with self.subTest(game=game), patch("package_runtime.linux_libraries", return_value={"libSDL2.so": library}):
+                with self.subTest(game=game), \
+                        patch("package_runtime.linux_libraries", return_value={"libSDL2.so": library}), \
+                        patch("package_runtime.relocate_linux_libraries"), \
+                        patch("package_runtime.verify_linux_runtime"):
                     output = root / game
                     package(build, output, game, "linux")
                     header = (output / "header.bin").read_bytes()
@@ -57,6 +62,55 @@ class PackageRuntimeTests(unittest.TestCase):
                     self.assertFalse(list(output.glob("*.cmd")))
                     with self.assertRaisesRegex(ValueError, "must be empty"):
                         package(build, output, game, "linux")
+
+    def test_runtime_verification_rejects_host_fallback(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            output = Path(temporary)
+            (output / "lib").mkdir()
+            with patch("package_runtime.linux_libraries", return_value={
+                    "libpulsecommon.so": Path("/usr/lib/libpulsecommon.so")}):
+                with self.assertRaisesRegex(ValueError, "outside package"):
+                    verify_linux_runtime(output, ["hg-game"])
+
+    @unittest.skipUnless(sys.platform == "linux" and shutil.which("cc") and shutil.which("patchelf"),
+                         "Linux ELF integration test needs cc and patchelf")
+    def test_relocated_runtime_resolves_library_with_absolute_vendor_runpath(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            build, vendor = root / "build", root / "vendor"
+            (build / "lib").mkdir(parents=True)
+            vendor.mkdir()
+            (root / "private.c").write_text("int private_value(void) { return 42; }\n", encoding="utf-8")
+            (root / "parent.c").write_text(
+                "int private_value(void); int parent_value(void) { return private_value(); }\n", encoding="utf-8")
+            (root / "main.c").write_text(
+                "int parent_value(void); int main(void) { return parent_value() != 42; }\n", encoding="utf-8")
+            commands = [
+                ["cc", "-shared", "-fPIC", str(root / "private.c"),
+                 "-Wl,-soname,libhgci_private.so", "-o", str(vendor / "libhgci_private.so")],
+                ["cc", "-shared", "-fPIC", str(root / "parent.c"), "-L" + str(vendor),
+                 "-lhgci_private", "-Wl,-soname,libhgci_parent.so", "-Wl,--enable-new-dtags",
+                 "-Wl,-rpath," + str(vendor), "-o", str(build / "lib/libhgci_parent.so")],
+                ["cc", str(root / "main.c"), "-L" + str(build / "lib"), "-lhgci_parent",
+                 "-Wl,-rpath-link," + str(vendor), "-Wl,--disable-new-dtags,-rpath,$ORIGIN/lib",
+                 "-o", str(build / "hg-game")],
+            ]
+            for command in commands:
+                subprocess.run(command, check=True, capture_output=True)
+            shutil.copy2(build / "hg-game", build / "hg-extract")
+            output = root / "package"
+            package(build, output, "heartgold", "linux")
+            # Neither the original build nor its vendor directory is available
+            # on a user's computer. Move the package and hide both source paths.
+            relocated = root / "relocated package with spaces"
+            output.rename(relocated)
+            build.rename(root / "hidden build")
+            vendor.rename(root / "hidden vendor")
+            verify_linux_runtime(relocated, ["hg-game", "hg-extract"])
+            environment = {key: value for key, value in os.environ.items()
+                           if not key.startswith("LD_")}
+            for name in ("hg-game", "hg-extract"):
+                subprocess.run([str(relocated / name)], cwd=root, env=environment, check=True)
 
 
 
