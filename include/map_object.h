@@ -2,6 +2,9 @@
 #define POKEHEARTGOLD_MAP_OBJECT_H
 
 #include "field_types_def.h"
+#if defined(SDK_PORT)
+#include "field/map_object_render_internal.h"
+#endif
 
 typedef struct SavedMapObject {
     u32 flags;
@@ -37,8 +40,12 @@ struct MapObjectManager { // declared field_system.h
     u32 priority;
     u8 unk10[4];
     NARC *mapModelNarc;
+#if defined(SDK_PORT)
+    struct MapObjectRender render;
+#else
     u32 render;
     u8 unk1C[0x108];
+#endif
     LocalMapObject *objects;
     FieldSystem *fieldSystem;
 }; // size: 0x12c

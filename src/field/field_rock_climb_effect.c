@@ -58,6 +58,21 @@ static void RockClimbEffect_Update(FieldEffect *effect, void *state);
 static void RockClimbEffect_Draw(FieldEffect *effect, void *state);
 
 static const VecFx32 sRockClimbScale = { FX32_ONE, FX32_ONE, FX32_ONE };
+#if defined(SDK_PORT)
+
+static BOOL RockClimbEffect_InitNative(FieldEffect *effect, void *state) {
+    return RockClimbEffect_Init(effect, state);
+}
+static void RockClimbEffect_DestroyNative(FieldEffect *effect, void *state) {
+    RockClimbEffect_Destroy(effect, state);
+}
+static void RockClimbEffect_UpdateNative(FieldEffect *effect, void *state) {
+    RockClimbEffect_Update(effect, state);
+}
+static void RockClimbEffect_DrawNative(FieldEffect *effect, void *state) {
+    RockClimbEffect_Draw(effect, state);
+}
+#endif
 
 static const FieldEffectBasicTemplate sRockClimbEffectTemplate = {
     sizeof(RockClimbEffect),

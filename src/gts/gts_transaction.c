@@ -1141,3 +1141,50 @@ static BOOL GtsTransaction_IsDepositMissingFromSave(GtsApp *app) {
     }
     return FALSE;
 }
+#if defined(SDK_PORT)
+
+/* Native tables from asm/gts_data.s; adapters give differing originals the table's signature. */
+static enum GtsAppState Native_GtsTransaction_Idle(GtsApp * a0) { return GtsTransaction_Idle(a0); }
+enum GtsAppState (*const gGtsTransactionStates[])(GtsApp *app) = {
+    GtsTransaction_Start,
+    Native_GtsTransaction_Idle,
+    GtsTransaction_SendPost,
+    GtsTransaction_WaitPost,
+    GtsTransaction_SendPostFinish,
+    GtsTransaction_WaitPostFinish,
+    GtsTransaction_DepositDone,
+    GtsTransaction_SendGet,
+    GtsTransaction_WaitGet,
+    GtsTransaction_SendReturn,
+    GtsTransaction_WaitReturn,
+    GtsTransaction_ReceiveDone,
+    GtsTransaction_SendExchange,
+    GtsTransaction_WaitExchange,
+    GtsTransaction_SendExchangeFinish,
+    GtsTransaction_WaitExchangeFinish,
+    GtsTransaction_ExchangeDone,
+    GtsTransaction_AlreadyTraded,
+    GtsTransaction_ReceiveTradedMon,
+    GtsTransaction_SendDelete,
+    GtsTransaction_WaitDelete,
+    GtsTransaction_TradedDone,
+    GtsTransaction_SendUnsavedReturn,
+    GtsTransaction_WaitUnsavedReturn,
+    GtsTransaction_SendResult,
+    GtsTransaction_WaitResult,
+    GtsTransaction_SendStatusGet,
+    GtsTransaction_WaitStatusGet,
+    GtsTransaction_ExitToMainMenu,
+    GtsTransaction_SaveAndExit,
+    GtsTransaction_StartSave,
+    GtsTransaction_WaitSaveDelay,
+    GtsTransaction_SaveFirstPart,
+    GtsTransaction_SaveRest,
+    GtsTransaction_StartSaveWithMessage,
+    GtsTransaction_SaveWithMessage,
+    GtsTransaction_FadeOut,
+    GtsTransaction_WaitText,
+    GtsTransaction_ServerErrorExit,
+    GtsTransaction_ServerError,
+};
+#endif

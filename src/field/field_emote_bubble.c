@@ -98,6 +98,21 @@ static void EmoteBubbleEffect_Destroy(FieldEffect *effect, void *state);
 static void EmoteBubbleEffect_Update(FieldEffect *effect, void *state);
 static void EmoteBubbleEffect_Draw(FieldEffect *effect, void *state);
 static BOOL EmoteBubbleAnim_Advance(EmoteBubbleAnim *anim);
+#if defined(SDK_PORT)
+
+static BOOL EmoteBubbleEffect_InitNative(FieldEffect *effect, void *state) {
+    return EmoteBubbleEffect_Init(effect, state);
+}
+static void EmoteBubbleEffect_DestroyNative(FieldEffect *effect, void *state) {
+    EmoteBubbleEffect_Destroy(effect, state);
+}
+static void EmoteBubbleEffect_UpdateNative(FieldEffect *effect, void *state) {
+    EmoteBubbleEffect_Update(effect, state);
+}
+static void EmoteBubbleEffect_DrawNative(FieldEffect *effect, void *state) {
+    EmoteBubbleEffect_Draw(effect, state);
+}
+#endif
 
 static const FieldEffectBasicTemplate sEmoteBubbleEffectTemplate = {
     sizeof(EmoteBubbleEffect),

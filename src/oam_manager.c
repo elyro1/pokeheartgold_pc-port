@@ -7,9 +7,13 @@
 #include "sprite.h"
 
 // NNS OAM manager instance (opaque here)
+#if defined(SDK_PORT)
+typedef NNSG2dOamManagerInstance OamInstance;
+#else
 typedef struct OamInstance {
     u32 data[7];
 } OamInstance;
+#endif
 
 typedef struct OamManager {
     OamInstance main;
@@ -23,10 +27,14 @@ static BOOL OamManager_EntrySubOam(const GXOamAttr *oam, u16 affine, BOOL double
 static u16 OamManager_EntryMainAffine(const MtxFx22 *matrix);
 static u16 OamManager_EntrySubAffine(const MtxFx22 *matrix);
 
+#if defined(SDK_PORT)
+// NitroSystem OAM manager (lib/include/nnsys/g2d_internal.h declares them with its own instance type)
+#else
 BOOL NNS_G2dGetNewOamManagerInstance(OamInstance *, u16, u16, u16, u16, int);
 void NNS_G2dApplyAndResetOamManagerBuffer(OamInstance *);
 BOOL NNS_G2dEntryOamManagerOamWithAffineIdx(OamInstance *, const GXOamAttr *, u16);
 u16 NNS_G2dEntryOamManagerAffine(OamInstance *, const MtxFx22 *);
+#endif
 
 static OamManager *sOamManager;
 
@@ -67,6 +75,11 @@ static void OamManager_CreateExact(int first, int count, int affineFirst, int af
 
 void OamManager_ApplyAndResetBuffers(void) {
     if (sOamManager) {
+#if defined(SDK_PORT)
+        // Subscreens can replace the battle graphics task and VBlank callback.
+        // Rebuild their skipped draw lists before uploading and clearing OAM.
+        SpriteList_DrawSkippedBattleLists();
+#endif
         NNS_G2dApplyAndResetOamManagerBuffer(&sOamManager->main);
         NNS_G2dApplyAndResetOamManagerBuffer(&sOamManager->sub);
     }

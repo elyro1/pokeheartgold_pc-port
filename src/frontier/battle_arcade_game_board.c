@@ -1517,3 +1517,8 @@ static void BattleArcadeGameBoard_RemoveWindows(Window *window) {
         RemoveWindow(&window[i]);
     }
 }
+#if defined(SDK_PORT)
+
+/* Native tables from asm/frontier_script_commands_data.s; adapters give differing originals the field signatures. */
+const OverlayManagerTemplate gOverlayTemplate_BattleArcadeGameBoard = { BattleArcadeGameBoard_InitOverlay, BattleArcadeGameBoard_Main, BattleArcadeGameBoard_Exit, FS_OVERLAY_ID(OVY_84) };
+#endif

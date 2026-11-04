@@ -1,3 +1,6 @@
+#if defined(SDK_PORT)
+#include <hg/qsort.h>
+#endif
 #include "pokeathlon/pokeathlon_course_ceremony.h"
 
 #include "global.h"
@@ -112,7 +115,10 @@ enum PokeathlonCeremonyInitState {
 
 FS_EXTERN_OVERLAY(OVY_98);
 
+#if defined(SDK_PORT)
+#else
 void MATH_QSort(void *head, u32 num, u32 width, int (*compare)(const void *, const void *), void *stackBuffer);
+#endif
 
 static BOOL PokeathlonCourseCeremony_IsCryActive(PokeathlonCourseCeremony *ceremony);
 static void PokeathlonCourseCeremony_LoadWinnerBg(BgConfig *bgConfig, enum HeapID heapId);
@@ -1246,7 +1252,11 @@ static void PokeathlonCourseCeremony_RankTeams(PokeathlonCourseCeremonyScore *sc
         ranks[i].drawingLot = drawingLots[i];
     }
 
+#if defined(SDK_PORT)
+    HG_QSort(ranks, POKEATHLON_PARTICIPANTS, sizeof(PokeathlonCourseCeremonyRank), PokeathlonCourseCeremony_CompareRanks, NULL);
+#else
     MATH_QSort(ranks, POKEATHLON_PARTICIPANTS, sizeof(PokeathlonCourseCeremonyRank), PokeathlonCourseCeremony_CompareRanks, NULL);
+#endif
 
     for (i = 0; i < POKEATHLON_PARTICIPANTS; i++) {
         ranks[i].place = place;
@@ -2222,7 +2232,11 @@ static void PokeathlonCourseCeremony_BreakTie(PokeathlonCourseCeremonyRank *rank
     }
     ranks[winner].place--;
     ranks[winner].points++;
+#if defined(SDK_PORT)
+    HG_QSort(ranks, POKEATHLON_PARTICIPANTS, sizeof(PokeathlonCourseCeremonyRank), PokeathlonCourseCeremony_CompareRanks, NULL);
+#else
     MATH_QSort(ranks, POKEATHLON_PARTICIPANTS, sizeof(PokeathlonCourseCeremonyRank), PokeathlonCourseCeremony_CompareRanks, NULL);
+#endif
     ranks[0].points--;
 }
 

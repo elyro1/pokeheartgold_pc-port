@@ -346,7 +346,11 @@ static int FishingRodState_Hooked(FishingRod *rod, PlayerAvatar *avatar, LocalMa
 static int FishingRodState_ShowLanded(FishingRod *rod, PlayerAvatar *avatar, LocalMapObject *object) {
     rod->timer++;
     if (rod->emoteMark != 0) {
+#if defined(SDK_PORT)
+        FieldEffect_Destroy((FieldEffectHandle)rod->emoteMark);
+#else
         FieldEffect_Destroy(rod->emoteMark);
+#endif
         rod->emoteMark = 0;
     }
     if (rod->timer > 15) {
@@ -445,7 +449,11 @@ static int FishingRodState_WaitPutAway(FishingRod *rod, PlayerAvatar *avatar, Lo
 
 static int FishingRodState_Finish(FishingRod *rod, PlayerAvatar *avatar, LocalMapObject *object) {
     if (rod->emoteMark != 0) {
+#if defined(SDK_PORT)
+        FieldEffect_Destroy((FieldEffectHandle)rod->emoteMark);
+#else
         FieldEffect_Destroy(rod->emoteMark);
+#endif
         rod->emoteMark = 0;
     }
     rod->finished = TRUE;

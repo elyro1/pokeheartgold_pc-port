@@ -476,8 +476,16 @@ typedef struct BattleHpBar {
 
 typedef struct BallThrow BallThrow;
 
+#if defined(SDK_PORT)
+typedef SysTaskFunc OpponentInputTask;
+
+#endif
 typedef struct OpponentData {
+#if defined(SDK_PORT)
+    OpponentInputTask inputTasks[6];
+#else
     u32 inputTasks[6];
+#endif
     ManagedSprite *managedSprite;
     u32 *unk1C;
     Pokepic *pokepic;
@@ -497,6 +505,10 @@ typedef struct OpponentData {
     NARC *pokepicAnimNarc;
     u8 commandReceived;
     u8 unk1A9[3];
+#if defined(SDK_PORT)
+    BOOL encounterSliding;
+    u32 encounterSlideEndFrame;
+#endif
 } OpponentData;
 
 typedef struct BattleTerrain {
@@ -524,6 +536,10 @@ typedef struct BattleSystemUnusedWords {
 
 typedef struct BattleInput BattleInput;
 
+#if defined(SDK_PORT)
+typedef SysTask *BattleTaskHandle;
+
+#endif
 struct BattleSystem {
     struct GF3DVramMan *gf3dVramMan;
     BgConfig *bgConfig;
@@ -532,9 +548,15 @@ struct BattleSystem {
     MsgData *attackMsgData;
     MessageFormat *msgFormat;
     String *msgBuffer;
+#if defined(SDK_PORT)
+    BattleTaskHandle drawGraphicsTask;
+    BattleTaskHandle criticalHpMusicTask;
+    BattleTaskHandle scrollBgTask;
+#else
     u32 drawGraphicsTask;
     u32 criticalHpMusicTask;
     u32 scrollBgTask;
+#endif
     PaletteData *palette;
     u32 battleType;
     BattleContext *ctx;
@@ -703,6 +725,12 @@ typedef struct PokedexEntryPopupArgs {
     enum HeapID heapID;
 } PokedexEntryPopupArgs;
 
+#if defined(SDK_PORT)
+typedef struct BallBurstEffect *BallBurstEffectHandle;
+typedef void *BallPaletteFlashHandle;
+typedef struct BattleAnimBattlerSprites *BallBattlerSpritesHandle;
+
+#endif
 struct BallThrow { // TODO: Give a better name.
     int ballAnim;
     int ballAnimStarted;

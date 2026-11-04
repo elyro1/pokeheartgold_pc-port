@@ -1,0 +1,10 @@
+[wrap-git]
+url = https://github.com/elyro1/libntr.git
+revision = lib_libntr
+depth = 1
+directory = libntr
+diff_files = libntr-intro-render.patch, libntr-win64.patch
+
+[provide]
+dependency_names = NitroSDK
+program_names = makelcf

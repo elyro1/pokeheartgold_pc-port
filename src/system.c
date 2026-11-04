@@ -1,3 +1,6 @@
+#if defined(SDK_PORT)
+#include "native_runtime.h"
+#endif
 #include "system.h"
 
 #include "global.h"
@@ -121,7 +124,12 @@ void InitSystemForTheGame(void) {
     OS_InitTick();
     InitHeapSystem();
     gSystem.mainTaskQueue = SysTaskQueue_PlacementNew(160, OS_AllocFromArenaLo(OS_ARENA_MAIN, SysTaskQueue_GetArenaSize(160), 4));
+#if defined(SDK_PORT)
+    gSystem.vblankTaskQueue = SysTaskQueue_PlacementNew(HG_PC_VBLANK_TASK_CAPACITY,
+        OS_AllocFromArenaLo(OS_ARENA_MAIN, SysTaskQueue_GetArenaSize(HG_PC_VBLANK_TASK_CAPACITY), 8));
+#else
     gSystem.vblankTaskQueue = SysTaskQueue_PlacementNew(32, OS_AllocFromArenaLo(OS_ARENA_MAIN, SysTaskQueue_GetArenaSize(32), 4));
+#endif
     gSystem.vwaitTaskQueue = SysTaskQueue_PlacementNew(32, OS_AllocFromArenaLo(OS_ARENA_MAIN, SysTaskQueue_GetArenaSize(32), 4));
     gSystem.printTaskQueue = SysTaskQueue_PlacementNew(4, OS_AllocFromArenaLo(OS_ARENA_MAIN, SysTaskQueue_GetArenaSize(4), 4));
     GX_DispOff();
@@ -155,8 +163,16 @@ void InitGraphicMemory(void) {
     GX_DisableBankForLCDC();
     MI_CpuFillFast((void *)HW_OAM, 0xC0, HW_OAM_SIZE);
     MI_CpuFillFast((void *)HW_DB_OAM, 0xC0, HW_DB_OAM_SIZE);
+#if defined(SDK_PORT)
+    // Native palette banks are separate arrays, not one contiguous DS region.
+    MI_CpuClearFast((void *)HW_BG_PLTT, HW_BG_PLTT_SIZE);
+    MI_CpuClearFast((void *)HW_OBJ_PLTT, HW_OBJ_PLTT_SIZE);
+    MI_CpuClearFast((void *)HW_DB_BG_PLTT, HW_DB_BG_PLTT_SIZE);
+    MI_CpuClearFast((void *)HW_DB_OBJ_PLTT, HW_DB_OBJ_PLTT_SIZE);
+#else
     MI_CpuClearFast((void *)HW_PLTT, HW_PLTT_SIZE);
     MI_CpuClearFast((void *)HW_DB_PLTT, HW_DB_PLTT_SIZE);
+#endif
 }
 
 void *Sys_AllocAndReadFile(enum HeapID heapID, const char *path) {

@@ -313,3 +313,111 @@ static void Task_ApplyBrightness(SysTask *task, void *data) {
     EncounterEffect_SetMasterBrightness(interp->screen, interp->interp.value);
     SysTask_Destroy(task);
 }
+#if defined(SDK_PORT)
+
+/* Native tables from asm/encounter_effect_data.s; adapters give differing originals the table's signature. */
+void EncounterEffect_WildRowsWhite(SysTask *task, EncounterEffectTask *effect);
+void EncounterEffect_WildRowsBlack(SysTask *task, EncounterEffectTask *effect);
+void EncounterEffect_WildWaveWhite(SysTask *task, EncounterEffectTask *effect);
+void EncounterEffect_WildWaveBlack(SysTask *task, EncounterEffectTask *effect);
+void EncounterEffect_WildDiagonalsWhite(SysTask *task, EncounterEffectTask *effect);
+void EncounterEffect_WildDiagonalsBlack(SysTask *task, EncounterEffectTask *effect);
+void EncounterEffect_TrainerSpinApart(SysTask *task, EncounterEffectTask *effect);
+void EncounterEffect_TrainerSpinZoom(SysTask *task, EncounterEffectTask *effect);
+void EncounterEffect_TrainerBallDrop(SysTask *task, EncounterEffectTask *effect);
+void EncounterEffect_TrainerFadeSpin(SysTask *task, EncounterEffectTask *effect);
+void EncounterEffect_TrainerBallFall(SysTask *task, EncounterEffectTask *effect);
+void EncounterEffect_TrainerRisingBall(SysTask *task, EncounterEffectTask *effect);
+void EncounterEffect_LeaderFalkner(SysTask *task, EncounterEffectTask *effect);
+void EncounterEffect_LeaderBugsy(SysTask *task, EncounterEffectTask *effect);
+void EncounterEffect_LeaderWhitney(SysTask *task, EncounterEffectTask *effect);
+void EncounterEffect_LeaderMorty(SysTask *task, EncounterEffectTask *effect);
+void EncounterEffect_LeaderJasmine(SysTask *task, EncounterEffectTask *effect);
+void EncounterEffect_LeaderChuck(SysTask *task, EncounterEffectTask *effect);
+void EncounterEffect_LeaderPryce(SysTask *task, EncounterEffectTask *effect);
+void EncounterEffect_LeaderClair(SysTask *task, EncounterEffectTask *effect);
+void EncounterEffect_LeaderBrock(SysTask *task, EncounterEffectTask *effect);
+void EncounterEffect_LeaderMisty(SysTask *task, EncounterEffectTask *effect);
+void EncounterEffect_LeaderLtSurge(SysTask *task, EncounterEffectTask *effect);
+void EncounterEffect_LeaderErika(SysTask *task, EncounterEffectTask *effect);
+void EncounterEffect_LeaderJanine(SysTask *task, EncounterEffectTask *effect);
+void EncounterEffect_LeaderSabrina(SysTask *task, EncounterEffectTask *effect);
+void EncounterEffect_LeaderBlaine(SysTask *task, EncounterEffectTask *effect);
+void EncounterEffect_LeaderBlue(SysTask *task, EncounterEffectTask *effect);
+void EncounterEffect_Rival(SysTask *task, EncounterEffectTask *effect);
+void EncounterEffect_EliteFourWill(SysTask *task, EncounterEffectTask *effect);
+void EncounterEffect_EliteFourKoga(SysTask *task, EncounterEffectTask *effect);
+void EncounterEffect_EliteFourBruno(SysTask *task, EncounterEffectTask *effect);
+void EncounterEffect_EliteFourKaren(SysTask *task, EncounterEffectTask *effect);
+void EncounterEffect_Champion(SysTask *task, EncounterEffectTask *effect);
+void EncounterEffect_Legendary(void *sysTask, void *task);
+void EncounterEffect_HoOh(void *sysTask, void *task);
+void EncounterEffect_Lugia(void *sysTask, void *task);
+void EncounterEffect_FrontierOrLinkSingle(SysTask *task, EncounterEffectTask *ctx);
+void EncounterEffect_Double(SysTask *task, EncounterEffectTask *ctx);
+void EncounterEffect_TeamRocket(SysTask *task, EncounterEffectTask *effect);
+void EncounterEffect_ExecutivePetrel(SysTask *task, EncounterEffectTask *effect);
+void EncounterEffect_ExecutiveProton(SysTask *task, EncounterEffectTask *effect);
+void EncounterEffect_ExecutiveArcher(SysTask *task, EncounterEffectTask *effect);
+void EncounterEffect_ExecutiveAriana(SysTask *task, EncounterEffectTask *effect);
+void EncounterEffect_RocketBoss(SysTask *task, EncounterEffectTask *effect);
+void EncounterEffect_KimonoGirl(SysTask *task, EncounterEffectTask *effect);
+void EncounterEffect_PkmnTrainerRed(SysTask *task, EncounterEffectTask *effect);
+static void Native_EncounterEffect_Legendary(SysTask * a0, EncounterEffectTask * a1) { EncounterEffect_Legendary((void *)a0, (void *)a1); }
+static void Native_EncounterEffect_HoOh(SysTask * a0, EncounterEffectTask * a1) { EncounterEffect_HoOh((void *)a0, (void *)a1); }
+static void Native_EncounterEffect_Lugia(SysTask * a0, EncounterEffectTask * a1) { EncounterEffect_Lugia((void *)a0, (void *)a1); }
+static void Native_EncounterEffect_FrontierOrLinkSingle(SysTask * a0, EncounterEffectTask * a1) { EncounterEffect_FrontierOrLinkSingle((void *)a0, (void *)a1); }
+static void Native_EncounterEffect_Double(SysTask * a0, EncounterEffectTask * a1) { EncounterEffect_Double((void *)a0, (void *)a1); }
+void (*const gEncounterEffectFuncs[])(SysTask *task, EncounterEffectTask *effect) = {
+    EncounterEffect_WildRowsWhite,
+    EncounterEffect_WildRowsBlack,
+    EncounterEffect_WildWaveWhite,
+    EncounterEffect_WildWaveBlack,
+    EncounterEffect_WildDiagonalsWhite,
+    EncounterEffect_WildDiagonalsBlack,
+    EncounterEffect_TrainerSpinApart,
+    EncounterEffect_TrainerSpinZoom,
+    EncounterEffect_TrainerBallDrop,
+    EncounterEffect_TrainerFadeSpin,
+    EncounterEffect_TrainerBallFall,
+    EncounterEffect_TrainerRisingBall,
+    EncounterEffect_LeaderFalkner,
+    EncounterEffect_LeaderBugsy,
+    EncounterEffect_LeaderWhitney,
+    EncounterEffect_LeaderMorty,
+    EncounterEffect_LeaderJasmine,
+    EncounterEffect_LeaderChuck,
+    EncounterEffect_LeaderPryce,
+    EncounterEffect_LeaderClair,
+    EncounterEffect_LeaderBrock,
+    EncounterEffect_LeaderMisty,
+    EncounterEffect_LeaderLtSurge,
+    EncounterEffect_LeaderErika,
+    EncounterEffect_LeaderJanine,
+    EncounterEffect_LeaderSabrina,
+    EncounterEffect_LeaderBlaine,
+    EncounterEffect_LeaderBlue,
+    EncounterEffect_Rival,
+    EncounterEffect_EliteFourWill,
+    EncounterEffect_EliteFourKoga,
+    EncounterEffect_EliteFourBruno,
+    EncounterEffect_EliteFourKaren,
+    EncounterEffect_Champion,
+    Native_EncounterEffect_Legendary,
+    Native_EncounterEffect_HoOh,
+    Native_EncounterEffect_Lugia,
+    Native_EncounterEffect_FrontierOrLinkSingle,
+    Native_EncounterEffect_Double,
+    EncounterEffect_TeamRocket,
+    EncounterEffect_ExecutivePetrel,
+    EncounterEffect_ExecutiveProton,
+    EncounterEffect_ExecutiveArcher,
+    EncounterEffect_ExecutiveAriana,
+    EncounterEffect_RocketBoss,
+    EncounterEffect_KimonoGirl,
+    EncounterEffect_PkmnTrainerRed,
+};
+
+/* Native storage for the .bss labels of asm/encounter_effect_data.s. */
+EncounterEffectState gEncounterEffectState;
+#endif

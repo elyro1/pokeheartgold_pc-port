@@ -14,7 +14,12 @@
 #include "map_object_behavior.h"
 
 BOOL ScrCmd_GetTrainerPathToPlayer(ScriptContext *ctx) {
+#if defined(SDK_PORT)
+    int *sightDistance, *encounterType, *sightDirection;
+    SysTask **approachTask;
+#else
     int *sightDistance, *encounterType, *sightDirection, *approachTask;
+#endif
     LocalMapObject **localMapObject;
     FieldSystem *fieldSystem = ctx->fieldSystem;
 
@@ -42,7 +47,11 @@ BOOL ScrCmd_GetTrainerPathToPlayer(ScriptContext *ctx) {
 }
 
 BOOL ScrCmd_TrainerStepTowardsPlayer(ScriptContext *ctx) {
+#if defined(SDK_PORT)
+    SysTask **approachTask;
+#else
     int *approachTask;
+#endif
     u16 trainerNum = ScriptGetVar(ctx);
     u16 *retPtr = ScriptGetVarPointer(ctx);
 
@@ -53,14 +62,26 @@ BOOL ScrCmd_TrainerStepTowardsPlayer(ScriptContext *ctx) {
         approachTask = FieldSysGetAttrAddr(ctx->fieldSystem, SCRIPTENV_ENGAGED_TRAINER_1_FIELD_18);
     }
 
+#if defined(SDK_PORT)
+    if (*approachTask == NULL) {
+#else
     if (*approachTask == 0) {
+#endif
         *retPtr = 1;
         return TRUE;
     }
 
+#if defined(SDK_PORT)
+    if (TrainerApproach_IsDone(*approachTask) == TRUE) {
+#else
     if (TrainerApproach_IsDone() == TRUE) {
+#endif
         TrainerApproach_Delete(*approachTask);
+#if defined(SDK_PORT)
+        *approachTask = NULL;
+#else
         *approachTask = 0;
+#endif
         *retPtr = 1;
     }
 
@@ -253,7 +274,11 @@ BOOL ScrCmd_SetLastInteractedTrainerFlag(ScriptContext *ctx) {
 BOOL ScrCmd_GoToIfTrainerDefeated(ScriptContext *ctx) {
     FieldSystem *fieldSystem = ctx->fieldSystem;
     LocalMapObject **lastInteracted = FieldSysGetAttrAddr(ctx->fieldSystem, SCRIPTENV_LAST_INTERACTED);
+#if defined(SDK_PORT)
+    s32 offset = (s32)ScriptReadWord(ctx);
+#else
     u32 offset = ScriptReadWord(ctx);
+#endif
     u32 mapObjectId = MapObject_GetID(*lastInteracted);
 
     if (TrainerFlagCheck(fieldSystem->saveData, (u16)mapObjectId) == TRUE) {

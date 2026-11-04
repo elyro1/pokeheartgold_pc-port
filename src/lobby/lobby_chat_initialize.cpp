@@ -119,7 +119,10 @@ struct Callbacks {
 
 extern Root *gLobbyChatManager;
 extern "C" const u8 _version_NINTENDO_DWC_LOBBY[];
+#if defined(SDK_PORT)
+#else
 extern "C" void OSi_ReferSymbol(const void *);
+#endif
 extern "C" const char gLobbyStr_DWCUser[], gLobbyStr_DWCName[], gLobbyStr_Dot[], gLobbyStr_PeerchatGsNintendowifiNet[];
 struct ConnectCallbacks {
     void (*onConnected)();

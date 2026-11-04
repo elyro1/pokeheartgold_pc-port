@@ -803,3 +803,9 @@ BOOL VsRecorder_RankingsSwitch(VsRecorderWork *work) {
     }
     return FALSE;
 }
+#if defined(SDK_PORT)
+
+const VsRecorderListConfig gVsRecorderRankingsThisWeekListConfig = { NULL, 12, 1, 4, 15, 24, 8, 256, 2, 4, NULL };
+
+const VsRecorderListConfig gVsRecorderRankingsLastWeekListConfig = { NULL, 12, 2, 4, 15, 24, 8, 256, 2, 2, NULL };
+#endif

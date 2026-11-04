@@ -1,3 +1,6 @@
+#if defined(SDK_PORT)
+#include "port/sim_config_prj.h"
+#endif
 #include "global.h"
 
 #include "comm_player_manager_internal.h"
@@ -376,6 +379,9 @@ static BOOL CommPlayerManager_IsPositionBlocked(int x, int z, int excludedNetId)
 static u32 CommPlayerManager_GetMoveDelay(int speed) {
     u32 delays[5] = { 2, 4, 8, 16, 2 };
     GF_ASSERT(speed < 5);
+#if defined(SDK_PORT)
+    if (SIM_Config_prj_GetConfig()->enable60fps) return delays[speed] * 2;
+#endif
     return delays[speed];
 }
 

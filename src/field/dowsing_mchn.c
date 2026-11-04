@@ -929,3 +929,14 @@ static BOOL DowsingMchn_ShouldHideButtons(DowsingMchn *dowsing) {
     }
     return FALSE;
 }
+#if defined(SDK_PORT)
+
+/* Native callback table from asm/dowsing_mchn_data.s. */
+void (*const gDowsingMchnStepAngleFuncs[5])(DowsingMchnAngle *angle) = {
+    DowsingMchn_StepAngleLevel0,
+    DowsingMchn_StepAngleLevel1,
+    DowsingMchn_StepAngleLevel2,
+    DowsingMchn_StepAngleLevel3,
+    DowsingMchn_StepAngleLevel4,
+};
+#endif

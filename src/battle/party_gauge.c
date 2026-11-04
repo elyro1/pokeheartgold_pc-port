@@ -220,7 +220,11 @@ static void PartyGaugeArrow_StartShowTask(PartyGaugeArrow *arrow, u32 side, u32 
 
     MI_CpuClear8(arrow, sizeof(PartyGaugeArrow));
 
+#if defined(SDK_PORT)
+    arrow->managedSprite = SpriteSystem_NewBattleUISprite(spriteSystem, spriteManager, &sPartyGaugeArrowSpriteTemplate);
+#else
     arrow->managedSprite = SpriteSystem_NewSprite(spriteSystem, spriteManager, &sPartyGaugeArrowSpriteTemplate);
+#endif
 
     if (side == 0) {
         ManagedSprite_SetPositionXY(arrow->managedSprite, ARROW_X_START_OURS, sPartyGaugeArrowYOurs[position]);
@@ -235,7 +239,11 @@ static void PartyGaugeArrow_StartShowTask(PartyGaugeArrow *arrow, u32 side, u32 
     arrow->side = side;
     arrow->position = position;
     arrow->state = 0;
+#if defined(SDK_PORT)
+    arrow->task = SysTask_CreateBattleUI(Task_ShowArrow, arrow, ARROW_TASK_PRIORITY);
+#else
     arrow->task = SysTask_CreateOnMainQueue(Task_ShowArrow, arrow, ARROW_TASK_PRIORITY);
+#endif
 
     PlaySE(SEQ_SE_DP_TB_START);
 }
@@ -288,7 +296,11 @@ static void PartyGaugeArrow_StartHideTask(PartyGaugeArrow *arrow, u32 type) {
         arrow->delay = 0;
     }
 
+#if defined(SDK_PORT)
+    arrow->task = SysTask_CreateBattleUI(Task_HidePartyArrow, arrow, 500);
+#else
     arrow->task = SysTask_CreateOnMainQueue(Task_HidePartyArrow, arrow, 500);
+#endif
 }
 
 static void Task_HidePartyArrow(SysTask *task, void *data) {
@@ -348,7 +360,11 @@ static void PartyGaugePokeballs_StartShowTask(PartyGaugePokeballs *pokeballs, s8
     GF_ASSERT(!pokeballs->managedSprite && !pokeballs->task);
 
     MI_CpuClear8(pokeballs, sizeof(PartyGaugePokeballs));
+#if defined(SDK_PORT)
+    pokeballs->managedSprite = SpriteSystem_NewBattleUISprite(spriteSystem, spriteManager, &sPartyGaugePokeballSpriteTemplate);
+#else
     pokeballs->managedSprite = SpriteSystem_NewSprite(spriteSystem, spriteManager, &sPartyGaugePokeballSpriteTemplate);
+#endif
 
     if (side == 0) {
         ManagedSprite_SetPositionXY(pokeballs->managedSprite, 0x114, sPartyGaugePokeballYOurs[pos]);
@@ -378,10 +394,18 @@ static void PartyGaugePokeballs_StartShowTask(PartyGaugePokeballs *pokeballs, s8
 
     if (type == 0) {
         pokeballs->delay = 2 * slot + slot + 5;
+#if defined(SDK_PORT)
+        pokeballs->task = SysTask_CreateBattleUI(Task_ShowPokeballs_StartOfBattle, pokeballs, 0x1F5);
+#else
         pokeballs->task = SysTask_CreateOnMainQueue(Task_ShowPokeballs_StartOfBattle, pokeballs, 0x1F5);
+#endif
     } else {
         pokeballs->delay = 0;
+#if defined(SDK_PORT)
+        pokeballs->task = SysTask_CreateBattleUI(Task_ShowPokeballs_MidBattle, pokeballs, 0x1F5);
+#else
         pokeballs->task = SysTask_CreateOnMainQueue(Task_ShowPokeballs_MidBattle, pokeballs, 0x1F5);
+#endif
     }
 }
 
@@ -543,12 +567,20 @@ static void PartyGaugePokeballs_StartHideTask(PartyGaugePokeballs *pokeballs, in
         pokeballs->arrowAlpha = arrowAlpha;
         pokeballs->delay = 3 * slot;
         pokeballs->startDelay = 4;
+#if defined(SDK_PORT)
+        pokeballs->task = SysTask_CreateBattleUI(Task_HidePokeballs_StartOfBattle, pokeballs, POKEBALL_TASK_PRIORITY);
+#else
         pokeballs->task = SysTask_CreateOnMainQueue(Task_HidePokeballs_StartOfBattle, pokeballs, POKEBALL_TASK_PRIORITY);
+#endif
     } else {
         pokeballs->arrowAlpha = arrowAlpha;
         pokeballs->delay = 0;
         pokeballs->startDelay = 0;
+#if defined(SDK_PORT)
+        pokeballs->task = SysTask_CreateBattleUI(Task_HidePokeballs_MidBattle, pokeballs, POKEBALL_TASK_PRIORITY);
+#else
         pokeballs->task = SysTask_CreateOnMainQueue(Task_HidePokeballs_MidBattle, pokeballs, POKEBALL_TASK_PRIORITY);
+#endif
     }
 }
 

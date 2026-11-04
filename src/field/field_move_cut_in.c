@@ -918,3 +918,85 @@ static void FieldMoveCutIn_DestroyWindowTask(FieldMoveCutIn *cutIn) {
     SysTask_Destroy(cutIn->windowTask);
     GX_SetVisibleWnd(GX_WNDMASK_NONE);
 }
+#if defined(SDK_PORT)
+
+const FieldMoveCutInStep gFieldMoveCutInSteps[] = {
+    FieldMoveCutIn_StepLoadBannerGraphics,
+    FieldMoveCutIn_StepCreateSprites,
+    FieldMoveCutIn_StepInitWindow,
+    FieldMoveCutIn_StepWidenWindow,
+    FieldMoveCutIn_StepOpenWindow,
+    FieldMoveCutIn_StepWaitBeforeMon,
+    FieldMoveCutIn_StepMonSlideIn,
+    FieldMoveCutIn_StepMonSlowDown,
+    FieldMoveCutIn_StepWaitBeforeMonExit,
+    FieldMoveCutIn_StepMonSlideOut,
+    FieldMoveCutIn_StepCloseWindow,
+    FieldMoveCutIn_StepFreeBannerGraphics,
+    FieldMoveCutIn_StepEndWindow,
+    FieldMoveCutIn_StepFinish,
+};
+
+const FieldMoveCutInStep gFieldMoveCutInFlySteps[] = {
+    FieldMoveCutIn_StepLoadBannerGraphics,
+    FieldMoveCutIn_StepCreateFlySprites,
+    FieldMoveCutIn_StepInitWindow,
+    FieldMoveCutIn_StepWidenWindow,
+    FieldMoveCutIn_StepOpenWindow,
+    FieldMoveCutIn_StepWaitBeforeMon,
+    FieldMoveCutIn_StepMonSlideIn,
+    FieldMoveCutIn_StepMonSlowDown,
+    FieldMoveCutIn_StepWaitBeforeMonExit,
+    FieldMoveCutIn_StepMonSlideOut,
+    FieldMoveCutIn_StepFreeMonGraphics,
+    FieldMoveCutIn_StepLoadFlyGraphics,
+    FieldMoveCutIn_StepWaitFlyGraphics,
+    FieldMoveCutIn_StepStartFly,
+    FieldMoveCutIn_StepWaitTakeOff,
+    FieldMoveCutIn_StepWaitBeforeFlyAway,
+    FieldMoveCutIn_StepWaitFlyAway,
+    FieldMoveCutIn_StepCloseFlyWindow,
+    FieldMoveCutIn_StepWaitFlyEnd,
+    FieldMoveCutIn_StepWaitPaletteFade,
+    FieldMoveCutIn_StepFreeBannerGraphics,
+    FieldMoveCutIn_StepEndWindow,
+    FieldMoveCutIn_StepFinish,
+};
+
+BOOL FieldMoveCutIn_StepShowOtherObject(FieldMoveCutIn *cutIn);
+BOOL FieldMoveCutIn_StepWaitModelEffect(FieldMoveCutIn *cutIn);
+const FieldMoveCutInStep gFieldMoveCutInFlyWithObjectSteps[] = {
+    FieldMoveCutIn_StepLoadSpriteGraphics,
+    FieldMoveCutIn_StepCreateFlyTrainerSprite,
+    FieldMoveCutIn_StepShowOtherObject,
+    FieldMoveCutIn_StepWaitModelEffect,
+    FieldMoveCutIn_StepLoadFlyGraphics,
+    FieldMoveCutIn_StepWaitFlyGraphics,
+    FieldMoveCutIn_StepWaitBeforePickUp,
+    FieldMoveCutIn_StepWaitFlyAway,
+    FieldMoveCutIn_StepWaitFlyEnd,
+    FieldMoveCutIn_StepWaitPaletteFade,
+    FieldMoveCutIn_StepFreeSpriteGraphics,
+    FieldMoveCutIn_StepFinish,
+};
+
+const VecFx32 gCutInTrainerPos = { 524288, 393216, 0 };
+
+const VecFx32 gCutInMonPos = { 1212416, 393216, 0 };
+
+const VecFx32 gCutInFlyTrainerPos = { 524288, 393216, 0 };
+
+const VecFx32 gCutInFlyMonPos = { 1212416, 393216, 0 };
+
+const VecFx32 gCutInFlyWithObjectTrainerPos = { 524288, 344064, 0 };
+
+const VecFx32 gCutInFlyerScale = { 4096, 4096, 0 };
+
+const u16 gCutInTrainerCharFiles[] = { 17, 20, 23 };
+
+const u16 gCutInTrainerAnimFiles[] = { 19, 22, 25 };
+
+const u16 gCutInTrainerCellFiles[] = { 18, 21, 24 };
+
+const u16 gCutInTrainerPlttFiles[] = { 7, 8 };
+#endif

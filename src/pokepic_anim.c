@@ -122,6 +122,10 @@ typedef struct PokepicMotion {
     int values[5]; // one per target: dx, dy, scaleX, scaleY, rotation
     void (*update)(struct PokepicMotion *motion, PokepicScriptAnim *anim);
 } PokepicMotion;
+#if defined(SDK_PORT)
+
+typedef u32 PokepicScriptWord;
+#endif
 
 struct PokepicScriptAnim {
     Pokepic *pic;
@@ -315,7 +319,11 @@ void PokepicAnimManager_StartAnim(PokepicAnimManager *mgr, Pokepic *pic, struct 
     mgr->anims[index].runMotions = FALSE;
     mgr->anims[index].scaleMode = POKEPIC_SCALE_CENTERED;
     mgr->anims[index].waitPaletteFade = FALSE;
+#if defined(SDK_PORT)
+    mgr->anims[index].task = SysTask_CreateBattleAnimation(PokepicScriptAnim_Task, &mgr->anims[index], 0);
+#else
     mgr->anims[index].task = SysTask_CreateOnMainQueue(PokepicScriptAnim_Task, &mgr->anims[index], 0);
+#endif
     mgr->anims[index].delay = delay;
     mgr->anims[index].baseX = Pokepic_GetAttr(pic, POKEPIC_X);
     mgr->anims[index].baseY = Pokepic_GetAttr(pic, POKEPIC_Y);

@@ -176,10 +176,16 @@ typedef struct SafariAreaCustomizer {
 typedef struct SafariAreaCustomizerBgTemplates {
     BgTemplate templates[8];
 } SafariAreaCustomizerBgTemplates;
+#if defined(SDK_PORT)
+_Static_assert(sizeof(SafariAreaCustomizerBgTemplates) == 224, "literal data: SafariAreaCustomizerBgTemplates");
+#endif
 
 typedef struct SafariAreaCustomizerResCounts {
     u8 counts[4];
 } SafariAreaCustomizerResCounts;
+#if defined(SDK_PORT)
+_Static_assert(sizeof(SafariAreaCustomizerResCounts) == 4, "literal data: SafariAreaCustomizerResCounts");
+#endif
 
 // The per-row scroll directions of the slot swap, the label text colours and the list menu template.
 typedef struct SafariAreaCustomizerConsts {
@@ -187,6 +193,9 @@ typedef struct SafariAreaCustomizerConsts {
     u32 labelColors[2];
     TouchscreenListMenuTemplate menuTemplate;
 } SafariAreaCustomizerConsts;
+#if defined(SDK_PORT)
+_Static_assert(sizeof(SafariAreaCustomizerConsts) == 24, "literal data: SafariAreaCustomizerConsts");
+#endif
 
 extern const SafariAreaCustomizerConsts gSafariAreaCustomizerConsts;
 extern const u32 gSafariAreaCustomizerLabelColors[2];

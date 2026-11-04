@@ -1,3 +1,7 @@
+#if defined(SDK_PORT)
+#include "port/battle_timing.h"
+#include "port/sim_config_prj.h"
+#endif
 #include "model_animation.h"
 
 #include <string.h>
@@ -57,6 +61,9 @@ void ModelAnimation_Free(ModelAnimation *animation, NNSFndAllocator *allocator) 
 }
 
 void ModelAnimation_AdvanceLooped(ModelAnimation *animation, fx32 step) {
+#if defined(SDK_PORT)
+    if (!BattleTiming_IsActive() && SIM_Config_prj_GetConfig()->enable60fps) step /= 2;
+#endif
     fx32 frames = NNS_G3dAnmObjGetNumFrame(animation->object);
     if (step > 0) {
         animation->frame = (animation->frame + step) % frames;
@@ -70,6 +77,9 @@ void ModelAnimation_AdvanceLooped(ModelAnimation *animation, fx32 step) {
 }
 
 BOOL ModelAnimation_Advance(ModelAnimation *animation, fx32 step) {
+#if defined(SDK_PORT)
+    if (!BattleTiming_IsActive() && SIM_Config_prj_GetConfig()->enable60fps) step /= 2;
+#endif
     fx32 frames = NNS_G3dAnmObjGetNumFrame(animation->object);
     BOOL done = FALSE;
     if (step > 0) {

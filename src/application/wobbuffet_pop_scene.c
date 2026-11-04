@@ -2355,3 +2355,34 @@ void WobbuffetPop_HandleDemoEvent(WobbuffetPop *game, WobbuffetPopEvent *event) 
     game->gameState = WOBBUFFET_POP_GAME_START_DEMO;
     WobbuffetPop_RequestSync(game, event->data.sync.kind, event->data.sync.id);
 }
+#if defined(SDK_PORT)
+
+const OverlayManagerTemplate sWobbuffetPopPlazaScreenOverlayTemplate = { WobbuffetPopPlazaScreen_Init, WobbuffetPopPlazaScreen_Main, WobbuffetPopPlazaScreen_Exit, 0xFFFFFFFF };
+
+void (*const gWobbuffetPopEventFuncs[])(WobbuffetPop *game, WobbuffetPopEvent *event) = {
+    0,
+    WobbuffetPop_HandlePumpEvent,
+    WobbuffetPop_HandlePopEvent,
+    WobbuffetPop_HandleNewBalloonEvent,
+    WobbuffetPop_HandleCountdownEvent,
+    WobbuffetPop_HandleFinishEvent,
+    WobbuffetPop_HandleSyncEvent,
+    WobbuffetPop_HandleDemoEvent,
+};
+
+static void Native_WobbuffetPop_RecvPlayerValue(int a0, int a1, void *a2, void *a3) { WobbuffetPop_RecvPlayerValue(a0, a1, a2, a3); }
+const CommCommand gWobbuffetPopCommands[] = {
+    0,
+    CommCmd_GetSize0,
+    0,
+    Native_WobbuffetPop_RecvPlayerValue,
+    WobbuffetPop_GetPlayerValueCommandSize,
+    0,
+    WobbuffetPop_RecvEvent,
+    WobbuffetPop_GetEventCommandSize,
+    0,
+    WobbuffetPop_RecvFinished,
+    CommCmd_GetSize0,
+    0,
+};
+#endif

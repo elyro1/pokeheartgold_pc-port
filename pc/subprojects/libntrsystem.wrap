@@ -1,0 +1,8 @@
+[wrap-git]
+url = https://github.com/elyro1/libntrsystem.git
+revision = lib_libntrsystem
+depth = 1
+directory = libntrsystem
+
+[provide]
+dependency_names = NitroSystem

@@ -397,7 +397,11 @@ void BallSealEffect_LoadResources(BallSealEffect *effect) {
         SysTask *task;
         effect->count = 0;
         effect->state = BALL_SEAL_LOAD_SEALS_1_2;
+#if defined(SDK_PORT)
+        task = SysTask_CreateBattleAnimation(BallSealEffect_LoadSealParticlesTask, effect, 1000);
+#else
         task = SysTask_CreateOnMainQueue(BallSealEffect_LoadSealParticlesTask, effect, 1000);
+#endif
         BallSealEffect_LoadSealParticlesTask(task, effect);
     }
 }
@@ -410,7 +414,11 @@ static void BallSealEffect_StartWithCallback(BallSealEffect *effect, void (*call
     effect->active = TRUE;
     BattleAnimSystem_InitBlend();
     BallSealEffect_Emit(effect, callback);
+#if defined(SDK_PORT)
+    effect->task = SysTask_CreateBattleAnimation(BallSealEffect_WaitTask, effect, 1000);
+#else
     effect->task = SysTask_CreateOnMainQueue(BallSealEffect_WaitTask, effect, 1000);
+#endif
 }
 
 void BallSealEffect_Start(BallSealEffect *effect) {
@@ -486,7 +494,11 @@ static void BallSealEffect_Emit(BallSealEffect *effect, void (*callback)(SPLEmit
         emitTask->seal = effect->seals[i];
         GF_ASSERT(emitTask->seal != NULL);
         emitTask->delay = BallSealEffect_GetSealEmitDelay(emitTask->seal);
+#if defined(SDK_PORT)
+        SysTask_CreateBattleAnimation(BallSealEffect_DelayedEmitTask, emitTask, 1001);
+#else
         SysTask_CreateOnMainQueue(BallSealEffect_DelayedEmitTask, emitTask, 1001);
+#endif
     }
 }
 
@@ -1362,7 +1374,11 @@ BallThrow *BallThrow_New(BallThrowParams *ballParams) {
     BallThrow_InitThrowTarget(data);
     data->modeRunning = TRUE;
     data->opened = FALSE;
+#if defined(SDK_PORT)
+    data->task = SysTask_CreateBattleAnimation(BallThrow_Task, data, 1000);
+#else
     data->task = SysTask_CreateOnMainQueue(BallThrow_Task, data, 1000);
+#endif
     return data;
 }
 
@@ -1612,7 +1628,14 @@ static void BallThrow_CreateSprite(BallThrow *data) {
     for (i = 0; i < GF_GFX_RES_TYPE_MAX; i++) {
         template.resIdList[i] = data->params.resTagOffset + 6000;
     }
+#if defined(SDK_PORT)
+    // Balls can be prepared by the UI controller before the throw task starts.
+    BattleTimingDomain previous = BattleTiming_SetDomain(BATTLE_TIMING_ANIMATION);
+#endif
     data->managedSprite = SpriteSystem_NewSprite(data->params.spriteSystem, data->spriteManager, &template);
+#if defined(SDK_PORT)
+    BattleTiming_SetDomain(previous);
+#endif
     ManagedSprite_SetDrawFlag(data->managedSprite, TRUE);
     ManagedSprite_SetAffineOverwriteMode(data->managedSprite, NNS_G2D_RND_AFFINE_OVERWRITE_DOUBLE);
     ManagedSprite_SetAnimationFrame(data->managedSprite, 0);
@@ -1752,7 +1775,11 @@ static BattleAnimEmitter *BattleAnimEmitter_New(enum HeapID heapId, BattleAnimEm
 void BattleAnimEmitter_Start(BattleAnimEmitter *emitter) {
     emitter->active = TRUE;
     BattleAnimEmitter_CreateEmitters(emitter, (void (*)(SPLEmitter *))BattleAnimEmitter_GetEmitterParam);
+#if defined(SDK_PORT)
+    emitter->task = SysTask_CreateBattleAnimation(BattleAnimEmitter_WaitTask, emitter, 1000);
+#else
     emitter->task = SysTask_CreateOnMainQueue(BattleAnimEmitter_WaitTask, emitter, 1000);
+#endif
 }
 
 BOOL BattleAnimEmitter_IsActive(BattleAnimEmitter *emitter) {
@@ -1938,3 +1965,55 @@ s16 BattleAnimUtil_GetBattlerTypeCoord(u32 battlerType, u32 index) {
     }
     return gBattlerPokepicPositions[0][battlerType][index];
 }
+#if defined(SDK_PORT)
+
+/* Native tables from asm/battle_anim_data.s; adapters give differing originals the table's signature. */
+const BallThrowFunc gBallThrowModeFuncs[] = {
+    BallThrow_RunThrowArc,
+    BallThrow_ThrowArcAndOpen,
+    BallThrow_Wobble,
+    BallThrow_RunCaptureState,
+    BallThrow_TrackPosition,
+    BallThrow_OpenInPlace,
+};
+const BallThrowFunc gBallThrowCaptureStateFuncs[] = {
+    BallThrow_CaptureStateIdle,
+    BallThrow_CaptureStateThrow,
+    BallThrow_CaptureStateGoToOpen,
+    BallThrow_CaptureStateOpen,
+    BallThrow_CaptureStateOpenDone,
+    BallThrow_CaptureStateDeflect,
+    BallThrow_CaptureStateDeflectDone,
+    BallThrow_CaptureStateStartFall,
+    BallThrow_CaptureStateGoToFlash,
+    BallThrow_CaptureStateFlash,
+    BallThrow_CaptureStateGoToDrop,
+    BallThrow_CaptureStateDrop,
+    BallThrow_CaptureStateNone,
+    BallThrow_CaptureStateBounce,
+    BallThrow_CaptureStateBounceDone,
+    BallThrow_CaptureStateShakeWait,
+    BallThrow_CaptureStateGoToShake,
+    BallThrow_CaptureStateShake,
+    BallThrow_CaptureStateShakeDone,
+    BallThrow_CaptureStateGoToSkip,
+    BallThrow_CaptureStateSkip,
+    BallThrow_CaptureStateClick,
+    BallThrow_CaptureStateClickDone,
+    BallThrow_CaptureStateRestorePalette,
+    BallThrow_CaptureStateGoToFadeOut,
+    BallThrow_CaptureStateFadeOut,
+    BallThrow_CaptureStateGoToEnd,
+    BallThrow_CaptureStateEnd,
+};
+const BallThrowFunc gBallThrowBallAnimFuncs[8] = {
+    BallThrow_BallAnimThrow,
+    BallThrow_BallAnimOpen,
+    BallThrow_BallAnimDeflect,
+    BallThrow_BallAnimFall,
+    BallThrow_BallAnimShake,
+    BallThrow_BallAnimSkip,
+    BallThrow_BallAnimClick,
+    BallThrow_BallAnimFade,
+};
+#endif

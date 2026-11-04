@@ -17,7 +17,11 @@
 // Particle mode of the leader effects: the main screen switches to 3D over a captured image of the field so particle
 // emitters can be drawn over it. Also the HBlank BG offset wave used by several effects.
 
+#if defined(SDK_PORT)
+#define PARTICLE_HEAP_SIZE PARTICLE_WORK_SIZE(0x4800)
+#else
 #define PARTICLE_HEAP_SIZE 0x4800
+#endif
 
 enum EncounterEffectParticlesState {
     PARTICLES_STATE_WAIT_FRAME,
@@ -58,7 +62,11 @@ void EncounterEffect_StartParticleMode(FieldSystem *fieldSystem) {
     GfGfx_EngineATogglePlanes(GX_PLANEMASK_BG2, GF_PLANE_TOGGLE_OFF);
     GfGfx_EngineATogglePlanes(GX_PLANEMASK_BG3, GF_PLANE_TOGGLE_OFF);
     GX_ResetBankForBG();
+#if defined(SDK_PORT)
+    MI_CpuClearFast((void *)HW_LCDC_VRAM_C, 0x20000); // VRAM bank C (LCDC)
+#else
     MI_CpuClearFast((void *)0x06840000, 0x20000); // VRAM bank D (LCDC)
+#endif
     // capture the main screen into VRAM bank D
     reg_GX_DISPCAPCNT = 0xC0320C04;
     SysTask_CreateOnVWaitQueue(Task_ParticleSetup_VWait, gEncounterEffectState.particles, 1024);

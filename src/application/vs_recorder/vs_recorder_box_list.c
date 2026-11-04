@@ -627,3 +627,8 @@ BOOL VsRecorder_BoxDataViewExit(VsRecorderWork *work) {
     }
     return FALSE;
 }
+#if defined(SDK_PORT)
+
+/* Native list configurations from asm/vs_recorder_data.s (entry/hitbox pointers are native width). */
+const VsRecorderListConfig gVsRecorderBoxListConfig = { NULL, 0, 3, 3, 7, 26, 15, 64, 2, 5, NULL };
+#endif

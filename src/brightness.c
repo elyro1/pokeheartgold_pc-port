@@ -8,6 +8,9 @@ static BrightnessData sMainScreenBrightnessData;
 static BrightnessData sSubScreenBrightnessData;
 
 void DoBrightnessTransitionStep(BrightnessData *brightness) {
+#if defined(SDK_PORT)
+    if (!BattleTiming_ShouldTick(brightness->timingDomain)) return;
+#endif
     BOOL transitionFinished = FALSE;
 
     if ((brightness->targetBrightness != brightness->currentBrightness + brightness->transitionDirection * brightness->stepSizeInteger) && brightness->currentBrightness != brightness->targetBrightness) {
@@ -42,6 +45,9 @@ void InitBrightnessTransition(BrightnessData *brightnessData, u16 stepCount, s16
     GF_ASSERT(!brightnessData->transitionActive);
 
     brightnessData->transitionActive = TRUE;
+#if defined(SDK_PORT)
+    brightnessData->timingDomain = BattleTiming_GetDomain();
+#endif
     brightnessData->surfaceMask = (GXBlendPlaneMask)(u8)surfaceMask;
     brightnessData->screenMask = (u8)screenMask;
     brightnessData->stepCount = stepCount;

@@ -149,6 +149,9 @@ const BattleLinkCommand gBattleLinkCommands[] = {
     { BattleLink_RecvPartnerParty,   BattleLink_GetPartySize,   BattleLink_GetParty3RecvBuffer   },
     { BattleLink_RecvPalPad,         BattleLink_GetPalPadSize,  BattleLink_GetPalPadRecvBuffer   },
 };
+#if defined(SDK_PORT)
+_Static_assert(NELEMS(gBattleLinkCommands) == 12, "Battle command IDs must retain their order");
+#endif
 
 void BattleLink_QueueSendData(BattleSystem *battle, int command, int battler, const u8 *data, u8 size) {
     u8 *header;

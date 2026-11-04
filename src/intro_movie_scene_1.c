@@ -1,5 +1,11 @@
 #include "global.h"
 
+#if defined(SDK_PORT)
+#include "main.h"
+#include "port/layer_scroll.h"
+#include "port/sim_config_prj.h"
+#endif
+
 #include "demo/opening/gs_opening.naix"
 
 #include "gf_gfx_loader.h"
@@ -65,10 +71,90 @@ BOOL IntroMovie_Scene1(IntroMovieOverlayData *data, void *pVoid) {
     return FALSE;
 }
 
+#if defined(SDK_PORT)
+static void IntroMovie_Scene1_ResetScroll(void) {
+    for (int layer = 1; layer <= 2; ++layer) SIM_Set2DLayerOffset(0, layer, 0, 0);
+    SIM_Set2DLayerOffset(0, 4, 0, 0);
+}
+
+static void IntroMovie_Scene1_InterpolateSprite(Sprite *sprite, int priority) {
+    NNSG2dCellAnimation *anim = Sprite_GetCellAnim(sprite);
+    const NNSG2dAnimSequence *seq = anim->animCtrl.pAnimSequence;
+    const NNSG2dAnimFrame *frame = anim->animCtrl.pActiveCurrent;
+    int type = NNSi_G2dGetAnimSequenceElementType(seq->animType);
+    if (!Sprite_GetAnimActiveFlag(sprite) || !frame->frames || type == NNS_G2D_ANIMELEMENT_INDEX) return;
+
+    // The opening assets play forward once. Hold the final pose, and retain
+    // the current cell index so wing artwork still changes at its authored rate.
+    const NNSG2dAnimFrame *next = frame + 1;
+    if (next >= seq->pAnmFrameArray + seq->numFrames) next = frame;
+    fx32 t = anim->animCtrl.currentTime / frame->frames;
+    if (t > FX32_ONE) t = FX32_ONE;
+    int nextX, nextY;
+    if (type == NNS_G2D_ANIMELEMENT_INDEX_T) {
+        const NNSG2dAnimDataT *target = next->pContent;
+        nextX = target->px;
+        nextY = target->py;
+    } else {
+        const NNSG2dAnimDataSRT *target = next->pContent;
+        nextX = target->px;
+        nextY = target->py;
+        anim->srtCtrl.srtData.scale.x += (s64)(target->sx - anim->srtCtrl.srtData.scale.x) * t / FX32_ONE;
+        anim->srtCtrl.srtData.scale.y += (s64)(target->sy - anim->srtCtrl.srtData.scale.y) * t / FX32_ONE;
+        s16 angle = target->rotZ - anim->srtCtrl.srtData.rotZ;
+        anim->srtCtrl.srtData.rotZ += (s32)angle * t / FX32_ONE;
+    }
+
+    VecFx32 position = *Sprite_GetMatrixPtr(sprite);
+    int x = anim->srtCtrl.srtData.trans.x;
+    int y = anim->srtCtrl.srtData.trans.y;
+    position.x += x * FX32_ONE + (nextX - x) * t;
+    position.y += y * FX32_ONE + (nextY - y) * t;
+    // SRT translations are integer pixels. Move their interpolated values
+    // into the sprite matrix, with a separate residual for each OBJ priority.
+    anim->srtCtrl.srtData.trans.x = 0;
+    anim->srtCtrl.srtData.trans.y = 0;
+    Sprite_SetMatrix(sprite, &position);
+    SIM_Set2DObjOffset(0, priority, -(position.x & (FX32_ONE - 1)),
+        -(position.y & (FX32_ONE - 1)));
+}
+
+static void IntroMovie_Scene1_RenderSmooth(IntroMovieOverlayData *data) {
+    for (int layer = 1; layer <= 2; ++layer) {
+        IntroMovieBgScrollAnim *anim = &data->bgAnimCnt.scroll[layer];
+        if (anim->duration <= 0) continue;
+        fx32 y = (s64)anim->yChange * FX32_ONE * anim->counter / anim->duration;
+        SIM_Set2DLayerOffset(0, layer, 0, y - y / FX32_ONE * FX32_ONE);
+    }
+
+    Sprite *sprites[] = { data->scene1Data.sunSprite, data->scene1Data.birdSprite };
+    NNSG2dCellAnimation saved[2];
+    VecFx32 positions[2];
+    BOOL active[2];
+    for (int i = 0; i < 2; ++i) {
+        saved[i] = *Sprite_GetCellAnim(sprites[i]);
+        positions[i] = *Sprite_GetMatrixPtr(sprites[i]);
+        active[i] = Sprite_GetAnimActiveFlag(sprites[i]);
+        IntroMovie_Scene1_InterpolateSprite(sprites[i], 1 - i);
+        Sprite_SetAnimActiveFlag(sprites[i], FALSE);
+    }
+    SpriteList_RenderAndAnimateSprites(data->spriteList);
+    for (int i = 0; i < 2; ++i) {
+        *Sprite_GetCellAnim(sprites[i]) = saved[i];
+        Sprite_SetMatrix(sprites[i], &positions[i]);
+        Sprite_SetAnimActiveFlag(sprites[i], active[i]);
+        if (active[i]) Sprite_UpdateAnim(sprites[i], sprites[i]->speed / 2);
+    }
+}
+#endif
+
 static void IntroMovie_Scene1_VBlankCB(void *pVoid) {
     IntroMovieOverlayData *data = (IntroMovieOverlayData *)pVoid;
 
     DoScheduledBgGpuUpdates(IntroMovie_GetBgConfig(data));
+#if defined(SDK_PORT)
+    if (data->scene1Data.smoothPan) IntroMovie_Scene1_RenderSmooth(data);
+#endif
     OamManager_ApplyAndResetBuffers();
 }
 
@@ -134,8 +220,17 @@ static BOOL IntroMovie_Scene1_Main(IntroMovieOverlayData *data, IntroMovieScene1
         break;
     case INTRO_SCENE1_WAIT_START_BG_SCROLL: // Start scrolling background
         if (timer >= 1) {
-            IntroMovie_StartBlendFadeEffect(&bgAnimCnt->blend[0], 1, 0x1E, 80, 1, 1);
-            IntroMovie_StartBlendFadeEffect(&bgAnimCnt->blend[1], 2, 0x1E, 80, 1, 0);
+            int blendDuration = 80;
+#if defined(SDK_PORT)
+            sceneData->smoothPan = SIM_Config_prj_GetConfig()->enable60fps;
+            sceneData->halfFrame = FALSE;
+            if (sceneData->smoothPan) {
+                Main_SetForce30Hz(FALSE);
+                blendDuration *= 2;
+            }
+#endif
+            IntroMovie_StartBlendFadeEffect(&bgAnimCnt->blend[0], 1, 0x1E, blendDuration, 1, 1);
+            IntroMovie_StartBlendFadeEffect(&bgAnimCnt->blend[1], 2, 0x1E, blendDuration, 1, 0);
             IntroMovie_StartBgScroll_VBlank(bgConfig, bgAnimCnt->scroll, GF_BG_LYR_MAIN_1, 0, -0x20, 0xF0);
             IntroMovie_StartBgScroll_VBlank(bgConfig, bgAnimCnt->scroll, GF_BG_LYR_MAIN_2, 0, -0x10, 0xF0);
             IntroMovie_StartSpriteAnimAndMakeVisible(sceneData->sunSprite, TRUE);
@@ -155,7 +250,13 @@ static BOOL IntroMovie_Scene1_Main(IntroMovieOverlayData *data, IntroMovieScene1
         break;
     case INTRO_SCENE1_DELAY90_START_FADEOUT: // Run anim 90 frames then start fade to white
         if (timer >= 90) {
-            BeginNormalPaletteFade(FADE_BOTH_SCREENS, FADE_TYPE_BRIGHTNESS_OUT, FADE_TYPE_BRIGHTNESS_OUT, RGB_WHITE, 65, 1, HEAP_ID_INTRO_MOVIE);
+#if defined(SDK_PORT)
+            // Keep the interpolated transforms throughout the fade as well.
+            int fadeFrames = sceneData->smoothPan ? 2 : 1;
+#else
+            int fadeFrames = 1;
+#endif
+            BeginNormalPaletteFade(FADE_BOTH_SCREENS, FADE_TYPE_BRIGHTNESS_OUT, FADE_TYPE_BRIGHTNESS_OUT, RGB_WHITE, 65, fadeFrames, HEAP_ID_INTRO_MOVIE);
             IntroMovie_AdvanceSceneStep(data);
         }
         break;
@@ -170,6 +271,12 @@ static BOOL IntroMovie_Scene1_Main(IntroMovieOverlayData *data, IntroMovieScene1
 
 static void IntroMovie_Scene1_Exit(IntroMovieOverlayData *data, IntroMovieScene1Data *sceneData) {
     BgConfig *bgConfig = IntroMovie_GetBgConfig(data);
+#if defined(SDK_PORT)
+    IntroMovie_Scene1_ResetScroll();
+    sceneData->smoothPan = FALSE;
+    sceneData->halfFrame = FALSE;
+    Main_SetForce30Hz(TRUE);
+#endif
     Main_SetVBlankIntrCB(NULL, NULL);
     if (sceneData->needFreeGfx) {
         IntroMovie_Scene1_DestroySpritesAndObjectGfx(data, sceneData);

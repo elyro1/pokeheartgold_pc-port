@@ -22,9 +22,17 @@ u16 MATH_CalcCRC16(const MATHCRC16Table *table, const void *data, u32 dataLength
 BOOL CTRDG_IsAgbCartridge(void);
 void CTRDG_TerminateForPulledOut(void);
 
+#if defined(SDK_PORT)
+MainMenuUtilWork gMainMenuUtilWork;
+#else
 u32 gMainMenuUtilWork[13];
+#endif
 
+#if defined(SDK_PORT)
+#define sMainMenuUtilWork (&gMainMenuUtilWork)
+#else
 #define sMainMenuUtilWork ((MainMenuUtilWork *)gMainMenuUtilWork)
+#endif
 
 static void MainMenuUtil_CartridgeIrqHandler(void);
 static void MainMenuUtil_IgnoreCartridgeIrqHandler(void);
@@ -44,7 +52,11 @@ void MainMenuUtil_ShowCardSubScreen(BgConfig *bgConfig, WonderCard *card) {
     Heap_Free(file);
     BgTilemapRectChangePalette(bgConfig, GF_BG_LYR_SUB_1, 0, 0, 32, 24, palette + 8);
     ScheduleBgTilemapBufferTransfer(bgConfig, GF_BG_LYR_SUB_1);
+#if defined(SDK_PORT)
+    work->vblankCallback = MainMenuUtil_LoadCardSubScreenPalette;
+#else
     gMainMenuUtilVBlankWork[9] = (u32)MainMenuUtil_LoadCardSubScreenPalette;
+#endif
     sMainMenuUtilWork->bgConfig = bgConfig;
     switch (tag) {
     case MG_TAG_BATTLE_RULES:
@@ -186,7 +198,12 @@ void MainMenuUtil_StartSave(SaveData *saveData) {
 }
 
 int MainMenuUtil_RunSave(void) {
+#if defined(SDK_PORT)
+    // the work through the preceding label (second literal-pool entry of the same address)
+    MainMenuUtilWork *work = &gMainMenuUtilWork;
+#else
     MainMenuUtilWork *work = (MainMenuUtilWork *)(&gMainMenuUtilCryptoHeapId + 1);
+#endif
     int result;
 
     switch (sMainMenuUtilWork->saveState) {
@@ -217,7 +234,11 @@ int MainMenuUtil_RunSave(void) {
 }
 
 void MainMenuUtil_ResumeSave(void) {
+#if defined(SDK_PORT)
+    MainMenuUtilWork *work = &gMainMenuUtilWork;
+#else
     MainMenuUtilWork *work = (MainMenuUtilWork *)(&gMainMenuUtilCryptoHeapId + 1);
+#endif
 
     if (sMainMenuUtilWork->saveState == SAVE_STATE_PAUSED) {
         work->saveState = SAVE_STATE_WRITING;
@@ -233,3 +254,7 @@ void MainMenuUtil_CancelSave(void) {
 int MainMenuUtil_GetSaveState(void) {
     return sMainMenuUtilWork->saveState;
 }
+#if defined(SDK_PORT)
+
+enum HeapID gMainMenuUtilCryptoHeapId;
+#endif

@@ -1591,3 +1591,34 @@ void BattleAnimUtil_InitSinMotion(BattleAnimSinMotion *motion, int startX, int e
     motion->stepX = (endX - startX) / duration;
     motion->stepY = ((u16)endY - startY) / duration;
 }
+#if defined(SDK_PORT)
+
+/* Native tables from asm/battle_anim_data.s; adapters give differing originals the table's signature. */
+BattleAnimEmitterConfigCb gBattleAnimEmitterFlagCallbacks[] = {
+    BattleAnimEmitterFlagCb_Nop0,
+    BattleAnimEmitterFlagCb_SetGravity,
+    BattleAnimEmitterFlagCb_Nop2,
+    BattleAnimEmitterFlagCb_Nop3,
+    BattleAnimEmitterFlagCb_SetMagnetPos,
+    BattleAnimEmitterFlagCb_SetMagnetForce,
+    BattleAnimEmitterFlagCb_SetSpinAngle,
+    BattleAnimEmitterFlagCb_SetSpinAxis,
+    BattleAnimEmitterFlagCb_Nop8,
+    BattleAnimEmitterFlagCb_Nop9,
+    BattleAnimEmitterFlagCb_Nop10,
+    BattleAnimEmitterFlagCb_Nop11,
+    BattleAnimEmitterFlagCb_SetConvergencePos,
+    BattleAnimEmitterFlagCb_SetConvergenceForce,
+};
+BattleAnimEmitterConfigCb gBattleAnimEmitterCameraCallbacks[] = {
+    BattleAnimEmitterCameraCb_ResetAngle,
+    BattleAnimEmitterCameraCb_SetPresetAngle4,
+    BattleAnimEmitterCameraCb_SetAngleFromScript,
+    BattleAnimEmitterCameraCb_SetPresetAngle3,
+    BattleAnimEmitterCameraCb_SetAngleByMode,
+    BattleAnimEmitterCameraCb_SetPresetAngle0,
+    BattleAnimEmitterCameraCb_SetPresetAngle1,
+    BattleAnimEmitterCameraCb_LookAtBattlerA,
+    BattleAnimEmitterCameraCb_LookAtBattlerB,
+};
+#endif

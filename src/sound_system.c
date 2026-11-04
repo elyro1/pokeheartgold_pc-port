@@ -12,6 +12,10 @@
 #include "sound_playback.h"
 #include "sound_playback_internal.h"
 #include "sound_system_internal.h"
+#if defined(SDK_PORT)
+
+#include <simulator/sim_audio.h>
+#endif
 
 // Sound state on top of the SND_WORK attributes (GF_SdatGetAttrPtr): the current BGM and the sound scenes,
 // per-sequence volume, microphone auto sampling, the two wave-out channels (14 and 15) that play reversed wave
@@ -771,6 +775,9 @@ void Sound_FreeWaveOutChannel(int channel) {
 }
 
 BOOL Sound_StartWaveOut(SoundWaveOutParam *param, int channel) {
+#if defined(SDK_PORT)
+    SIM_Audio_SetChannelFastForward(channel, TRUE);
+#endif
     BOOL success = NNS_SndWaveOutStart(*param->handle, param->format, param->data, param->loopFlag, param->loopStartSample, param->samples, param->sampleRate, param->volume, param->speed, param->pan);
     if (!success) {
         Sound_FreeWaveOutChannel(channel);
@@ -808,7 +815,11 @@ void Sound_SetWaveOutVolume(int channel, int volume) {
 BOOL Sound_PlayReversedWaveArc(int waveArcNo, int volume, int pan, int channel, int heapId) {
     GetSoundDataPointer();
     void **buffer = GF_SdatGetAttrPtr(SOUND_ATTR_REVERSED_WAVE_BUFFER);
+#if defined(SDK_PORT)
+    const NNSSndArcWaveArcInfo *info;
+#else
     const SndArcWaveArcInfo *info;
+#endif
     u32 size;
     SoundWaveOutParam param;
     BOOL success;

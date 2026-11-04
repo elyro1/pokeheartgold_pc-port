@@ -1,0 +1,106 @@
+diff --git a/libraries/sim/src/shaders/g2_fragment.glsl b/libraries/sim/src/shaders/g2_fragment.glsl
+index c15c25e..39fd2db 100644
+--- a/libraries/sim/src/shaders/g2_fragment.glsl
++++ b/libraries/sim/src/shaders/g2_fragment.glsl
+@@ -49,9 +49,27 @@ uniform bool singleScreen;
+ uniform sampler2D sideAverageTexture;
+ uniform bool sideAverageValid;
+ uniform bool averagePass;
++uniform vec2 layerOffset[8]; // BG0-3, then OBJ priorities 0-3.
+ vec2 uiCoord;
+ vec2 worldCoord;
+ 
++vec4 sampleScrolledLayer(sampler2D layerTexture, vec2 offset, bool sprite) {
++    if (all(equal(offset, vec2(0.0)))) return texture(layerTexture, uiCoord);
++    vec2 coord = uiCoord + offset;
++    float bottom = topScreen == 1 ? 0.5 : 0.0;
++    // These textures contain rasterized screens, not repeating tile maps.
++    // A fractional shift must not fetch the opposite edge or the other LCD.
++    if (sprite) {
++        if (coord.x < 0.0 || coord.x >= 1.0 || coord.y < bottom || coord.y >= bottom + 0.5)
++            return vec4(0.0);
++    } else {
++        vec2 halfTexel = 0.5 / vec2(256.0, 384.0);
++        coord = clamp(coord, vec2(0.0, bottom) + halfTexel,
++            vec2(1.0, bottom + 0.5) - halfTexel);
++    }
++    return texture(layerTexture, coord);
++}
++
+ bool insideFieldMoveWindow() {
+     // Scale only the horizontal reveal. The band keeps its native height.
+     float x = fragTexCoord.x * 256.0;
+@@ -117,7 +135,7 @@ vec4 sampleBg(int layer) {
+         }
+     }
+     if (uiCoord.x < 0.0 || uiCoord.x >= 1.0) return vec4(0.0);
+-    return texture(bgTexture[layer], uiCoord);
++    return sampleScrolledLayer(bgTexture[layer], layerOffset[layer], false);
+ }
+ vec4 sampleObj(int layer) {
+     if (!fieldMoveCutIn && (windowMask & 16) == 0) return vec4(0.0);
+@@ -129,7 +147,7 @@ vec4 sampleObj(int layer) {
+         return vec4(0.0);
+     }
+     if ((windowMask & 16) == 0) return vec4(0.0);
+-    return texture(objTexture[layer], uiCoord);
++    return sampleScrolledLayer(objTexture[layer], layerOffset[4 + min(layer, 3)], true);
+ }
+ vec4 sampleWindow() {
+     if (uiCoord.x < 0.0 || uiCoord.x >= 1.0) return vec4(0.0);
+diff --git a/libraries/sim/src/shaders/g3_fragment.glsl b/libraries/sim/src/shaders/g3_fragment.glsl
+index 0224e37..e439b65 100644
+--- a/libraries/sim/src/shaders/g3_fragment.glsl
++++ b/libraries/sim/src/shaders/g3_fragment.glsl
+@@ -137,7 +137,11 @@ void main()
+     vec4 shadedColor;
+     vec4 texel = vec4(1.0);
+     if( useTexture == 1 ) {
+-        texel = texture(myTexture, fragTexCoord);
++        // Constant UVs on an atlas texel boundary can interpolate a few ULPs
++        // to either side, producing a stippled mix of neighboring colors.
++        // Select the positive side consistently, well below a DS UV step.
++        vec2 stableUV = fragTexCoord + vec2(0.0001) / vec2(textureSize(myTexture, 0));
++        texel = texture(myTexture, stableUV);
+         shadedColor = polygonMode == 0 ? texel * fragInColor : texel;
+         // Cast shadows blur past the sprite's outline; see mode 23.
+         if( shadedColor.a <= 0.0 && fieldEffectMode != 23) {
+diff --git a/libraries/sim/src/sim_main.cpp b/libraries/sim/src/sim_main.cpp
+index 5897361..e1fd21e 100644
+--- a/libraries/sim/src/sim_main.cpp
++++ b/libraries/sim/src/sim_main.cpp
+@@ -289,6 +289,23 @@ u8 bg1stex[4 * SIM_NDS_SCREEN_WIDTH * SIM_NDS_SCREEN_HEIGHT * 2];
+ u8 bg2stex[4 * SIM_NDS_SCREEN_WIDTH * SIM_NDS_SCREEN_HEIGHT * 2];
+ u8 bg3stex[4 * SIM_NDS_SCREEN_WIDTH * SIM_NDS_SCREEN_HEIGHT * 2];
+ 
++// Optional subpixel sampling residuals for native 2D animations (BG0-3, OBJ).
++static float s_LayerOffset[2][8][2] = {};
++extern "C" void SIM_Set2DObjOffset(int screen, int priority, s32 x, s32 y) {
++  if (screen < 0 || screen > 1 || priority < 0 || priority > 3) return;
++  s_LayerOffset[screen][4 + priority][0] = (float)x / (4096.0f * 256.0f);
++  s_LayerOffset[screen][4 + priority][1] = (float)-y / (4096.0f * 384.0f);
++}
++extern "C" void SIM_Set2DLayerOffset(int screen, int layer, s32 x, s32 y) {
++  if (screen < 0 || screen > 1 || layer < 0 || layer > 4) return;
++  if (layer == 4) {
++    for (int priority = 0; priority < 4; ++priority) SIM_Set2DObjOffset(screen, priority, x, y);
++    return;
++  }
++  s_LayerOffset[screen][layer][0] = (float)x / (4096.0f * 256.0f);
++  s_LayerOffset[screen][layer][1] = (float)-y / (4096.0f * 384.0f);
++}
++
+ u8 oam0Tex[4 * SIM_NDS_SCREEN_WIDTH * SIM_NDS_SCREEN_HEIGHT * 2];
+ u8 oam1Tex[4 * SIM_NDS_SCREEN_WIDTH * SIM_NDS_SCREEN_HEIGHT * 2];
+ u8 oam2Tex[4 * SIM_NDS_SCREEN_WIDTH * SIM_NDS_SCREEN_HEIGHT * 2];
+@@ -1335,6 +1352,10 @@ static void DrawEngine(BOOL isSub) {
+                      glGetUniformLocation(g2shaderProgramID, "topScreen"),
+                      topScreen);
+ 
++  glProgramUniform2fv(g2shaderProgramID,
++      glGetUniformLocation(g2shaderProgramID, "layerOffset"), 8,
++      &s_LayerOffset[isSub ? 1 : 0][0][0]);
++
+   // Pass bg0as3d to the shader
+   glProgramUniform1i(g2shaderProgramID,
+                      glGetUniformLocation(g2shaderProgramID, "bg0as3d"),

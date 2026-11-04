@@ -241,7 +241,14 @@ extern const u8 gScratchOffCardsSpriteResourceCounts[4];
 extern const ObjCharTransferTemplate gScratchOffCardsObjCharTransferTemplate;
 extern const VecFx32 gScratchOffCardsSpriteScale;
 extern const WindowTemplate gScratchOffCardsWindowTemplates[16];
+#if defined(SDK_PORT)
+extern const u8 gScratchOffCardsMatchPaletteFiles[8];
+
+/* Native fixed-width tables from asm/scratch_off_cards_data.s. */
+_Static_assert(sizeof(ScratchOffCardsPos) == 4 && sizeof(ScratchOffCardsSpritePos) == 4 && sizeof(ScratchOffCardsBounds) == 4, "scratch-off positions and bounds");
+#else
 extern u8 gScratchOffCardsMatchPaletteFiles[8];
+#endif
 
 static BOOL ScratchOffCards_FadeIn(ScratchOffCardsWork *work);
 static BOOL ScratchOffCards_SlideInCardChoices(ScratchOffCardsWork *work);
@@ -596,7 +603,11 @@ static BOOL ScratchOffCards_ShowCard(ScratchOffCardsWork *work) {
         work->slideX = -256;
         work->unk_019[work->cardNo] = 0;
         for (i = 0; i < 0x9600; i++) {
+#if defined(SDK_PORT)
+            ((u8 *)work->scratchMask)[i] = 0;
+#else
             ((u8 *)((u32)work + i))[offsetof(ScratchOffCardsWork, scratchMask)] = 0;
+#endif
         }
         work->revealedCount = 0;
         ScratchOffCards_ClearCells(work);

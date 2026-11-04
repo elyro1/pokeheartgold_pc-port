@@ -12,6 +12,9 @@
 #include "yes_no_prompt.h"
 
 // The card payload at the start of TrainerCardAppArgs, as the trainer card viewer reads it.
+#if defined(SDK_PORT)
+typedef TrainerCardData TrainerCardMainCard;
+#else
 typedef struct TrainerCardMainCard {
     u8 version; // game version of the card's owner (HG/SS cards show badges)
     u8 language;
@@ -49,6 +52,7 @@ typedef struct TrainerCardMainCard {
     u8 badgeShininess[0x20];
     u8 signature[0x600]; // 1 bit per pixel
 } TrainerCardMainCard;
+#endif
 
 typedef struct TrainerCardMainSprites {
     SpriteList *spriteList;

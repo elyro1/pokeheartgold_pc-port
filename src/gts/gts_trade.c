@@ -174,3 +174,14 @@ static void GtsTrade_StoreReceivedMon(GtsApp *app) {
         PCStorage_PlaceMonInBoxFirstEmptySlot(app->args->pcStorage, box, Mon_GetBoxMon(mon));
     }
 }
+#if defined(SDK_PORT)
+
+/* Native tables from asm/gts_data.s; adapters give differing originals the field signatures. */
+BOOL TradeSequence_Init(void *man, int *state);
+static int Native_TradeSequence_Init_7731(OverlayManager * a0, int * a1) { return (int)TradeSequence_Init((void *)a0, (int *)a1); }
+BOOL TradeSequence_Main(void *man, int *state);
+static int Native_TradeSequence_Main_7731(OverlayManager * a0, int * a1) { return (int)TradeSequence_Main((void *)a0, (int *)a1); }
+BOOL TradeSequence_Exit(void *man, int *state);
+static int Native_TradeSequence_Exit_7731(OverlayManager * a0, int * a1) { return (int)TradeSequence_Exit((void *)a0, (int *)a1); }
+const OverlayManagerTemplate gGtsTradeSequenceTemplate = { Native_TradeSequence_Init_7731, Native_TradeSequence_Main_7731, Native_TradeSequence_Exit_7731, FS_OVERLAY_ID(OVY_71) };
+#endif

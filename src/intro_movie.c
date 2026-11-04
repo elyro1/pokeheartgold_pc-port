@@ -51,6 +51,9 @@ enum HeapID _deadstrip_00(int idx) {
 }
 
 static BOOL IntroMovie_Init(OverlayManager *man, int *state) {
+#if defined(SDK_PORT)
+    Main_SetForce30Hz(TRUE);
+#endif
     ScreenBrightnessData_InitAll();
     SetMasterBrightnessByColor(PM_LCD_TOP, RGB_BLACK);
     SetMasterBrightnessByColor(PM_LCD_BOTTOM, RGB_BLACK);
@@ -84,6 +87,19 @@ static BOOL IntroMovie_Main(OverlayManager *man, int *state) {
         SetMasterBrightnessByColor(PM_LCD_TOP, RGB_WHITE);
         SetMasterBrightnessByColor(PM_LCD_BOTTOM, RGB_WHITE);
     }
+
+#if defined(SDK_PORT)
+    // Smooth scenes render at 60 Hz while the movie script stays at 30 Hz.
+    BOOL *halfFrame = data->scene1Data.smoothPan ? &data->scene1Data.halfFrame
+        : data->scene2Data.smoothPan ? &data->scene2Data.halfFrame : NULL;
+    if (!data->introSkipped && halfFrame != NULL) {
+        *halfFrame = !*halfFrame;
+        if (*halfFrame) {
+            IntroMovie_HandleSpriteUpdates(data);
+            return FALSE;
+        }
+    }
+#endif
 
     switch (*state) {
     case INTRO_MOVIE_INIT:
@@ -119,6 +135,9 @@ static BOOL IntroMovie_Main(OverlayManager *man, int *state) {
 }
 
 static BOOL IntroMovie_Exit(OverlayManager *man, int *state) {
+#if defined(SDK_PORT)
+    Main_SetForce30Hz(FALSE);
+#endif
     int i;
 
     IntroMovieOverlayData *data = OverlayManager_GetData(man);
@@ -181,6 +200,10 @@ static void IntroMovie_SetGraphicsBanks(void) {
 }
 
 static void IntroMovie_HandleSpriteUpdates(IntroMovieOverlayData *data) {
+#if defined(SDK_PORT)
+    // Smooth scenes submit sprites in VBlank, after the movement tasks.
+    if (data->scene1Data.smoothPan || data->scene2Data.smoothPan) return;
+#endif
     SpriteList_RenderAndAnimateSprites(data->spriteList);
 }
 

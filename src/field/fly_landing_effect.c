@@ -358,3 +358,42 @@ void FieldMove_FadeOutToWhite(void) {
 void FieldMove_SetPlayerVisible(FieldSystem *fieldSystem, BOOL visible) {
     MapObject_SetVisible(PlayerAvatar_GetMapObject(fieldSystem->playerAvatar), visible);
 }
+#if defined(SDK_PORT)
+const FlyLandingStepFunc sFlyLandingIdleSteps[] = {
+    FlyLandingEffect_Idle,
+};
+const FlyLandingStepFunc sFlyLandingSteps[] = {
+    FlyLandingEffect_SwoopIn,
+    FlyLandingEffect_StartClimb,
+    FlyLandingEffect_Climb,
+    FlyLandingEffect_HideFlyer,
+    FlyLandingEffect_StartFlyAway,
+    FlyLandingEffect_FlyAway,
+    FlyLandingEffect_ShowPlayer,
+    FlyLandingEffect_Done,
+};
+
+
+
+const FlyLandingStepFunc *const gFlyLandingPhases[] = {sFlyLandingIdleSteps, sFlyLandingSteps};
+
+const VecFx32 gFlyLandingFlyerScale = { 4096, 4096, 0 };
+
+const VecFx32 gFlyLandingSwoopCenter = { 524288, 454656, 0 };
+
+const VecFx32 gFlyLandingSwoopScale = { 8192, 8192, 0 };
+
+const VecFx32 gFlyLandingTrainerScale = { 8192, 8192, 0 };
+
+const VecFx32 gFlyLandingFlyAwayCenter = { 557056, 323584, 0 };
+
+const VecFx32 gFlyLandingFlyAwayScale = { 4096, 4096, 0 };
+static BOOL FlyLandingEffect_Init_Native(FieldEffect *effect, void *state) { return FlyLandingEffect_Init(effect, state); }
+static void FlyLandingEffect_Destroy_Native(FieldEffect *effect, void *state) { FlyLandingEffect_Destroy(effect, state); }
+static void FlyLandingEffect_Update_Native(FieldEffect *effect, void *state) { FlyLandingEffect_Update(effect, state); }
+
+
+
+
+const FieldEffectBasicTemplate gFlyLandingEffectTemplate = {sizeof(FlyLandingEffect), FlyLandingEffect_Init_Native, FlyLandingEffect_Destroy_Native, FlyLandingEffect_Update_Native, FieldEffect_DefaultDraw};
+#endif

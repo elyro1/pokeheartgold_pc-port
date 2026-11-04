@@ -2,6 +2,10 @@
 #define POKEHEARTGOLD_SPRITE_H
 
 #include "sprite_resource_header.h"
+#if defined(SDK_PORT)
+#include "port/battle_timing.h"
+#include "port/battle_smoothing.h"
+#endif
 
 typedef enum SpriteAnimType {
     SPRITE_ANIM_TYPE_NULL,
@@ -53,6 +57,15 @@ typedef struct SpriteMultiAnimationData {
     NNSG2dCellAnimation *cellAnim;
 } SpriteMultiAnimationData;
 
+#if defined(SDK_PORT)
+// The native SDK's animations contain pointers and outgrow the DS word buffer.
+typedef union SpriteNativeAnimationStorage {
+    SpriteAnimationData cell;
+    SpriteAnimationDataWithTransfer transfer;
+    SpriteMultiAnimationData multi;
+} SpriteNativeAnimationStorage;
+#define SPRITE_ANIMATION_DATA_WORD_COUNT (sizeof(SpriteNativeAnimationStorage) / sizeof(u32))
+#else
 // UB: this is too small
 #ifdef BUGFIX_SPRITE_ANIM_SIZE
 #define max(a, b)                        ((a) > (b) ? (a) : (b))
@@ -60,8 +73,13 @@ typedef struct SpriteMultiAnimationData {
 #else
 #define SPRITE_ANIMATION_DATA_WORD_COUNT 29
 #endif // BUGFIX_SPRITE_ANIM_SIZE
+#endif
 
 typedef struct Sprite {
+#if defined(SDK_PORT)
+    BattleTimingDomain battleTimingDomain;
+    BattleVisualHistory battleVisualHistory;
+#endif
     VecFx32 matrix;                                      // 000
     VecFx32 affineMatrix;                                // 00C
     VecFx32 scale;                                       // 018
@@ -77,7 +95,14 @@ typedef struct Sprite {
     u8 animActive;                                       // 035
     fx32 speed;                                          // 038
     SpriteList *spriteList;                              // 03c
+#if defined(SDK_PORT)
+    union {
+        SpriteNativeAnimationStorage nativeAnimationStorage;
+        u32 animationData[SPRITE_ANIMATION_DATA_WORD_COUNT];
+    };
+#else
     u32 animationData[SPRITE_ANIMATION_DATA_WORD_COUNT]; // 040
+#endif
     NNSG2dImageProxy imageProxy;                         // 0b4
     NNSG2dImagePaletteProxy paletteProxy;                // 0d8
     SpriteAnimType flag;                                 // 0ec
@@ -97,6 +122,11 @@ typedef struct ManagedSprite {
 } ManagedSprite;
 
 struct SpriteList {
+#if defined(SDK_PORT)
+    SpriteList *battleDrawNext;
+    u32 battleDrawFrame;
+    BattleTimingDomain battleDrawDomain;
+#endif
     Sprite *sprites;                  // 0x000
     int numSprites;                   // 0x004
     Sprite **stack;                   // 0x008
@@ -108,6 +138,10 @@ struct SpriteList {
     u32 flag;                         // 0x120
 };
 
+#if defined(SDK_PORT)
+void SpriteList_ResetBattleDrawLists(void);
+void SpriteList_DrawSkippedBattleLists(void);
+#endif
 SpriteList *SpriteList_Create(SpriteListParam *param);
 BOOL SpriteList_Delete(SpriteList *spriteList);
 BOOL SpriteList_DeleteAllSprites(SpriteList *spriteList);

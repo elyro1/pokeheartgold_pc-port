@@ -1806,7 +1806,11 @@ static void BattleCastlePartyApp_DrawItemIcons(BattleCastlePartyApp *app) {
     pageOffset = index * sizeof(ListMenuItem);
     for (; i < CASTLE_ITEMS_PER_PAGE; i++, index++, itemOffset += sizeof(ListMenuItem), iconSlot = (BattleCastlePartyApp *)((u8 *)iconSlot + sizeof(BattleCastleSprite *))) {
         if (index < app->numItems) {
+#if defined(SDK_PORT)
+            ListMenuItem *item = (ListMenuItem *)((u8 *)app->itemList + pageOffset + itemOffset);
+#else
             ListMenuItem *item = (ListMenuItem *)(itemOffset + (pageOffset + (u32)app->itemList));
+#endif
             u16 itemId = BattleCastlePartyApp_GetRentalItemId(app, (u16)item->value, app->action);
             struct {
                 u16 y;
@@ -2206,7 +2210,12 @@ static int BattleCastlePartyApp_GetMonIconHpPalette(BattleCastlePartyApp *app, u
     case 1:
         return 4;
     default:
+#if defined(SDK_PORT)
+        GF_ASSERT(FALSE);
+        return 0;
+#else
         return (int)app; // not reached for a valid colour
+#endif
     }
 }
 
@@ -2221,7 +2230,12 @@ static int BattleCastlePartyApp_GetHpBarAnimSeq(BattleCastlePartyApp *app, u32 h
     case 1:
         return 13;
     default:
+#if defined(SDK_PORT)
+        GF_ASSERT(FALSE);
+        return 0;
+#else
         return (int)app; // not reached for a valid colour
+#endif
     }
 }
 
@@ -3213,3 +3227,9 @@ static void BattleCastlePartyApp_StartButtonAnim(BattleCastlePartyApp *app, u16 
     app->buttonAnimState = CASTLE_BUTTON_ANIM_HIGHLIGHT;
     app->buttonAnimTimer = 0;
 }
+#if defined(SDK_PORT)
+
+/* Native tables from asm/frontier_script_commands_data.s; adapters give differing originals the field signatures. */
+static int Native_BattleCastlePartyApp_Exit_7731(OverlayManager * a0, int * a1) { return (int)BattleCastlePartyApp_Exit((OverlayManager *)a0, a1); }
+const OverlayManagerTemplate gOverlayTemplate_BattleCastlePartyApp = { BattleCastlePartyApp_Init, BattleCastlePartyApp_Main, Native_BattleCastlePartyApp_Exit_7731, FS_OVERLAY_ID(OVY_83) };
+#endif

@@ -39,6 +39,9 @@ typedef struct FrontierBrainIntroArgs {
     u8 bgScreen;
     u8 unused;
 } FrontierBrainIntroArgs;
+#if defined(SDK_PORT)
+_Static_assert(sizeof(FrontierBrainIntroArgs) == 12, "literal data: FrontierBrainIntroArgs");
+#endif
 
 typedef struct FrontierBrainIntroLerp {
     fx32 value;

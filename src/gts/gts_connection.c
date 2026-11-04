@@ -1,3 +1,6 @@
+#if defined(SDK_PORT)
+#include <hg/dwc_compat.h>
+#endif
 #include "global.h"
 
 #include "constants/dwc_status.h"
@@ -461,7 +464,11 @@ enum GtsAppState GtsConnection_WaitConnect(GtsApp *app) {
     if (DWC_CheckInet()) {
         switch (DWC_GetInetStatus()) {
         case DWC_CONNECTINET_STATE_ERROR:
+#if defined(SDK_PORT)
+            app->connectionResult = HG_DWC_GetLastErrorEx(&locals.errorCode, &locals.errorType);
+#else
             app->connectionResult = DWC_GetLastErrorEx(&locals.errorCode, &locals.errorType);
+#endif
             app->connectionErrorCode = locals.errorCode;
             app->connectionErrorType = locals.errorType;
             DWC_ClearError();
@@ -510,7 +517,11 @@ enum GtsAppState GtsConnection_WaitAuth(GtsApp *app) {
     case DWC_NASLOGIN_STATE_ERROR:
     case DWC_NASLOGIN_STATE_CANCELED:
         Gts_DeleteWaitingIcon(app);
+#if defined(SDK_PORT)
+        result = HG_DWC_GetLastErrorEx(&errorCode, &errorType);
+#else
         result = DWC_GetLastErrorEx(&errorCode, &errorType);
+#endif
         app->connectionResult = result;
         app->connectionErrorCode = errorCode;
         DWC_ClearError();
@@ -915,3 +926,36 @@ static void GtsConnection_PrintErrorCode(GtsApp *app, int msgId, int errorCode) 
     ClearFrameAndWindow2(&app->waitingIconWindow, TRUE);
     GtsConnection_PrintError(app, msgId);
 }
+#if defined(SDK_PORT)
+
+/* Native tables from asm/gts_data.s; adapters give differing originals the table's signature. */
+void GtsConnection_StartConnect(GtsApp *app);
+static enum GtsAppState Native_GtsConnection_StartConnect(GtsApp * a0) { GtsConnection_StartConnect((GtsApp *)a0); return 0; }
+enum GtsAppState (*const gGtsConnectionStates[])(GtsApp *app) = {
+    GtsConnection_AskConnect,
+    GtsConnection_HandleConnectPrompt,
+    Native_GtsConnection_StartConnect,
+    GtsConnection_WaitConnect,
+    GtsConnection_StartAuth,
+    GtsConnection_WaitAuth,
+    GtsConnection_InitServer,
+    GtsConnection_SendInfo,
+    GtsConnection_WaitInfo,
+    GtsConnection_SendSetProfile,
+    GtsConnection_WaitSetProfile,
+    GtsConnection_FadeOut,
+    GtsConnection_WaitText,
+    GtsConnection_WaitTextAndShowYesNo,
+    GtsConnection_HandleExitPrompt,
+    GtsConnection_AskDisconnect,
+    GtsConnection_HandleDisconnectMenu,
+    GtsConnection_PrintDisconnecting,
+    GtsConnection_Disconnect,
+    GtsConnection_PrintDisconnected,
+    GtsConnection_WaitTextAndDelay,
+    GtsConnection_PrintServerError,
+    GtsConnection_DisconnectAfterError,
+    GtsConnection_ShowConnectionError,
+    GtsConnection_WaitCloseError,
+};
+#endif

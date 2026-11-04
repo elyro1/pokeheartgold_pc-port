@@ -65,8 +65,13 @@ static void Gts_InitObjTransfer(void);
 static void Gts_InitSpriteResources(GtsApp *app);
 static void Gts_InitSpriteResourcesHeaders(GtsApp *app);
 static void Gts_ListMenuCallback(TouchscreenListMenu *menu, u8 cursorPos, void *callbackArg, int event);
+#if defined(SDK_PORT)
+static void *Gts_Alloc(DWCAllocType unused, u32 size, int alignment);
+static void Gts_Free(DWCAllocType unused, void *ptr, u32 size);
+#else
 static void *Gts_Alloc(int unused, u32 size, int alignment);
 static void Gts_Free(int unused, void *ptr, u32 size);
+#endif
 static void Gts_InitGraphics(GtsApp *app);
 static void Gts_FreeGraphics(GtsApp *app);
 static void Gts_DecrementTimer(GtsApp *app);
@@ -161,7 +166,11 @@ BOOL Gts_Init(OverlayManager *man, int *state) {
         Gts_InitGraphics(app);
         Sound_SetSceneAndPlayBGM(11, SEQ_GS_WIFI_ACCESS, 1);
         app->heapMemory = Heap_Alloc(HEAP_ID_61, 0x20020);
+#if defined(SDK_PORT)
+        app->heap = NNS_FndCreateExpHeapEx((void *)(((uintptr_t)app->heapMemory + 0x1F) & ~(uintptr_t)0x1F), 0x20000, 0);
+#else
         app->heap = NNS_FndCreateExpHeapEx((void *)(((u32)app->heapMemory + 0x1F) & ~0x1F), 0x20000, 0);
+#endif
         *state = GTS_INIT_START_WIRELESS;
         break;
     case GTS_INIT_START_WIRELESS:
@@ -255,7 +264,10 @@ BOOL Gts_Exit(OverlayManager *man, int *state) {
 static void Gts_VBlankCB(void *arg) {
     GtsApp *app = arg;
     // OS_SetIrqCheckFlag(OS_IE_V_BLANK), with the DTCM base as a constant
+#if defined(SDK_PORT)
+#else
     vu32 *dtcm = (vu32 *)0x027E0000;
+#endif
 
     if (app->vblankTask != NULL) {
         app->vblankTask(app);
@@ -267,7 +279,11 @@ static void Gts_VBlankCB(void *arg) {
     DoScheduledBgGpuUpdates(app->bgConfig);
     GF_RunVramTransferTasks();
     OamManager_ApplyAndResetBuffers();
+#if defined(SDK_PORT)
+    OS_SetIrqCheckFlag(OS_IE_V_BLANK);
+#else
     dtcm[0x3FF8 / 4] |= OS_IE_V_BLANK;
+#endif
 }
 
 static void Gts_SetGfxBanks(void) {
@@ -486,14 +502,22 @@ void Gts_SetSpritePositionRounded(Sprite *sprite, int x, int y) {
     Sprite_SetMatrix(sprite, &vec);
 }
 
+#if defined(SDK_PORT)
+static void *Gts_Alloc(DWCAllocType unused, u32 size, int alignment) {
+#else
 static void *Gts_Alloc(int unused, u32 size, int alignment) {
+#endif
     OSIntrMode intrMode = OS_DisableInterrupts();
     void *ptr = NNS_FndAllocFromExpHeapEx(gGtsGlobals.heap, size, alignment);
     OS_RestoreInterrupts(intrMode);
     return ptr;
 }
 
+#if defined(SDK_PORT)
+static void Gts_Free(DWCAllocType unused, void *ptr, u32 size) {
+#else
 static void Gts_Free(int unused, void *ptr, u32 size) {
+#endif
     if (ptr != NULL) {
         OSIntrMode intrMode = OS_DisableInterrupts();
         NNS_FndFreeToExpHeap(gGtsGlobals.heap, ptr);
@@ -599,3 +623,13 @@ static void Gts_ClearDim(void) {
     G2_BlendNone();
     G2S_BlendNone();
 }
+#if defined(SDK_PORT)
+
+volatile GtsServer gGtsServer;
+
+GtsServerPending gGtsServerPending;
+
+volatile GtsServerAnswer gGtsServerAnswer;
+
+GtsGlobals gGtsGlobals;
+#endif

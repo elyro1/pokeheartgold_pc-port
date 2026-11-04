@@ -1,3 +1,7 @@
+#if defined(SDK_PORT)
+#include "port/battle_timing.h"
+#include "sprite.h"
+#endif
 #include "battle/battle_022378C0.h"
 
 #include "constants/game_stats.h"
@@ -45,6 +49,13 @@ typedef enum BattleState {
 BOOL Battle_Run(OverlayManager *man, int *state) {
     BattleSetup *setup = OverlayManager_GetArgs(man);
 
+#if defined(SDK_PORT)
+    if (*state == BSTATE_INIT) {
+        SpriteList_ResetBattleDrawLists();
+        BattleTiming_SetActive(TRUE);
+    }
+    BattleTimingDomain previous = BattleTiming_SetDomain(BATTLE_TIMING_UI);
+#endif
     switch (*state) {
     case BSTATE_INIT:
         Heap_Create(HEAP_ID_3, HEAP_ID_BATTLE, 0xB0000);
@@ -121,6 +132,10 @@ BOOL Battle_Run(OverlayManager *man, int *state) {
         if (Battle_EndInit(man) == TRUE) {
             *state = BSTATE_END_MAIN;
         } else {
+#if defined(SDK_PORT)
+            SpriteList_ResetBattleDrawLists();
+            BattleTiming_SetActive(FALSE);
+#endif
             Heap_Destroy(HEAP_ID_BATTLE);
             *state = BSTATE_EVOLUTION_INIT;
         }
@@ -128,6 +143,10 @@ BOOL Battle_Run(OverlayManager *man, int *state) {
     case BSTATE_END_MAIN:
         if (Battle_EndMain(man) == TRUE) {
             UnloadOverlayByID(FS_OVERLAY_ID(OVY_5));
+#if defined(SDK_PORT)
+            SpriteList_ResetBattleDrawLists();
+            BattleTiming_SetActive(FALSE);
+#endif
             Heap_Destroy(HEAP_ID_BATTLE);
             *state = BSTATE_END_WAIT;
         }
@@ -163,8 +182,16 @@ BOOL Battle_Run(OverlayManager *man, int *state) {
         break;
     }
     case BSTATE_EXIT:
+#if defined(SDK_PORT)
+        SpriteList_ResetBattleDrawLists();
+        BattleTiming_SetActive(FALSE);
+        BattleTiming_SetDomain(previous);
+#endif
         return TRUE;
     }
+#if defined(SDK_PORT)
+    BattleTiming_SetDomain(previous);
+#endif
     return FALSE;
 }
 

@@ -105,6 +105,161 @@ enum FieldMoveStepResult FieldDig_DigHole(TaskManager *taskManager, FieldSystem 
 enum FieldMoveStepResult FieldDig_SpinAndFadeOut(TaskManager *taskManager, FieldSystem *fieldSystem, FieldMoveTaskEnvironment *env);
 enum FieldMoveStepResult FieldDig_WaitFadeOut(TaskManager *taskManager, FieldSystem *fieldSystem, FieldMoveTaskEnvironment *env);
 enum FieldMoveStepResult FieldDig_Warp(TaskManager *taskManager, FieldSystem *fieldSystem, FieldMoveTaskEnvironment *env);
+#if defined(SDK_PORT)
+
+// Native pointers for state dispatch; movement commands retain their DS u16 encoding.
+const FieldMoveStepFunc gFieldMoveArrivalSteps[] = {
+    FieldMoveArrival_FadeIn,
+    FieldMoveArrival_WaitFadeIn,
+    FieldMoveArrival_Spin,
+    FieldMoveArrival_Finish,
+};
+const FieldMoveStepFunc gEscapeRopeSteps[] = {
+    FieldEscapeRope_SpinStart,
+    FieldEscapeRope_SpinAndFadeOut,
+    FieldEscapeRope_WaitFadeOut,
+    FieldEscapeRope_Warp,
+};
+const FieldMoveStepFunc gDigWithFollowMonSteps[] = {
+    FieldDig_SinkStart,
+    FieldDig_DigHole,
+    FieldDig_SpinAndFadeOut,
+    FieldDig_WaitFadeOut,
+    FieldDig_Warp,
+};
+const FieldMoveStepFunc gTeleportSteps[] = {
+    FieldMove_ShowCutIn,
+    FieldMove_WaitCutIn,
+    FieldTeleport_SpinStart,
+    FieldTeleport_SpinAndFadeOut,
+    FieldTeleport_WaitFadeOut,
+    FieldTeleport_Warp,
+};
+const FieldMoveStepFunc gTeleportWithFollowMonSteps[] = {
+    FieldTeleport_FollowMonFlash,
+    FieldTeleport_FollowMonSpinStart,
+    FieldTeleport_FollowMonWaitSpin,
+    FieldTeleport_SpinAndFadeOut,
+    FieldTeleport_WaitFadeOut,
+    FieldTeleport_Warp,
+};
+const FieldMoveStepFunc gDigSteps[] = {
+    FieldMove_ShowCutIn,
+    FieldMove_WaitCutIn,
+    FieldDig_SinkStart,
+    FieldDig_DigHole,
+    FieldDig_SpinAndFadeOut,
+    FieldDig_WaitFadeOut,
+    FieldDig_Warp,
+};
+const MovementScriptCommand gTeleportFollowMonSpinMovement[] = {
+    { 0x01, 1 },
+    { 0x3C, 2 },
+    { 0x02, 1 },
+    { 0x3C, 2 },
+    { 0x00, 1 },
+    { 0x3C, 2 },
+    { 0x03, 1 },
+    { 0x3C, 2 },
+    { 0xFE, 0 },
+};
+const MovementScriptCommand gEscapeRopeSpinMovement[] = {
+    { 0x00, 1 },
+    { 0x03, 1 },
+    { 0x01, 1 },
+    { 0x02, 1 },
+    { 0x00, 1 },
+    { 0x03, 1 },
+    { 0x01, 1 },
+    { 0x02, 1 },
+    { 0xFE, 0 },
+};
+const MovementScriptCommand gDigHoleMovement[] = {
+    { 0x01, 1 },
+    { 0x02, 1 },
+    { 0x00, 1 },
+    { 0x03, 1 },
+    { 0x01, 1 },
+    { 0x02, 1 },
+    { 0x00, 1 },
+    { 0x03, 1 },
+    { 0xFE, 0 },
+};
+const MovementScriptCommand gDigSinkMovement[] = {
+    { 0x01, 1 },
+    { 0x3C, 2 },
+    { 0x02, 1 },
+    { 0x3C, 2 },
+    { 0x00, 1 },
+    { 0x3C, 2 },
+    { 0x03, 1 },
+    { 0x3C, 2 },
+    { 0x01, 1 },
+    { 0x3C, 1 },
+    { 0x02, 1 },
+    { 0x3C, 1 },
+    { 0x00, 1 },
+    { 0x3C, 1 },
+    { 0x03, 1 },
+    { 0x3C, 1 },
+    { 0xFE, 0 },
+};
+const MovementScriptCommand gEscapeRopeSpinStartMovement[] = {
+    { 0x01, 1 },
+    { 0x3C, 2 },
+    { 0x02, 1 },
+    { 0x3C, 2 },
+    { 0x00, 1 },
+    { 0x3C, 2 },
+    { 0x03, 1 },
+    { 0x3C, 2 },
+    { 0x01, 1 },
+    { 0x3C, 1 },
+    { 0x02, 1 },
+    { 0x3C, 1 },
+    { 0x00, 1 },
+    { 0x3C, 1 },
+    { 0x03, 1 },
+    { 0x3C, 1 },
+    { 0x01, 1 },
+    { 0x02, 1 },
+    { 0x00, 1 },
+    { 0x03, 1 },
+    { 0x01, 1 },
+    { 0x02, 1 },
+    { 0x00, 1 },
+    { 0x03, 1 },
+    { 0xFE, 0 },
+};
+const MovementScriptCommand gArrivalSpinMovement[] = {
+    { 0x01, 1 },
+    { 0x02, 1 },
+    { 0x00, 1 },
+    { 0x03, 1 },
+    { 0x01, 1 },
+    { 0x02, 1 },
+    { 0x00, 1 },
+    { 0x03, 1 },
+    { 0x01, 1 },
+    { 0x3C, 1 },
+    { 0x02, 1 },
+    { 0x3C, 1 },
+    { 0x00, 1 },
+    { 0x3C, 1 },
+    { 0x03, 1 },
+    { 0x3C, 1 },
+    { 0x01, 1 },
+    { 0x3C, 2 },
+    { 0x02, 1 },
+    { 0x3C, 3 },
+    { 0x00, 1 },
+    { 0x3C, 4 },
+    { 0x03, 1 },
+    { 0x3C, 5 },
+    { 0x01, 1 },
+    { 0xFE, 0 },
+};
+#endif
 
 FieldMoveTaskEnvironment *CreateFieldEscapeRopeTaskEnv(FieldSystem *fieldSystem, enum HeapID heapID) {
     FieldMoveTaskEnvironment *env = FieldMoveTaskEnvironment_New(heapID, sizeof(FieldMoveTaskEnvironment));

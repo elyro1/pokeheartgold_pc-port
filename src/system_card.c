@@ -29,13 +29,23 @@ typedef struct RomHeaderFields {
 static const char sRomArchiveName[] = "rom";
 
 void SystemCard_InitRomArchive(void) {
+#if defined(SDK_PORT)
+    // The native filesystem serves the extracted ROM archive; there is no ROM header mirror to fix up.
+#else
     FSArchive *archive;
     RomHeaderFields *header = HW_ROM_HEADER_MIRROR;
 
+#endif
     if (!FS_IsAvailable()) {
         OS_Terminate();
+#if defined(SDK_PORT)
+#else
         return;
+#endif
     }
+#if defined(SDK_PORT)
+    return;
+#else
 
     if (*HW_ROM_HEADER_VALID == 0) {
         CARD_Init();
@@ -52,6 +62,7 @@ void SystemCard_InitRomArchive(void) {
     if (header->gameCode != ROM_GAME_CODE || header->makerCode != ROM_MAKER_CODE) {
         OS_Terminate();
     }
+#endif
 }
 
 void SystemCard_RebootIntoFile(const char *path) {
@@ -59,7 +70,11 @@ void SystemCard_RebootIntoFile(const char *path) {
 
     FS_InitFile(&file);
     if (FS_OpenFile(&file, path)) {
+#if defined(SDK_PORT)
+        *(u32 *)HW_ROM_BASE_OFFSET_BUF = file.prop.file.top;
+#else
         *(u32 *)0x027FFC2C = file.prop.file.top;
+#endif
         OS_ResetSystem(0);
     }
 }

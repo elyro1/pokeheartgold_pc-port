@@ -478,3 +478,147 @@ BOOL VsRecorder_Main(VsRecorderWork *work, int *screen) {
     VsRecorder_UpdateNet(work);
     return FALSE;
 }
+#if defined(SDK_PORT)
+
+/* Native state tables from asm/vs_recorder_data.s. */
+#include "application/vs_recorder/vs_recorder_screens.h"
+
+
+
+
+
+
+VsRecorderScreenFunc gVsRecorderBoxDataSendSubStates[] = {
+    VsRecorder_BoxDataInit,
+    VsRecorder_BoxDataEnter,
+    VsRecorder_BoxDataSendShow,
+    VsRecorder_BoxDataSendMain,
+    VsRecorder_BoxDataSendChangeBox,
+    VsRecorder_BoxDataSendShowCategories,
+    VsRecorder_BoxDataSendSelectCategory,
+    VsRecorder_BoxDataSendCancelCategory,
+    VsRecorder_BoxDataSendUpload,
+    VsRecorder_BoxDataSendQuit,
+    VsRecorder_BoxDataSendExit,
+};
+VsRecorderScreenFunc gVsRecorderBoxDataViewSubStates[] = {
+    VsRecorder_BoxDataInit,
+    VsRecorder_BoxDataEnter,
+    VsRecorder_BoxDataViewShow,
+    VsRecorder_BoxDataViewSelectCategory,
+    VsRecorder_BoxDataViewDownload,
+    VsRecorder_BoxListMain,
+    VsRecorder_BoxListBack,
+    VsRecorder_BoxListShowProfile,
+    VsRecorder_BoxListHideProfile,
+    VsRecorder_BoxDataViewOpenBox,
+    VsRecorder_BoxDataViewBoxMain,
+    VsRecorder_BoxDataViewCloseBox,
+    VsRecorder_BoxDataViewQuit,
+    VsRecorder_BoxDataViewExit,
+};
+VsRecorderScreenFunc gVsRecorderRankingsSubStates[] = {
+    VsRecorder_RankingsInit,
+    VsRecorder_RankingsEnter,
+    VsRecorder_RankingsDownload,
+    VsRecorder_RankingsInvalid,
+    VsRecorder_RankingsSwitch,
+    VsRecorder_RankingsShow,
+    VsRecorder_RankingsMain,
+    VsRecorder_RankingsCloseList,
+    VsRecorder_RankingsExit,
+};
+VsRecorderScreenFunc gVsRecorderVideoListSubStates[] = {
+    VsRecorder_VideoListInit,
+    VsRecorder_VideoListEnter,
+    VsRecorder_VideoListDownloadList,
+    VsRecorder_VideoListShowList,
+    VsRecorder_VideoListSelect,
+    VsRecorder_VideoListExit,
+    VsRecorder_VideoListShowDetails,
+    VsRecorder_VideoListDetailsMain,
+    VsRecorder_VideoListToggleProfile,
+    VsRecorder_VideoListPlay,
+    VsRecorder_VideoListBackToList,
+    VsRecorder_VideoListShowSlots,
+    VsRecorder_VideoListSlotsMain,
+    VsRecorder_VideoListSlotsCancel,
+    VsRecorder_VideoListConfirmOverwrite,
+    VsRecorder_VideoListOverwriteMain,
+    VsRecorder_VideoListOverwriteNo,
+    VsRecorder_VideoListSave,
+    VsRecorder_VideoListDownloadVideo,
+    VsRecorder_VideoListResume,
+    VsRecorder_VideoListReturnToDetails,
+};
+VsRecorderScreenFunc gVsRecorderSendVideoSubStates[] = {
+    VsRecorder_VideoSearchInit,
+    VsRecorder_VideoSearchEnter,
+    VsRecorder_SendVideoShowCursor,
+    VsRecorder_SendVideoUpload,
+    VsRecorder_SendVideoExit,
+};
+VsRecorderScreenFunc gVsRecorderNumberSearchSubStates[] = {
+    VsRecorder_VideoSearchInit,
+    VsRecorder_VideoSearchEnter,
+    VsRecorder_NumberSearchShowPad,
+    VsRecorder_NumberSearchPadMain,
+    VsRecorder_NumberSearchClosePad,
+    VsRecorder_NumberSearchExit,
+    VsRecorder_NumberSearchDownloadVideo,
+    VsRecorder_NumberSearchShowDetails,
+    VsRecorder_NumberSearchDetailsMain,
+    VsRecorder_NumberSearchToggleProfile,
+    VsRecorder_NumberSearchPlay,
+    VsRecorder_NumberSearchExitDetails,
+    VsRecorder_NumberSearchShowSlots,
+    VsRecorder_NumberSearchSlotsMain,
+    VsRecorder_NumberSearchSlotsCancel,
+    VsRecorder_NumberSearchConfirmOverwrite,
+    VsRecorder_NumberSearchOverwriteMain,
+    VsRecorder_NumberSearchOverwriteNo,
+    VsRecorder_NumberSearchSave,
+    VsRecorder_NumberSearchResume,
+    VsRecorder_NumberSearchReturnToDetails,
+};
+VsRecorderScreenFunc gVsRecorderVideoSearchSubStates[] = {
+    VsRecorder_VideoSearchInit,
+    VsRecorder_VideoSearchEnter,
+    VsRecorder_VideoSearchShowConditions,
+    VsRecorder_VideoSearchConditionsMain,
+    VsRecorder_VideoSearchExit,
+    VsRecorder_VideoSearchOpenCondition,
+    VsRecorder_VideoSearchSelectFacility,
+    VsRecorder_VideoSearchClearSpecies,
+    VsRecorder_VideoSearchSelectCategory,
+    VsRecorder_VideoSearchSelectSpecies,
+    VsRecorder_VideoSearchSelectLocation,
+    VsRecorder_VideoSearchReturnToConditions,
+    VsRecorder_VideoSearchRequest,
+    VsRecorder_VideoSearchLeaveConditions,
+    VsRecorder_VideoSearchShowResults,
+    VsRecorder_VideoSearchResultsMain,
+    VsRecorder_VideoSearchResultsBack,
+    VsRecorder_VideoSearchShowDetails,
+    VsRecorder_VideoSearchDetailsMain,
+    VsRecorder_VideoSearchToggleProfile,
+    VsRecorder_VideoSearchPlay,
+    VsRecorder_VideoSearchBackToResults,
+    VsRecorder_VideoSearchShowSlots,
+    VsRecorder_VideoSearchSlotsMain,
+    VsRecorder_VideoSearchSlotsCancel,
+    VsRecorder_VideoSearchConfirmOverwrite,
+    VsRecorder_VideoSearchOverwriteMain,
+    VsRecorder_VideoSearchOverwriteNo,
+    VsRecorder_VideoSearchSave,
+    VsRecorder_VideoSearchDownloadVideo,
+    VsRecorder_VideoSearchResume,
+    VsRecorder_VideoSearchReturnToDetails,
+};
+VsRecorderScreenFunc gVsRecorderDeleteSubStates[] = {
+    VsRecorder_DeleteInit,
+    VsRecorder_DeleteEnter,
+    VsRecorder_DeleteMain,
+    VsRecorder_DeleteExit,
+};
+#endif

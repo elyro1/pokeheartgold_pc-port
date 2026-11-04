@@ -36,12 +36,19 @@ enum WiiMessageSettingsMainState {
     WII_MESSAGE_SETTINGS_MAIN_EXIT,
 };
 
+#if defined(SDK_PORT)
+static void *WiiMessageSettings_Alloc(DWCAllocType unused, u32 size, int alignment);
+static void WiiMessageSettings_Free(DWCAllocType unused, void *ptr, u32 size);
+#endif
 static NNSFndHeapHandle sWiiMessageSettingsHeap;
 
 static void WiiMessageSettings_LoadNetworkOverlays(WiiMessageSettings *app);
 static void WiiMessageSettings_UnloadNetworkOverlays(WiiMessageSettings *app);
+#if defined(SDK_PORT)
+#else
 static void *WiiMessageSettings_Alloc(int unused, u32 size, int alignment);
 static void WiiMessageSettings_Free(int unused, void *ptr, u32 size);
+#endif
 static void WiiMessageSettings_SetRegistrationCodePrefix(WiiMessageSettings *app, int prefix);
 static void WiiMessageSettings_SetWiiNumberEntryState(WiiMessageSettings *app, u8 entryState);
 static void *WiiMessageSettings_CreateScreenArgs(WiiMessageSettings *app);
@@ -167,7 +174,11 @@ static void WiiMessageSettings_LoadNetworkOverlays(WiiMessageSettings *app) {
         LoadOVY38();
         Comm_InitDwc(HEAP_ID_115);
         app->expHeapMemory = Heap_Alloc(HEAP_ID_115, 0x20020);
+#if defined(SDK_PORT)
+        app->expHeap = NNS_FndCreateExpHeapEx((void *)(((uintptr_t)app->expHeapMemory + 0x1F) & ~(uintptr_t)0x1F), 0x20000, 0);
+#else
         app->expHeap = NNS_FndCreateExpHeapEx((void *)(((u32)app->expHeapMemory + 0x1F) & ~0x1F), 0x20000, 0);
+#endif
         CommWireless_StartUp();
         Sys_ClearSleepDisableFlag(4);
     }
@@ -202,14 +213,22 @@ u8 WiiMessageSettings_GetScreenStartState(WiiMessageSettings *app) {
     return app->screenStartState;
 }
 
+#if defined(SDK_PORT)
+static void *WiiMessageSettings_Alloc(DWCAllocType unused, u32 size, int alignment) {
+#else
 static void *WiiMessageSettings_Alloc(int unused, u32 size, int alignment) {
+#endif
     OSIntrMode intrMode = OS_DisableInterrupts();
     void *ptr = NNS_FndAllocFromExpHeapEx(sWiiMessageSettingsHeap, size, alignment);
     OS_RestoreInterrupts(intrMode);
     return ptr;
 }
 
+#if defined(SDK_PORT)
+static void WiiMessageSettings_Free(DWCAllocType unused, void *ptr, u32 size) {
+#else
 static void WiiMessageSettings_Free(int unused, void *ptr, u32 size) {
+#endif
     if (ptr) {
         OSIntrMode intrMode = OS_DisableInterrupts();
         NNS_FndFreeToExpHeap(sWiiMessageSettingsHeap, ptr);

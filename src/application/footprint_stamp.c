@@ -927,7 +927,11 @@ static BOOL FootprintStamp_LoadFootprintIcon(int species, int form, ManagedSprit
     NNSG2dCharacterData *charData;
     u8 *bottom;
     u8 *top;
+#if defined(SDK_PORT)
+    uintptr_t vram;
+#else
     u32 vram;
+#endif
 
     if (species == SPECIES_NONE || species > NATIONAL_DEX_COUNT) {
         return FALSE;
@@ -1706,3 +1710,37 @@ void FootprintStamp_DrawFootprintTexture(NNSG3dResTex *texture, NARC *narc, NARC
     *(u16 *)((u8 *)texture + texture->plttInfo.ofsPlttData + 2) = mon->color;
     Heap_Free(file);
 }
+#if defined(SDK_PORT)
+
+const OverlayManagerTemplate sWiFiPlazaFootprintStampBoard1OverlayTemplate = { FootprintStamp_Init, FootprintStamp_Main, FootprintStamp_Exit, FS_OVERLAY_ID(OVY_89) };
+
+const OverlayManagerTemplate sWiFiPlazaFootprintStampBoard0OverlayTemplate = { FootprintStamp_Init, FootprintStamp_Main, FootprintStamp_Exit, FS_OVERLAY_ID(OVY_89) };
+
+/* Native pointer tables from the corresponding DS data. */
+BOOL (*const gFootprintStampCameraEffectFuncs[])(FootprintStampBoard *unused, FootprintStampBoard *board, Camera *camera) = {
+    0,
+    FootprintStampCamera_ZoomIn,
+    FootprintStampCamera_Roll,
+    FootprintStampCamera_TurnLeft,
+    FootprintStampCamera_TurnRight,
+    FootprintStampCamera_PitchUp,
+    FootprintStampCamera_Sway,
+    FootprintStampCamera_ZoomOut,
+    FootprintStampCamera_ShakeX,
+    FootprintStampCamera_ShakeY,
+    FootprintStampCamera_PitchDown
+};
+const FootprintStampEffectFuncs gFootprintStampEffectFuncs[] = {
+    {FootprintStamp_UpdateIdle, 0, FootprintStamp_HitIdle},
+    {FootprintStamp_UpdateVanish, FootprintStamp_DrawVanish, FootprintStamp_HitVanish},
+    {FootprintStamp_UpdateSplit, FootprintStamp_DrawSplit, FootprintStamp_HitSplit},
+    {FootprintStamp_UpdateZigzag, 0, FootprintStamp_HitZigzag},
+    {FootprintStamp_UpdateWave, 0, FootprintStamp_HitWave},
+    {FootprintStamp_UpdateRise, FootprintStamp_DrawRise, FootprintStamp_HitRise},
+    {FootprintStamp_UpdateFall, 0, FootprintStamp_HitFall},
+    {FootprintStamp_UpdateGrow, 0, FootprintStamp_HitGrow},
+    {FootprintStamp_UpdateSpreadX, FootprintStamp_DrawSpreadX, FootprintStamp_HitSpreadX},
+    {FootprintStamp_UpdateSpreadY, FootprintStamp_DrawSpreadY, FootprintStamp_HitSpreadY},
+    {FootprintStamp_UpdateStretch, 0, FootprintStamp_HitStretch}
+};
+#endif

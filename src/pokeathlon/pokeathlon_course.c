@@ -23,7 +23,12 @@ extern BOOL GF_heap_c_dummy_return_true(enum HeapID heapId);
 // Data tables in assembly
 extern const OverlayManagerTemplate subOverlayTemplate;
 extern const u8 gPokeathlonCourseEventIds[40];
+#if defined(SDK_PORT)
+extern const PokeathlonStateFunc sPokeathlonStateInfoFuncTable[];
+#define POKEATHLON_STATE_INFO_FUNC_TABLE sPokeathlonStateInfoFuncTable
+#else
 extern const void *sPokeathlonStateInfoFuncTable;
+#endif
 
 BOOL PokeathlonCourse_Init(OverlayManager *manager, int *state) {
     PokeathlonCourseData *data;
@@ -49,7 +54,11 @@ BOOL PokeathlonCourse_Init(OverlayManager *manager, int *state) {
     data->subOverlay = subOverlay;
 
     specialMode = FALSE;
+#if defined(SDK_PORT)
+    data->state = NULL;
+#else
     data->state = specialMode;
+#endif
     args = data->args;
 
     if (args->mode == 1) {
@@ -64,7 +73,11 @@ BOOL PokeathlonCourse_Init(OverlayManager *manager, int *state) {
     system = PokeathlonCourseLink_New(PokeathlonCourseCmd_GetTable(), PokeathlonCourseCmd_GetCount(), data, specialMode, data->heapId);
     data->system = system;
 
+#if defined(SDK_PORT)
+    PokeathlonCourse_InitStateInfo(POKEATHLON_STATE_INFO_FUNC_TABLE, &data->stateInfo);
+#else
     PokeathlonCourse_InitStateInfo(&sPokeathlonStateInfoFuncTable, &data->stateInfo);
+#endif
 
     data->stateInfo.stateIndex = 0;
     data->courseState.argsPtr = &data->stateInfo;
@@ -444,25 +457,49 @@ u8 *PokeathlonCourse_GetDataCopyArea(PokeathlonCourseData *data) {
 
 void PokeathlonCourse_ResetDataCopyArea(PokeathlonCourseData *data) {
     // Look like it's filling dataCopySource + dataCopyBuffer1 + dataCopyBuffer2 + filler_304 + eventDataTransfer
+#if defined(SDK_PORT)
+    MI_CpuFill8(data->dataCopySource, 0, offsetof(PokeathlonCourseData, courseState) - offsetof(PokeathlonCourseData, dataCopySource));
+#else
     MI_CpuFill8(data->dataCopySource, 0, 296);
+#endif
 }
 
+#if defined(SDK_PORT)
+void PokeathlonCourse_SetEventDataTransfer(PokeathlonCourseData *data, void *a0, void *a1, u32 a2) {
+    data->eventDataTransfer.source = a0;
+    data->eventDataTransfer.destination = a1;
+    data->eventDataTransfer.size = a2;
+    data->eventDataTransfer.enabled = 1;
+#else
 void PokeathlonCourse_SetEventDataTransfer(PokeathlonCourseData *data, u32 a0, u32 a1, u32 a2) {
     data->eventDataTransfer[0] = a0;
     data->eventDataTransfer[1] = a1;
     data->eventDataTransfer[2] = a2;
     data->eventDataTransfer[3] = 1;
+#endif
 }
 
 void PokeathlonCourse_ClearEventDataTransfer(PokeathlonCourseData *data) {
+#if defined(SDK_PORT)
+    data->eventDataTransfer.source = 0;
+    data->eventDataTransfer.destination = 0;
+    data->eventDataTransfer.size = 0;
+    data->eventDataTransfer.enabled = 0;
+#else
     data->eventDataTransfer[0] = 0;
     data->eventDataTransfer[1] = 0;
     data->eventDataTransfer[2] = 0;
     data->eventDataTransfer[3] = 0;
+#endif
 }
 
+#if defined(SDK_PORT)
+void *PokeathlonCourse_GetEventRecvBuffer(PokeathlonCourseData *data) {
+    return data->eventDataTransfer.destination;
+#else
 u32 PokeathlonCourse_GetEventRecvBuffer(PokeathlonCourseData *data) {
     return data->eventDataTransfer[1];
+#endif
 }
 
 u32 PokeathlonCourse_GetEventResultSize() {

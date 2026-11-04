@@ -191,6 +191,9 @@ const u8 sCardFaceUpTileIDs[5][2] = {
     { 0x6B, 0x0B },
 };
 
+#if defined(SDK_PORT)
+static
+#endif
 const TouchscreenListMenuTemplate sListMenuTemplate = {
     .wrapAround = TRUE,
     .centered = TRUE,

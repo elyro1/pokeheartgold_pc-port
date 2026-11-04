@@ -1,7 +1,16 @@
 #include "poke_overlay.h"
 
+#if defined(SDK_PORT)
+#include <hg/native_overlays.h>
+#else
 #define OVY_MAX_PER_REGION (8)
+#endif
 
+#if defined(SDK_PORT)
+BOOL HandleLoadOverlay(FSOverlayID id, PMOverlayLoadType loadType) {
+    if (loadType < OVY_LOAD_NORMAL || loadType > OVY_LOAD_ASYNC) return FALSE;
+    return PC_LoadOverlay(MI_PROCESSOR_ARM9, id);
+#else
 typedef enum PMiOverlayRegion {
     OVY_REGION_MAIN,
     OVY_REGION_ITCM,
@@ -28,8 +37,13 @@ static void FreeOverlayAllocation(PMiLoadedOverlay *ovload) {
     GF_ASSERT(ovload->active == TRUE);
     GF_ASSERT(FS_UnloadOverlay(MI_PROCESSOR_ARM9, ovload->id) == TRUE);
     ovload->active = FALSE;
+#endif
 }
 
+#if defined(SDK_PORT)
+void UnloadOverlayByID(FSOverlayID id) {
+    GF_ASSERT(PC_UnloadOverlay(MI_PROCESSOR_ARM9, id));
+#else
 void UnloadOverlayByID(FSOverlayID ovyId) {
     int i;
     PMiLoadedOverlay *table = GetLoadedOverlaysInRegion(GetOverlayLoadDestination(ovyId));
@@ -39,7 +53,10 @@ void UnloadOverlayByID(FSOverlayID ovyId) {
             break;
         }
     }
+#endif
 }
+#if defined(SDK_PORT)
+#else
 
 static PMiOverlayRegion GetOverlayLoadDestination(FSOverlayID id) {
     FSOverlayInfo info;
@@ -192,3 +209,4 @@ static BOOL LoadOverlayNoInitAsync(MIProcessor proc, FSOverlayID ovyId) {
     FS_StartOverlay(&info);
     return TRUE;
 }
+#endif

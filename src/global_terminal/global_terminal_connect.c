@@ -1,3 +1,6 @@
+#if defined(SDK_PORT)
+#include <hg/dwc_compat.h>
+#endif
 #include "global.h"
 
 #include "constants/dwc_status.h"
@@ -393,7 +396,11 @@ static void GlobalTerminalConnect_VBlankCB(GlobalTerminalConnectWork *work) {
     GF_RunVramTransferTasks();
     OamManager_ApplyAndResetBuffers();
     DoScheduledBgGpuUpdates(work->bgConfig);
+#if defined(SDK_PORT)
+    OS_SetIrqCheckFlag(OS_IE_V_BLANK);
+#else
     dtcm[0x3FF8 / sizeof(u32)] |= OS_IE_V_BLANK;
+#endif
 }
 
 static void GlobalTerminalConnect_InitBgs(BgConfig *bgConfig) {
@@ -744,7 +751,11 @@ static BOOL GlobalTerminalConnect_StateWaitConnect(GlobalTerminalConnectWork *wo
     if (DWC_CheckInet()) {
         switch (DWC_GetInetStatus()) {
         case DWC_CONNECTINET_STATE_ERROR:
+#if defined(SDK_PORT)
+            work->dwcResult = HG_DWC_GetLastErrorEx(&result.errorCode, &result.errorType);
+#else
             work->dwcResult = DWC_GetLastErrorEx(&result.errorCode, &result.errorType);
+#endif
             work->errorCode = result.errorCode;
             work->errorType = result.errorType;
             DWC_ClearError();
@@ -792,7 +803,11 @@ static BOOL GlobalTerminalConnect_StateWaitAuth(GlobalTerminalConnectWork *work)
     case DWC_NASLOGIN_STATE_ERROR:
     case DWC_NASLOGIN_STATE_CANCELED:
         GlobalTerminalConnect_HideWaitingIcon(work);
+#if defined(SDK_PORT)
+        work->dwcResult = HG_DWC_GetLastErrorEx(&errorCode, &errorType);
+#else
         work->dwcResult = DWC_GetLastErrorEx(&errorCode, &errorType);
+#endif
         work->errorCode = errorCode;
         work->errorType = errorType;
         DWC_ClearError();
@@ -1038,3 +1053,9 @@ void GlobalTerminalNet_UploadFormToDressUp(const GlobalTerminalNetDressUpForm *s
     }
     dst->secondTextGender = 0;
 }
+#if defined(SDK_PORT)
+static int Native_GlobalTerminalConnect_Exit_7731(OverlayManager * a0, int * a1) { return (int)GlobalTerminalConnect_Exit((OverlayManager *)a0, a1); }
+
+
+const OverlayManagerTemplate sOverlayTemplate_GlobalTerminalConnect = { GlobalTerminalConnect_Init, GlobalTerminalConnect_Main, Native_GlobalTerminalConnect_Exit_7731, 0xFFFFFFFF };
+#endif

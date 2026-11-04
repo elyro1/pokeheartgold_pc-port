@@ -21,6 +21,9 @@ static void PokegearMap_PrintLocationPanel(PokegearMapAppData *mapApp, BOOL copy
 static void PokegearMap_PrintMarkingECWord(PokegearMapAppData *mapApp, u8 index, u16 word);
 static void PokegearMap_GetLandmarkNameFromMapID(u16 mapno, enum HeapID heapID, String *dest);
 
+#if defined(SDK_PORT)
+static
+#endif
 const TouchscreenListMenuTemplate sListMenuTemplate = {
     .wrapAround = TRUE,
     .centered = TRUE,

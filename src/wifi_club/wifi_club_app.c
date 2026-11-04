@@ -1509,7 +1509,11 @@ s32 WifiClub_State_Start(WifiClubApp *app, s32 mainState) {
         Sound_SetSceneAndPlayBGM(11, SEQ_GS_WIFI_ACCESS, 1);
         WifiClub_PrintTitleBar(app);
         FriendRoster_GetUserData(app->friendRoster);
+#if defined(SDK_PORT)
+        if (!DWC_CheckHasProfile(FriendRoster_GetUserData(app->friendRoster))) {
+#else
         if (!DWC_CheckHasProfile()) {
+#endif
             SetBgPriority(GF_BG_LYR_MAIN_0, 3);
             SetBgPriority(GF_BG_LYR_MAIN_1, 0);
             SetBgPriority(GF_BG_LYR_MAIN_3, 0);
@@ -1519,7 +1523,11 @@ s32 WifiClub_State_Start(WifiClubApp *app, s32 mainState) {
             app->state = WIFI_CLUB_STATE_SAVE_USER_INFO_PROMPT;
         } else {
             FriendRoster_GetUserData(app->friendRoster);
+#if defined(SDK_PORT)
+            if (!DWC_CheckValidConsole(FriendRoster_GetUserData(app->friendRoster))) {
+#else
             if (!DWC_CheckValidConsole()) {
+#endif
                 WifiClub_ShowConnectionNotice(app, msg_0800_00020);
                 app->state = WIFI_CLUB_STATE_ASK_UPDATE_USER_INFO;
             } else {

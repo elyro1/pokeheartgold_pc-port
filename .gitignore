@@ -108,3 +108,6 @@ __pycache__
 .local-tools/
 .venv/
 *.pyc
+
+# Meson subproject metadata
+.meson-subproject-wrap-hash.txt

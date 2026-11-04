@@ -15,7 +15,13 @@ void Pokedex_OnDummyCheckFailed(void);
 BOOL Pokedex_Init(OverlayManager *man, int *state) {
     PokedexAppData *appData;
 
+#if defined(SDK_PORT)
+    // Search keeps 101 windows and both screens' sprite resources resident.
+    // Native pointers, animation data and heap alignment exceed the DS budget.
+    Heap_Create(HEAP_ID_3, HEAP_ID_POKEDEX_APP, 0x81000);
+#else
     Heap_Create(HEAP_ID_3, HEAP_ID_POKEDEX_APP, 0x61000);
+#endif
     appData = OverlayManager_CreateAndGetData(man, sizeof(PokedexAppData), HEAP_ID_POKEDEX_APP);
     MI_CpuClear8(appData, sizeof(PokedexAppData));
     appData->args = OverlayManager_GetArgs(man);

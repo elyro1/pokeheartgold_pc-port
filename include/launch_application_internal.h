@@ -125,7 +125,11 @@ typedef struct NamingScreenData {
 } NamingScreenData;
 
 typedef struct GtsArgs {
+#if defined(SDK_PORT)
+    void *gtsSave;
+#else
     int gtsSave;
+#endif
     SysInfo *sysInfo;
     Party *party;
     PCStorage *pcStorage;
@@ -138,7 +142,11 @@ typedef struct GtsArgs {
     GameStats *gameStats;
     Bag *bag;
     BOOL natDexEnabled;
+#if defined(SDK_PORT)
+    s32 gsProfileId;
+#else
     void *gsProfileId;
+#endif
     u32 unk38;
     int connectDirectly;
 } GtsArgs;

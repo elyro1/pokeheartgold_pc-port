@@ -92,3 +92,43 @@ u8 PokeathlonEvent_RingDropPoints(u32 score) {
 u8 PokeathlonEvent_SnowThrowPoints(int score) {
     return PokeathlonEvent_ClampPoints(score * 3);
 }
+#if defined(SDK_PORT)
+
+/* Native tables from asm/pokeathlon_event_data.s. */
+void (*const gPokeathlonEventPointsCalcFuncs[])(PokeathlonCourseScoreList *list, int event) = {
+    PokeathlonEvent_CalcPointsFromScores,
+    PokeathlonEvent_CalcPointsFromScores,
+    PokeathlonEvent_CalcPointsFromScores,
+    PokeathlonEvent_CalcPointsFromScores,
+    PokeathlonEvent_CalcPointsFromScores,
+    PokeathlonEvent_CalcPointsFromScores,
+    PokeathlonEvent_CalcPointsFromScores,
+    PokeathlonEvent_CalcPointsFromScores,
+    PokeathlonEvent_CalcPointsFromScores,
+    PokeathlonEvent_CalcPointsFromRanks,
+};
+
+static u32 Native_PokeathlonEvent_HurdleDashPoints(u32 score) { return PokeathlonEvent_HurdleDashPoints(score); }
+static u32 Native_PokeathlonEvent_PennantCapturePoints(u32 score) { return PokeathlonEvent_PennantCapturePoints(score); }
+static u32 Native_PokeathlonEvent_CirclePushPoints(u32 score) { return PokeathlonEvent_CirclePushPoints(score); }
+static u32 Native_PokeathlonEvent_BlockSmashPoints(u32 score) { return PokeathlonEvent_BlockSmashPoints(score); }
+static u32 Native_PokeathlonEvent_DiscCatchPoints(u32 score) {
+    return PokeathlonEvent_DiscCatchPoints((float)score);
+}
+static u32 Native_PokeathlonEvent_LampJumpPoints(u32 score) { return PokeathlonEvent_LampJumpPoints(score); }
+static u32 Native_PokeathlonEvent_RelayRunPoints(u32 score) { return PokeathlonEvent_RelayRunPoints(score); }
+static u32 Native_PokeathlonEvent_RingDropPoints(u32 score) { return PokeathlonEvent_RingDropPoints(score); }
+static u32 Native_PokeathlonEvent_SnowThrowPoints(u32 score) { return PokeathlonEvent_SnowThrowPoints(score); }
+const PokeathlonEventPointsFunc gPokeathlonEventScorePointsFuncs[] = {
+    Native_PokeathlonEvent_HurdleDashPoints,
+    Native_PokeathlonEvent_PennantCapturePoints,
+    Native_PokeathlonEvent_CirclePushPoints,
+    Native_PokeathlonEvent_BlockSmashPoints,
+    Native_PokeathlonEvent_DiscCatchPoints,
+    Native_PokeathlonEvent_LampJumpPoints,
+    Native_PokeathlonEvent_RelayRunPoints,
+    Native_PokeathlonEvent_RingDropPoints,
+    Native_PokeathlonEvent_SnowThrowPoints,
+    0,
+};
+#endif

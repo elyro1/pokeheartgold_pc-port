@@ -1,3 +1,6 @@
+#if defined(SDK_PORT)
+#include "port/battle_timing.h"
+#endif
 #include "text.h"
 
 #include "global.h"
@@ -33,7 +36,13 @@ static u8 CreateTextPrinterSysTask(SysTaskFunc taskFunc, TextPrinter *printer, u
             continue;
         }
 
+#if defined(SDK_PORT)
+        BattleTimingDomain previous = BattleTiming_SetDomain(BattleTiming_IsActive() ? BATTLE_TIMING_UI : BATTLE_TIMING_NONE);
+#endif
         sTextPrinterTasks[i] = SysTask_CreateOnPrintQueue(taskFunc, printer, priority);
+#if defined(SDK_PORT)
+        BattleTiming_SetDomain(previous);
+#endif
         if (sTextPrinterTasks[i] == NULL) {
             i = MAX_TEXT_PRINTERS;
         }

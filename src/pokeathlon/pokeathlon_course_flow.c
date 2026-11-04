@@ -704,9 +704,17 @@ BOOL PokeathlonCourse_State_WaitRoundStart(PokeathlonCourseData *course) {
 }
 
 BOOL PokeathlonCourse_State_SendEventData(PokeathlonCourseData *course) {
+#if defined(SDK_PORT)
+    if (course->eventDataTransfer.enabled != 0) {
+#else
     if (course->eventDataTransfer[3] != 0) {
+#endif
         if (!PokeathlonCourse_GetNetId(course)) {
+#if defined(SDK_PORT)
+            if (PokeathlonCourseLink_SendLargeCommand(POKEATHLON_COURSE_CMD_EVENT_DATA, (void *)course->eventDataTransfer.source, course->eventDataTransfer.size, course->system)) {
+#else
             if (PokeathlonCourseLink_SendLargeCommand(POKEATHLON_COURSE_CMD_EVENT_DATA, (void *)course->eventDataTransfer[0], course->eventDataTransfer[2], course->system)) {
+#endif
                 PokeathlonCourse_SetNextState(course, POKEATHLON_COURSE_STATE_WAIT_FOR_COMMAND);
             }
         } else {
@@ -2004,3 +2012,508 @@ PokeathlonCourseMonGfxManager *PokeathlonCourseMonGfx_AllocManager(enum HeapID h
     manager->heapId = heapId;
     return manager;
 }
+#if defined(SDK_PORT)
+
+/* Native tables from asm/pokeathlon_course_rodata.s; adapters give differing originals the field signatures. */
+void PokeathlonCourseCmd_RecvEvents(int netId, int size, void *data, void *context);
+int PokeathlonCourseCmd_EventsSize(void);
+void PokeathlonCourseCmd_RecvParticipant(int netId, int size, void *data, void *context);
+int PokeathlonCourseCmd_ParticipantSize(void);
+void PokeathlonCourseCmd_RecvAllParticipants(int netId, int size, void *data, void *context);
+int PokeathlonCourseCmd_AllParticipantsSize(void);
+void PokeathlonCourseCmd_RecvProfiles(int netId, int size, void *data, void *context);
+u32 PokeathlonCourseCmd_ProfilesSize(void);
+static int Native_PokeathlonCourseCmd_ProfilesSize_3519(void) { return (int)PokeathlonCourseCmd_ProfilesSize(); }
+void PokeathlonCourseCmd_RecvRecord(int netId, int size, void *data, void *context);
+int PokeathlonCourseCmd_RecordSize(void);
+void * PokeathlonCourseCmd_GetRecordBuffer(int netId, void *context);
+static void * Native_PokeathlonCourseCmd_GetRecordBuffer_7563(int a0, void * a1, int a2) { return (void *)PokeathlonCourseCmd_GetRecordBuffer(a0, (void *)a1); }
+void PokeathlonCourseCmd_RecvPacket(int netId, int size, void *data, void *context);
+int PokeathlonCourseCmd_PacketSize(void);
+static int Native_PokeathlonCourseCmd_PacketSize_3519(void) { return PokeathlonCourseCmd_PacketSize(); }
+void PokeathlonCourseCmd_RecvEventData(int netId, int size, void *data, void *context);
+u32 CommCmd_GetSizeVariable(void);
+static int Native_CommCmd_GetSizeVariable_3519(void) { return (int)CommCmd_GetSizeVariable(); }
+void * PokeathlonCourseCmd_GetEventDataBuffer(int netId, void *context);
+static void * Native_PokeathlonCourseCmd_GetEventDataBuffer_7563(int a0, void * a1, int a2) { return (void *)PokeathlonCourseCmd_GetEventDataBuffer(a0, (void *)a1); }
+void PokeathlonCourseCmd_RecvEventResult(int netId, int size, void *data, void *context);
+void PokeathlonCourseCmd_RecvEventResults(int netId, int size, void *data, void *context);
+void PokeathlonCourseCmd_RecvMonCounters(int netId, int size, void *data, void *context);
+int PokeathlonCourseCmd_MonCountersSize(void);
+void * PokeathlonCourseCmd_GetMonCountersBuffer(int netId, void *context, int size);
+void PokeathlonCourseCmd_RecvResults(int netId, int size, void *data, void *context);
+int PokeathlonCourseCmd_ResultsSize(void);
+void * PokeathlonCourseCmd_GetResultsBuffer(int netId, void *context);
+static void * Native_PokeathlonCourseCmd_GetResultsBuffer_7563(int a0, void * a1, int a2) { return (void *)PokeathlonCourseCmd_GetResultsBuffer(a0, (void *)a1); }
+void PokeathlonCourseCmd_RecvJuiceRecord(int netId, int size, void *data, void *context);
+u32 PokeathlonCourseCmd_JuiceRecordSize(void);
+static int Native_PokeathlonCourseCmd_JuiceRecordSize_3519(void) { return (int)PokeathlonCourseCmd_JuiceRecordSize(); }
+void * PokeathlonCourseCmd_GetJuiceRecordBuffer(int netId, void *context);
+static void * Native_PokeathlonCourseCmd_GetJuiceRecordBuffer_7563(int a0, void * a1, int a2) { return (void *)PokeathlonCourseCmd_GetJuiceRecordBuffer(a0, (void *)a1); }
+const PokeathlonCourseCmd gPokeathlonCourseCmds[POKEATHLON_COURSE_CMD_JUICE_RECORD - POKEATHLON_COURSE_CMD_FIRST + 1] = {
+    PokeathlonCourseCmd_RecvEvents,
+    PokeathlonCourseCmd_EventsSize,
+    0,
+    PokeathlonCourseCmd_RecvParticipant,
+    PokeathlonCourseCmd_ParticipantSize,
+    0,
+    PokeathlonCourseCmd_RecvAllParticipants,
+    PokeathlonCourseCmd_AllParticipantsSize,
+    0,
+    PokeathlonCourseCmd_RecvProfiles,
+    Native_PokeathlonCourseCmd_ProfilesSize_3519,
+    0,
+    PokeathlonCourseCmd_RecvRecord,
+    PokeathlonCourseCmd_RecordSize,
+    Native_PokeathlonCourseCmd_GetRecordBuffer_7563,
+    PokeathlonCourseCmd_RecvPacket,
+    Native_PokeathlonCourseCmd_PacketSize_3519,
+    0,
+    PokeathlonCourseCmd_RecvEventData,
+    Native_CommCmd_GetSizeVariable_3519,
+    Native_PokeathlonCourseCmd_GetEventDataBuffer_7563,
+    PokeathlonCourseCmd_RecvEventResult,
+    Native_PokeathlonCourseCmd_PacketSize_3519,
+    0,
+    PokeathlonCourseCmd_RecvEventResults,
+    Native_PokeathlonCourseCmd_PacketSize_3519,
+    0,
+    PokeathlonCourseCmd_RecvMonCounters,
+    PokeathlonCourseCmd_MonCountersSize,
+    PokeathlonCourseCmd_GetMonCountersBuffer,
+    PokeathlonCourseCmd_RecvResults,
+    PokeathlonCourseCmd_ResultsSize,
+    Native_PokeathlonCourseCmd_GetResultsBuffer_7563,
+    PokeathlonCourseCmd_RecvJuiceRecord,
+    Native_PokeathlonCourseCmd_JuiceRecordSize_3519,
+    Native_PokeathlonCourseCmd_GetJuiceRecordBuffer_7563,
+};
+
+/* Native event descriptors from asm/pokeathlon_course_rodata.s; adapters give each callback the field signature. */
+BOOL PokeathlonCirclePush_Init(PokeathlonCourseData *course);
+BOOL PokeathlonCourseOpening_Init(PokeathlonCourseData *course);
+BOOL PokeathlonGoalRoll_Init(PokeathlonCourseData *course);
+BOOL PokeathlonBlockSmash_Init(PokeathlonCourseData *course);
+BOOL PokeathlonCourseClosing_Init(PokeathlonCourseData *course);
+BOOL PokeathlonSnowThrow_Init(PokeathlonCourseData *course);
+BOOL PokeathlonResults_Init(PokeathlonCourseData *course);
+BOOL PokeathlonRingDrop_Init(PokeathlonCourseData *course);
+BOOL PokeathlonDiscCatch_Init(PokeathlonCourseData *course);
+BOOL PokeathlonCourseWait_Init(PokeathlonCourseData *course);
+BOOL PokeathlonPennantCapture_Init(PokeathlonCourseData *course);
+BOOL PokeathlonEventIntro_Init(PokeathlonCourseData *course);
+BOOL PokeathlonRelayRun_Init(PokeathlonCourseData *course);
+BOOL PokeathlonHurdleDash_Init(PokeathlonCourseData *course);
+BOOL PokeathlonLampJump_Init(PokeathlonCourseData *course);
+BOOL PokeathlonCirclePush_Main(PokeathlonCourseData *course);
+BOOL PokeathlonCirclePush_CalcResults(PokeathlonCourseData *course);
+BOOL PokeathlonCirclePush_Exit(PokeathlonCourseData *course);
+BOOL PokeathlonCourseOpening_Main(PokeathlonCourseData *course);
+BOOL PokeathlonCourseOpening_Exit(PokeathlonCourseData *course);
+BOOL PokeathlonGoalRoll_Draw(PokeathlonCourseData *course);
+BOOL PokeathlonGoalRoll_ShowResults(PokeathlonCourseData *course);
+BOOL PokeathlonGoalRoll_Exit(PokeathlonCourseData *course);
+BOOL PokeathlonBlockSmash_Draw(PokeathlonCourseData *course);
+BOOL PokeathlonBlockSmash_ShowResults(PokeathlonCourseData *course);
+BOOL PokeathlonBlockSmash_Exit(PokeathlonCourseData *course);
+BOOL PokeathlonCourseClosing_Main(PokeathlonCourseData *course);
+BOOL PokeathlonCourseClosing_Exit(PokeathlonCourseData *course);
+BOOL PokeathlonSnowThrow_Draw(PokeathlonCourseData *course);
+BOOL PokeathlonSnowThrow_ShowResults(PokeathlonCourseData *course);
+BOOL PokeathlonSnowThrow_Exit(PokeathlonCourseData *course);
+BOOL PokeathlonResults_Draw(PokeathlonCourseData *course);
+BOOL PokeathlonResults_Exit(PokeathlonCourseData *course);
+BOOL PokeathlonRingDrop_Draw(PokeathlonCourseData *course);
+BOOL PokeathlonRingDrop_ShowResults(PokeathlonCourseData *course);
+BOOL PokeathlonRingDrop_Exit(PokeathlonCourseData *course);
+u32 PokeathlonDiscCatch_Draw(PokeathlonCourseData *course);
+u32 PokeathlonDiscCatch_ShowResults(PokeathlonCourseData *course);
+u32 PokeathlonDiscCatch_Exit(PokeathlonCourseData *course);
+BOOL PokeathlonCourseWait_Main(void);
+BOOL PokeathlonCourseWait_Exit(PokeathlonCourseData *course);
+BOOL PokeathlonPennantCapture_Draw(PokeathlonCourseData *course);
+BOOL PokeathlonPennantCapture_ShowResults(PokeathlonCourseData *course);
+BOOL PokeathlonPennantCapture_Exit(PokeathlonCourseData *course);
+BOOL PokeathlonEventIntro_Main(PokeathlonCourseData *course);
+BOOL PokeathlonEventIntro_Exit(PokeathlonCourseData *course);
+BOOL PokeathlonRelayRun_Draw(PokeathlonCourseData *course);
+BOOL PokeathlonRelayRun_ShowResults(PokeathlonCourseData *course);
+BOOL PokeathlonRelayRun_Exit(PokeathlonCourseData *course);
+BOOL PokeathlonHurdleDash_Draw(PokeathlonCourseData *course);
+BOOL PokeathlonHurdleDash_ShowResults(PokeathlonCourseData *course);
+BOOL PokeathlonHurdleDash_Exit(PokeathlonCourseData *course);
+BOOL PokeathlonLampJump_Draw(PokeathlonCourseData *course);
+BOOL PokeathlonLampJump_ShowResults(PokeathlonCourseData *course);
+BOOL PokeathlonLampJump_Exit(PokeathlonCourseData *course);
+static void Native_PokeathlonCirclePush_Main(PokeathlonCourseData *course, u32 param) { (void)param; PokeathlonCirclePush_Main(course); }
+static void Native_PokeathlonCirclePush_CalcResults(PokeathlonCourseData *course, u32 param) { (void)param; PokeathlonCirclePush_CalcResults(course); }
+static void Native_PokeathlonCirclePush_Exit(PokeathlonCourseData *course, u32 param) { (void)param; PokeathlonCirclePush_Exit(course); }
+static void Native_PokeathlonCourseOpening_Main(PokeathlonCourseData *course, u32 param) { (void)param; PokeathlonCourseOpening_Main(course); }
+static void Native_PokeathlonCourseOpening_Exit(PokeathlonCourseData *course, u32 param) { (void)param; PokeathlonCourseOpening_Exit(course); }
+static void Native_PokeathlonGoalRoll_Draw(PokeathlonCourseData *course, u32 param) { (void)param; PokeathlonGoalRoll_Draw(course); }
+static void Native_PokeathlonGoalRoll_ShowResults(PokeathlonCourseData *course, u32 param) { (void)param; PokeathlonGoalRoll_ShowResults(course); }
+static void Native_PokeathlonGoalRoll_Exit(PokeathlonCourseData *course, u32 param) { (void)param; PokeathlonGoalRoll_Exit(course); }
+static void Native_PokeathlonBlockSmash_Draw(PokeathlonCourseData *course, u32 param) { (void)param; PokeathlonBlockSmash_Draw(course); }
+static void Native_PokeathlonBlockSmash_ShowResults(PokeathlonCourseData *course, u32 param) { (void)param; PokeathlonBlockSmash_ShowResults(course); }
+static void Native_PokeathlonBlockSmash_Exit(PokeathlonCourseData *course, u32 param) { (void)param; PokeathlonBlockSmash_Exit(course); }
+static void Native_PokeathlonCourseClosing_Main(PokeathlonCourseData *course, u32 param) { (void)param; PokeathlonCourseClosing_Main(course); }
+static void Native_PokeathlonCourseClosing_Exit(PokeathlonCourseData *course, u32 param) { (void)param; PokeathlonCourseClosing_Exit(course); }
+static void Native_PokeathlonSnowThrow_Draw(PokeathlonCourseData *course, u32 param) { (void)param; PokeathlonSnowThrow_Draw(course); }
+static void Native_PokeathlonSnowThrow_ShowResults(PokeathlonCourseData *course, u32 param) { (void)param; PokeathlonSnowThrow_ShowResults(course); }
+static void Native_PokeathlonSnowThrow_Exit(PokeathlonCourseData *course, u32 param) { (void)param; PokeathlonSnowThrow_Exit(course); }
+static void Native_PokeathlonResults_Draw(PokeathlonCourseData *course, u32 param) { (void)param; PokeathlonResults_Draw(course); }
+static void Native_PokeathlonResults_Exit(PokeathlonCourseData *course, u32 param) { (void)param; PokeathlonResults_Exit(course); }
+static void Native_PokeathlonRingDrop_Draw(PokeathlonCourseData *course, u32 param) { (void)param; PokeathlonRingDrop_Draw(course); }
+static void Native_PokeathlonRingDrop_ShowResults(PokeathlonCourseData *course, u32 param) { (void)param; PokeathlonRingDrop_ShowResults(course); }
+static void Native_PokeathlonRingDrop_Exit(PokeathlonCourseData *course, u32 param) { (void)param; PokeathlonRingDrop_Exit(course); }
+static void Native_PokeathlonDiscCatch_Draw(PokeathlonCourseData *course, u32 param) { (void)param; PokeathlonDiscCatch_Draw(course); }
+static void Native_PokeathlonDiscCatch_ShowResults(PokeathlonCourseData *course, u32 param) { (void)param; PokeathlonDiscCatch_ShowResults(course); }
+static void Native_PokeathlonDiscCatch_Exit(PokeathlonCourseData *course, u32 param) { (void)param; PokeathlonDiscCatch_Exit(course); }
+static void Native_PokeathlonCourseWait_Main(PokeathlonCourseData *course, u32 param) { (void)param; PokeathlonCourseWait_Main(); }
+static void Native_PokeathlonCourseWait_Exit(PokeathlonCourseData *course, u32 param) { (void)param; PokeathlonCourseWait_Exit(course); }
+static void Native_PokeathlonPennantCapture_Draw(PokeathlonCourseData *course, u32 param) { (void)param; PokeathlonPennantCapture_Draw(course); }
+static void Native_PokeathlonPennantCapture_ShowResults(PokeathlonCourseData *course, u32 param) { (void)param; PokeathlonPennantCapture_ShowResults(course); }
+static void Native_PokeathlonPennantCapture_Exit(PokeathlonCourseData *course, u32 param) { (void)param; PokeathlonPennantCapture_Exit(course); }
+static void Native_PokeathlonEventIntro_Main(PokeathlonCourseData *course, u32 param) { (void)param; PokeathlonEventIntro_Main(course); }
+static void Native_PokeathlonEventIntro_Exit(PokeathlonCourseData *course, u32 param) { (void)param; PokeathlonEventIntro_Exit(course); }
+static void Native_PokeathlonRelayRun_Draw(PokeathlonCourseData *course, u32 param) { (void)param; PokeathlonRelayRun_Draw(course); }
+static void Native_PokeathlonRelayRun_ShowResults(PokeathlonCourseData *course, u32 param) { (void)param; PokeathlonRelayRun_ShowResults(course); }
+static void Native_PokeathlonRelayRun_Exit(PokeathlonCourseData *course, u32 param) { (void)param; PokeathlonRelayRun_Exit(course); }
+static void Native_PokeathlonHurdleDash_Draw(PokeathlonCourseData *course, u32 param) { (void)param; PokeathlonHurdleDash_Draw(course); }
+static void Native_PokeathlonHurdleDash_ShowResults(PokeathlonCourseData *course, u32 param) { (void)param; PokeathlonHurdleDash_ShowResults(course); }
+static void Native_PokeathlonHurdleDash_Exit(PokeathlonCourseData *course, u32 param) { (void)param; PokeathlonHurdleDash_Exit(course); }
+static void Native_PokeathlonLampJump_Draw(PokeathlonCourseData *course, u32 param) { (void)param; PokeathlonLampJump_Draw(course); }
+static void Native_PokeathlonLampJump_ShowResults(PokeathlonCourseData *course, u32 param) { (void)param; PokeathlonLampJump_ShowResults(course); }
+static void Native_PokeathlonLampJump_Exit(PokeathlonCourseData *course, u32 param) { (void)param; PokeathlonLampJump_Exit(course); }
+const PokeathlonCourseEvent gPokeathlonCirclePushEvent = {
+    PokeathlonCirclePush_Init,
+    Native_PokeathlonCirclePush_Main,
+    Native_PokeathlonCirclePush_CalcResults,
+    Native_PokeathlonCirclePush_Exit,
+    0,
+};
+const PokeathlonCourseEvent gPokeathlonCourseEvent_Opening = {
+    PokeathlonCourseOpening_Init,
+    Native_PokeathlonCourseOpening_Main,
+    0,
+    Native_PokeathlonCourseOpening_Exit,
+    0,
+};
+const PokeathlonCourseEvent gPokeathlonGoalRollEvent = {
+    PokeathlonGoalRoll_Init,
+    Native_PokeathlonGoalRoll_Draw,
+    Native_PokeathlonGoalRoll_ShowResults,
+    Native_PokeathlonGoalRoll_Exit,
+    0,
+};
+const PokeathlonCourseEvent gPokeathlonBlockSmashEvent = { (void *)PokeathlonBlockSmash_Init, Native_PokeathlonBlockSmash_Draw, Native_PokeathlonBlockSmash_ShowResults, Native_PokeathlonBlockSmash_Exit, 1 };
+const PokeathlonCourseEvent gPokeathlonCourseEvent_Closing = {
+    PokeathlonCourseClosing_Init,
+    Native_PokeathlonCourseClosing_Main,
+    0,
+    Native_PokeathlonCourseClosing_Exit,
+    0,
+};
+const PokeathlonCourseEvent gPokeathlonSnowThrowEvent = {
+    PokeathlonSnowThrow_Init,
+    Native_PokeathlonSnowThrow_Draw,
+    Native_PokeathlonSnowThrow_ShowResults,
+    Native_PokeathlonSnowThrow_Exit,
+    0,
+};
+const PokeathlonCourseEvent gPokeathlonCourseEvent_ResultsAnnouncement = {
+    PokeathlonResults_Init,
+    Native_PokeathlonResults_Draw,
+    0,
+    Native_PokeathlonResults_Exit,
+    0,
+};
+const PokeathlonCourseEvent gPokeathlonRingDropEvent = {
+    PokeathlonRingDrop_Init,
+    Native_PokeathlonRingDrop_Draw,
+    Native_PokeathlonRingDrop_ShowResults,
+    Native_PokeathlonRingDrop_Exit,
+    0,
+};
+const PokeathlonCourseEvent gPokeathlonDiscCatchEvent = {
+    PokeathlonDiscCatch_Init,
+    Native_PokeathlonDiscCatch_Draw,
+    Native_PokeathlonDiscCatch_ShowResults,
+    Native_PokeathlonDiscCatch_Exit,
+    0,
+};
+const PokeathlonCourseEvent gPokeathlonCourseEvent_Wait = {
+    PokeathlonCourseWait_Init,
+    Native_PokeathlonCourseWait_Main,
+    0,
+    Native_PokeathlonCourseWait_Exit,
+    0,
+};
+const PokeathlonCourseEvent gPokeathlonPennantCaptureEvent = {
+    PokeathlonPennantCapture_Init,
+    Native_PokeathlonPennantCapture_Draw,
+    Native_PokeathlonPennantCapture_ShowResults,
+    Native_PokeathlonPennantCapture_Exit,
+    0,
+};
+const PokeathlonCourseEvent gPokeathlonCourseEvent_EventIntro = {
+    PokeathlonEventIntro_Init,
+    Native_PokeathlonEventIntro_Main,
+    0,
+    Native_PokeathlonEventIntro_Exit,
+    0,
+};
+const PokeathlonCourseEvent gPokeathlonRelayRunEvent = {
+    PokeathlonRelayRun_Init,
+    Native_PokeathlonRelayRun_Draw,
+    Native_PokeathlonRelayRun_ShowResults,
+    Native_PokeathlonRelayRun_Exit,
+    0,
+};
+const PokeathlonCourseEvent gPokeathlonHurdleDashEvent = { (void *)PokeathlonHurdleDash_Init, Native_PokeathlonHurdleDash_Draw, Native_PokeathlonHurdleDash_ShowResults, Native_PokeathlonHurdleDash_Exit, 1 };
+const PokeathlonCourseEvent gPokeathlonLampJumpEvent = { (void *)PokeathlonLampJump_Init, Native_PokeathlonLampJump_Draw, Native_PokeathlonLampJump_ShowResults, Native_PokeathlonLampJump_Exit, 1 };
+
+
+/* Native state table from asm/pokeathlon_course_rodata.s; adapters give each state the PokeathlonStateFunc signature. */
+static BOOL Native_PokeathlonCourse_State_SendEvents(PokeathlonCourseData *course, void **state) { (void)state; return (BOOL)PokeathlonCourse_State_SendEvents(course); }
+static BOOL Native_PokeathlonCourse_State_RunEventOverlay(PokeathlonCourseData *course, void **state) { (void)state; return (BOOL)PokeathlonCourse_State_RunEventOverlay(course); }
+static BOOL Native_PokeathlonCourse_State_RunWait(PokeathlonCourseData *course, void **state) { (void)state; return (BOOL)PokeathlonCourse_State_RunWait(course, (u8 *)state); }
+static BOOL Native_PokeathlonCourse_State_SendParticipant(PokeathlonCourseData *course, void **state) { (void)state; return (BOOL)PokeathlonCourse_State_SendParticipant(course); }
+static BOOL Native_PokeathlonCourse_State_SendParticipants(PokeathlonCourseData *course, void **state) { (void)state; return (BOOL)PokeathlonCourse_State_SendParticipants(course); }
+static BOOL Native_PokeathlonCourse_State_SendProfiles(PokeathlonCourseData *course, void **state) { (void)state; return (BOOL)PokeathlonCourse_State_SendProfiles(course); }
+static BOOL Native_PokeathlonCourse_State_SendRecord(PokeathlonCourseData *course, void **state) { (void)state; return (BOOL)PokeathlonCourse_State_SendRecord(course); }
+static BOOL Native_PokeathlonCourse_State_StartOpening(PokeathlonCourseData *course, void **state) { (void)state; return (BOOL)PokeathlonCourse_State_StartOpening(course); }
+static BOOL Native_PokeathlonCourse_State_WaitOpeningStart(PokeathlonCourseData *course, void **state) { (void)state; return (BOOL)PokeathlonCourse_State_WaitOpeningStart(course); }
+static BOOL Native_PokeathlonCourse_State_RunOpening(PokeathlonCourseData *course, void **state) { (void)state; return (BOOL)PokeathlonCourse_State_RunOpening(course); }
+static BOOL Native_PokeathlonCourse_State_EndOpening(PokeathlonCourseData *course, void **state) { (void)state; return (BOOL)PokeathlonCourse_State_EndOpening(course); }
+static BOOL Native_PokeathlonCourse_State_StartEventIntro(PokeathlonCourseData *course, void **state) { (void)state; return (BOOL)PokeathlonCourse_State_StartEventIntro(course); }
+static BOOL Native_PokeathlonCourse_State_WaitEventIntroStart(PokeathlonCourseData *course, void **state) { (void)state; return (BOOL)PokeathlonCourse_State_WaitEventIntroStart(course); }
+static BOOL Native_PokeathlonCourse_State_RunEventIntro(PokeathlonCourseData *course, void **state) { (void)state; return (BOOL)PokeathlonCourse_State_RunEventIntro(course); }
+static BOOL Native_PokeathlonCourse_State_EndEventIntro(PokeathlonCourseData *course, void **state) { (void)state; return (BOOL)PokeathlonCourse_State_EndEventIntro(course); }
+static BOOL Native_PokeathlonCourse_State_StartRound(PokeathlonCourseData *course, void **state) { (void)state; return (BOOL)PokeathlonCourse_State_StartRound(course); }
+static BOOL Native_PokeathlonCourse_State_WaitRoundStart(PokeathlonCourseData *course, void **state) { (void)state; return (BOOL)PokeathlonCourse_State_WaitRoundStart(course); }
+static BOOL Native_PokeathlonCourse_State_SendEventData(PokeathlonCourseData *course, void **state) { (void)state; return (BOOL)PokeathlonCourse_State_SendEventData(course); }
+static BOOL Native_PokeathlonCourse_State_RunEvent(PokeathlonCourseData *course, void **state) { (void)state; return (BOOL)PokeathlonCourse_State_RunEvent(course); }
+static BOOL Native_PokeathlonCourse_State_ResetDataCopyArea(PokeathlonCourseData *course, void **state) { (void)state; return (BOOL)PokeathlonCourse_State_ResetDataCopyArea(course); }
+static BOOL Native_PokeathlonCourse_State_SendEventResult(PokeathlonCourseData *course, void **state) { (void)state; return (BOOL)PokeathlonCourse_State_SendEventResult(course); }
+static BOOL Native_PokeathlonCourse_State_SendEventResults(PokeathlonCourseData *course, void **state) { (void)state; return (BOOL)PokeathlonCourse_State_SendEventResults(course); }
+static BOOL Native_PokeathlonCourse_State_EndRound(PokeathlonCourseData *course, void **state) { (void)state; return (BOOL)PokeathlonCourse_State_EndRound(course); }
+static BOOL Native_PokeathlonCourse_State_ExitEvent(PokeathlonCourseData *course, void **state) { (void)state; return (BOOL)PokeathlonCourse_State_ExitEvent(course); }
+static BOOL Native_PokeathlonCourse_State_NextRound(PokeathlonCourseData *course, void **state) { (void)state; return (BOOL)PokeathlonCourse_State_NextRound(course); }
+static BOOL Native_PokeathlonCourse_State_StartResults(PokeathlonCourseData *course, void **state) { (void)state; return (BOOL)PokeathlonCourse_State_StartResults(course); }
+static BOOL Native_PokeathlonCourse_State_WaitResultsStart(PokeathlonCourseData *course, void **state) { (void)state; return (BOOL)PokeathlonCourse_State_WaitResultsStart(course); }
+static BOOL Native_PokeathlonCourse_State_RunResults(PokeathlonCourseData *course, void **state) { (void)state; return (BOOL)PokeathlonCourse_State_RunResults(course); }
+static BOOL Native_PokeathlonCourse_State_EndResults(PokeathlonCourseData *course, void **state) { (void)state; return (BOOL)PokeathlonCourse_State_EndResults(course); }
+static BOOL Native_PokeathlonCourse_State_SendMonCounters(PokeathlonCourseData *course, void **state) { (void)state; return (BOOL)PokeathlonCourse_State_SendMonCounters(course); }
+static BOOL Native_PokeathlonCourse_State_SendResults(PokeathlonCourseData *course, void **state) { (void)state; return (BOOL)PokeathlonCourse_State_SendResults(course); }
+static BOOL Native_PokeathlonCourse_State_StartClosing(PokeathlonCourseData *course, void **state) { (void)state; return (BOOL)PokeathlonCourse_State_StartClosing(course); }
+static BOOL Native_PokeathlonCourse_State_WaitClosingStart(PokeathlonCourseData *course, void **state) { (void)state; return (BOOL)PokeathlonCourse_State_WaitClosingStart(course); }
+static BOOL Native_PokeathlonCourse_State_RunClosing(PokeathlonCourseData *course, void **state) { (void)state; return (BOOL)PokeathlonCourse_State_RunClosing(course); }
+static BOOL Native_PokeathlonCourse_State_CreateJuiceRecords(PokeathlonCourseData *course, void **state) { (void)state; return (BOOL)PokeathlonCourse_State_CreateJuiceRecords(course); }
+static BOOL Native_PokeathlonCourse_State_SendJuiceRecord(PokeathlonCourseData *course, void **state) { (void)state; return (BOOL)PokeathlonCourse_State_SendJuiceRecord(course); }
+static BOOL Native_PokeathlonCourse_State_StoreJuiceRecords(PokeathlonCourseData *course, void **state) { (void)state; return (BOOL)PokeathlonCourse_State_StoreJuiceRecords(course); }
+static BOOL Native_PokeathlonCourse_State_Exit(PokeathlonCourseData *course, void **state) { (void)state; return (BOOL)PokeathlonCourse_State_Exit(course); }
+static BOOL Native_PokeathlonCourse_State_WaitForCommand(PokeathlonCourseData *course, void **state) { (void)state; return (BOOL)PokeathlonCourse_State_WaitForCommand(); }
+const PokeathlonStateFunc sPokeathlonStateInfoFuncTable[39] = {
+    Native_PokeathlonCourse_State_SendEvents,
+    Native_PokeathlonCourse_State_RunEventOverlay,
+    Native_PokeathlonCourse_State_RunWait,
+    Native_PokeathlonCourse_State_SendParticipant,
+    Native_PokeathlonCourse_State_SendParticipants,
+    Native_PokeathlonCourse_State_SendProfiles,
+    Native_PokeathlonCourse_State_SendRecord,
+    Native_PokeathlonCourse_State_StartOpening,
+    Native_PokeathlonCourse_State_WaitOpeningStart,
+    Native_PokeathlonCourse_State_RunOpening,
+    Native_PokeathlonCourse_State_EndOpening,
+    Native_PokeathlonCourse_State_StartEventIntro,
+    Native_PokeathlonCourse_State_WaitEventIntroStart,
+    Native_PokeathlonCourse_State_RunEventIntro,
+    Native_PokeathlonCourse_State_EndEventIntro,
+    Native_PokeathlonCourse_State_StartRound,
+    Native_PokeathlonCourse_State_WaitRoundStart,
+    Native_PokeathlonCourse_State_SendEventData,
+    Native_PokeathlonCourse_State_RunEvent,
+    Native_PokeathlonCourse_State_ResetDataCopyArea,
+    Native_PokeathlonCourse_State_SendEventResult,
+    Native_PokeathlonCourse_State_SendEventResults,
+    Native_PokeathlonCourse_State_EndRound,
+    Native_PokeathlonCourse_State_ExitEvent,
+    Native_PokeathlonCourse_State_NextRound,
+    Native_PokeathlonCourse_State_StartResults,
+    Native_PokeathlonCourse_State_WaitResultsStart,
+    Native_PokeathlonCourse_State_RunResults,
+    Native_PokeathlonCourse_State_EndResults,
+    Native_PokeathlonCourse_State_SendMonCounters,
+    Native_PokeathlonCourse_State_SendResults,
+    Native_PokeathlonCourse_State_StartClosing,
+    Native_PokeathlonCourse_State_WaitClosingStart,
+    Native_PokeathlonCourse_State_RunClosing,
+    Native_PokeathlonCourse_State_CreateJuiceRecords,
+    Native_PokeathlonCourse_State_SendJuiceRecord,
+    Native_PokeathlonCourse_State_StoreJuiceRecords,
+    Native_PokeathlonCourse_State_Exit,
+    Native_PokeathlonCourse_State_WaitForCommand,
+};
+
+/* Native tables from asm/pokeathlon_course_data.s; adapters give differing originals the field signatures. */
+BOOL PokeathlonCourseOpening_FadeIn(void *course, u8 *state);
+static BOOL Native_PokeathlonCourseOpening_FadeIn_8395(PokeathlonCourseData * a0, u8 * a1) { return (BOOL)PokeathlonCourseOpening_FadeIn((void *)a0, (u8 *)a1); }
+BOOL PokeathlonCourseOpening_Introduce(void *course);
+static BOOL Native_PokeathlonCourseOpening_Introduce_8395(PokeathlonCourseData * a0, u8 * a1) { return (BOOL)PokeathlonCourseOpening_Introduce((void *)a0); }
+BOOL PokeathlonCourseOpening_FadeOut(void *course, u8 *state);
+static BOOL Native_PokeathlonCourseOpening_FadeOut_8395(PokeathlonCourseData * a0, u8 * a1) { return (BOOL)PokeathlonCourseOpening_FadeOut((void *)a0, (u8 *)a1); }
+BOOL PokeathlonCourseClosing_FadeIn(void *course, u8 *state);
+static BOOL Native_PokeathlonCourseClosing_FadeIn_8395(PokeathlonCourseData * a0, u8 * a1) { return (BOOL)PokeathlonCourseClosing_FadeIn((void *)a0, (u8 *)a1); }
+BOOL PokeathlonCourseClosing_Awards(void *course);
+static BOOL Native_PokeathlonCourseClosing_Awards_8395(PokeathlonCourseData * a0, u8 * a1) { return (BOOL)PokeathlonCourseClosing_Awards((void *)a0); }
+BOOL PokeathlonCourseClosing_FadeOut(void *course, u8 *state);
+static BOOL Native_PokeathlonCourseClosing_FadeOut_8395(PokeathlonCourseData * a0, u8 * a1) { return (BOOL)PokeathlonCourseClosing_FadeOut((void *)a0, (u8 *)a1); }
+BOOL PokeathlonCourseWait_FadeOut(void *course, u8 *state);
+static BOOL Native_PokeathlonCourseWait_FadeOut_8395(PokeathlonCourseData * a0, u8 * a1) { return (BOOL)PokeathlonCourseWait_FadeOut((void *)a0, (u8 *)a1); }
+BOOL PokeathlonEventIntro_Appear(void *course, u8 *state);
+static BOOL Native_PokeathlonEventIntro_Appear_8395(PokeathlonCourseData * a0, u8 * a1) { return (BOOL)PokeathlonEventIntro_Appear((void *)a0, (u8 *)a1); }
+BOOL PokeathlonEventIntro_DetailsPage(void *course, u8 *state);
+static BOOL Native_PokeathlonEventIntro_DetailsPage_8395(PokeathlonCourseData * a0, u8 * a1) { return (BOOL)PokeathlonEventIntro_DetailsPage((void *)a0, (u8 *)a1); }
+BOOL PokeathlonEventIntro_RulesPage(void *course, u8 *state);
+static BOOL Native_PokeathlonEventIntro_RulesPage_8395(PokeathlonCourseData * a0, u8 * a1) { return (BOOL)PokeathlonEventIntro_RulesPage((void *)a0, (u8 *)a1); }
+BOOL PokeathlonEventIntro_ControlsPage(void *course, u8 *state);
+static BOOL Native_PokeathlonEventIntro_ControlsPage_8395(PokeathlonCourseData * a0, u8 * a1) { return (BOOL)PokeathlonEventIntro_ControlsPage((void *)a0, (u8 *)a1); }
+BOOL PokeathlonEventIntro_FadeOut(void *course, u8 *state);
+static BOOL Native_PokeathlonEventIntro_FadeOut_8395(PokeathlonCourseData * a0, u8 * a1) { return (BOOL)PokeathlonEventIntro_FadeOut((void *)a0, (u8 *)a1); }
+BOOL PokeathlonCirclePush_FadeIn(void *course, u8 *state);
+static BOOL Native_PokeathlonCirclePush_FadeIn_8395(PokeathlonCourseData * a0, u8 * a1) { return (BOOL)PokeathlonCirclePush_FadeIn((void *)a0, (u8 *)a1); }
+BOOL PokeathlonCirclePush_Play(void *course, u8 *state);
+static BOOL Native_PokeathlonCirclePush_Play_8395(PokeathlonCourseData * a0, u8 * a1) { return (BOOL)PokeathlonCirclePush_Play((void *)a0, (u8 *)a1); }
+BOOL PokeathlonCirclePush_End(void *course, u8 *state);
+static BOOL Native_PokeathlonCirclePush_End_8395(PokeathlonCourseData * a0, u8 * a1) { return (BOOL)PokeathlonCirclePush_End((void *)a0, (u8 *)a1); }
+
+
+
+
+
+
+/* Native tables from asm/pokeathlon_event_data.s; adapters give differing originals the field signatures. */
+BOOL PokeathlonLampJump_Play(void *course, u8 *state);
+BOOL PokeathlonLampJump_CalcScores(void *course, u8 *state);
+BOOL PokeathlonResults_Run(void *course, u8 *state);
+BOOL PokeathlonHurdleDash_Start(void *course);
+BOOL PokeathlonHurdleDash_Play(void *course, u8 *state);
+BOOL PokeathlonHurdleDash_CalcScores(void *course, u8 *state);
+BOOL PokeathlonRelayRun_Start(void *course, u8 *state);
+BOOL PokeathlonRelayRun_Play(void *course, u8 *state);
+BOOL PokeathlonRelayRun_SaveScores(void *course, u8 *state);
+BOOL PokeathlonSnowThrow_Play(void *course, u8 *state);
+BOOL PokeathlonSnowThrow_SaveScores(void *course, u8 *state);
+BOOL PokeathlonPennantCapture_State_Setup(void *course, u8 *state);
+BOOL PokeathlonPennantCapture_State_Play(void *course, u8 *state);
+BOOL PokeathlonPennantCapture_State_End(void *course, u8 *state);
+BOOL PokeathlonBlockSmash_Intro(void *course, u8 *state);
+BOOL PokeathlonBlockSmash_Play(void *course, u8 *state);
+BOOL PokeathlonBlockSmash_Finish(void *course);
+u32 PokeathlonDiscCatch_Intro(void *course, u8 *state);
+u32 PokeathlonDiscCatch_Play(void *course, u8 *state);
+u32 PokeathlonDiscCatch_Finish(void *course, u8 *state);
+static BOOL Native_PokeathlonLampJump_Play_8395(PokeathlonCourseData * a0, u8 * a1) { return (BOOL)PokeathlonLampJump_Play((void *)a0, (u8 *)a1); }
+static BOOL Native_PokeathlonLampJump_CalcScores_8395(PokeathlonCourseData * a0, u8 * a1) { return (BOOL)PokeathlonLampJump_CalcScores((void *)a0, (u8 *)a1); }
+const PokeathlonCourseStepFunc gPokeathlonLampJumpStates[2] = {
+    Native_PokeathlonLampJump_Play_8395,
+    Native_PokeathlonLampJump_CalcScores_8395,
+};
+static BOOL Native_PokeathlonResults_Run_8395(PokeathlonCourseData * a0, u8 * a1) { return (BOOL)PokeathlonResults_Run((void *)a0, (u8 *)a1); }
+const PokeathlonCourseStepFunc gPokeathlonResultsAnnouncementSteps[] = {
+    Native_PokeathlonResults_Run_8395,
+};
+static BOOL Native_PokeathlonHurdleDash_Start_8395(PokeathlonCourseData * a0, u8 * a1) { return (BOOL)PokeathlonHurdleDash_Start((void *)a0); }
+static BOOL Native_PokeathlonHurdleDash_Play_8395(PokeathlonCourseData * a0, u8 * a1) { return (BOOL)PokeathlonHurdleDash_Play((void *)a0, (u8 *)a1); }
+static BOOL Native_PokeathlonHurdleDash_CalcScores_8395(PokeathlonCourseData * a0, u8 * a1) { return (BOOL)PokeathlonHurdleDash_CalcScores((void *)a0, (u8 *)a1); }
+const PokeathlonCourseStepFunc gPokeathlonHurdleDashStates[3] = {
+    Native_PokeathlonHurdleDash_Start_8395,
+    Native_PokeathlonHurdleDash_Play_8395,
+    Native_PokeathlonHurdleDash_CalcScores_8395,
+};
+static BOOL Native_PokeathlonRelayRun_Start_8395(PokeathlonCourseData * a0, u8 * a1) { return (BOOL)PokeathlonRelayRun_Start((void *)a0, (u8 *)a1); }
+static BOOL Native_PokeathlonRelayRun_Play_8395(PokeathlonCourseData * a0, u8 * a1) { return (BOOL)PokeathlonRelayRun_Play((void *)a0, (u8 *)a1); }
+static BOOL Native_PokeathlonRelayRun_SaveScores_8395(PokeathlonCourseData * a0, u8 * a1) { return (BOOL)PokeathlonRelayRun_SaveScores((void *)a0, (u8 *)a1); }
+const PokeathlonCourseStepFunc gPokeathlonRelayRunStates[3] = {
+    Native_PokeathlonRelayRun_Start_8395,
+    Native_PokeathlonRelayRun_Play_8395,
+    Native_PokeathlonRelayRun_SaveScores_8395,
+};
+static BOOL Native_PokeathlonSnowThrow_Play_8395(PokeathlonCourseData * a0, u8 * a1) { return (BOOL)PokeathlonSnowThrow_Play((void *)a0, (u8 *)a1); }
+static BOOL Native_PokeathlonSnowThrow_SaveScores_8395(PokeathlonCourseData * a0, u8 * a1) { return (BOOL)PokeathlonSnowThrow_SaveScores((void *)a0, (u8 *)a1); }
+const PokeathlonCourseStepFunc gPokeathlonSnowThrowStates[2] = {
+    Native_PokeathlonSnowThrow_Play_8395,
+    Native_PokeathlonSnowThrow_SaveScores_8395,
+};
+static BOOL Native_PokeathlonPennantCapture_State_Setup_8395(PokeathlonCourseData * a0, u8 * a1) { return (BOOL)PokeathlonPennantCapture_State_Setup((void *)a0, (u8 *)a1); }
+static BOOL Native_PokeathlonPennantCapture_State_Play_8395(PokeathlonCourseData * a0, u8 * a1) { return (BOOL)PokeathlonPennantCapture_State_Play((void *)a0, (u8 *)a1); }
+static BOOL Native_PokeathlonPennantCapture_State_End_8395(PokeathlonCourseData * a0, u8 * a1) { return (BOOL)PokeathlonPennantCapture_State_End((void *)a0, (u8 *)a1); }
+const PokeathlonCourseStepFunc gPokeathlonPennantCaptureStates[3] = {
+    Native_PokeathlonPennantCapture_State_Setup_8395,
+    Native_PokeathlonPennantCapture_State_Play_8395,
+    Native_PokeathlonPennantCapture_State_End_8395,
+};
+static BOOL Native_PokeathlonBlockSmash_Intro_8395(PokeathlonCourseData * a0, u8 * a1) { return (BOOL)PokeathlonBlockSmash_Intro((void *)a0, (u8 *)a1); }
+static BOOL Native_PokeathlonBlockSmash_Play_8395(PokeathlonCourseData * a0, u8 * a1) { return (BOOL)PokeathlonBlockSmash_Play((void *)a0, (u8 *)a1); }
+static BOOL Native_PokeathlonBlockSmash_Finish_8395(PokeathlonCourseData * a0, u8 * a1) { return (BOOL)PokeathlonBlockSmash_Finish((void *)a0); }
+const PokeathlonCourseStepFunc gPokeathlonBlockSmashStates[3] = {
+    Native_PokeathlonBlockSmash_Intro_8395,
+    Native_PokeathlonBlockSmash_Play_8395,
+    Native_PokeathlonBlockSmash_Finish_8395,
+};
+static BOOL Native_PokeathlonDiscCatch_Intro_8395(PokeathlonCourseData * a0, u8 * a1) { return (BOOL)PokeathlonDiscCatch_Intro((void *)a0, (u8 *)a1); }
+static BOOL Native_PokeathlonDiscCatch_Play_8395(PokeathlonCourseData * a0, u8 * a1) { return (BOOL)PokeathlonDiscCatch_Play((void *)a0, (u8 *)a1); }
+static BOOL Native_PokeathlonDiscCatch_Finish_8395(PokeathlonCourseData * a0, u8 * a1) { return (BOOL)PokeathlonDiscCatch_Finish((void *)a0, (u8 *)a1); }
+const PokeathlonCourseStepFunc gPokeathlonDiscCatchStates[3] = {
+    Native_PokeathlonDiscCatch_Intro_8395,
+    Native_PokeathlonDiscCatch_Play_8395,
+    Native_PokeathlonDiscCatch_Finish_8395,
+};
+
+/* Native event tables from asm/pokeathlon_course_data.s. */
+extern const PokeathlonCourseStepFunc gPokeathlonHurdleDashStates[];
+extern const PokeathlonCourseEvent gPokeathlonHurdleDashEvent;
+extern const PokeathlonCourseStepFunc gPokeathlonPennantCaptureStates[];
+extern const PokeathlonCourseEvent gPokeathlonPennantCaptureEvent;
+extern const PokeathlonCourseStepFunc gPokeathlonCirclePushStates[];
+extern const PokeathlonCourseEvent gPokeathlonCirclePushEvent;
+extern const PokeathlonCourseStepFunc gPokeathlonBlockSmashStates[];
+extern const PokeathlonCourseEvent gPokeathlonBlockSmashEvent;
+extern const PokeathlonCourseStepFunc gPokeathlonDiscCatchStates[];
+extern const PokeathlonCourseEvent gPokeathlonDiscCatchEvent;
+extern const PokeathlonCourseStepFunc gPokeathlonLampJumpStates[];
+extern const PokeathlonCourseEvent gPokeathlonLampJumpEvent;
+extern const PokeathlonCourseStepFunc gPokeathlonRelayRunStates[];
+extern const PokeathlonCourseEvent gPokeathlonRelayRunEvent;
+extern const PokeathlonCourseStepFunc gPokeathlonRingDropStates[];
+extern const PokeathlonCourseEvent gPokeathlonRingDropEvent;
+extern const PokeathlonCourseStepFunc gPokeathlonSnowThrowStates[];
+extern const PokeathlonCourseEvent gPokeathlonSnowThrowEvent;
+extern const PokeathlonCourseStepFunc gPokeathlonGoalRollStates[];
+extern const PokeathlonCourseEvent gPokeathlonGoalRollEvent;
+const PokeathlonCourseStepFunc *const gPokeathlonCourseEventSteps[] = {
+    gPokeathlonHurdleDashStates,
+    gPokeathlonPennantCaptureStates,
+    gPokeathlonCirclePushStates,
+    gPokeathlonBlockSmashStates,
+    gPokeathlonDiscCatchStates,
+    gPokeathlonLampJumpStates,
+    gPokeathlonRelayRunStates,
+    gPokeathlonRingDropStates,
+    gPokeathlonSnowThrowStates,
+    gPokeathlonGoalRollStates,
+};
+const PokeathlonCourseEvent *const gPokeathlonCourseEvents[] = {
+    &gPokeathlonHurdleDashEvent,
+    &gPokeathlonPennantCaptureEvent,
+    &gPokeathlonCirclePushEvent,
+    &gPokeathlonBlockSmashEvent,
+    &gPokeathlonDiscCatchEvent,
+    &gPokeathlonLampJumpEvent,
+    &gPokeathlonRelayRunEvent,
+    &gPokeathlonRingDropEvent,
+    &gPokeathlonSnowThrowEvent,
+    &gPokeathlonGoalRollEvent,
+};
+#endif

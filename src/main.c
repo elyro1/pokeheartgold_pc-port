@@ -1,3 +1,7 @@
+#if defined(SDK_PORT)
+#include "port/battle_timing.h"
+#include "port/sim_config_prj.h"
+#endif
 #include "main.h"
 
 #include "brightness.h"
@@ -45,7 +49,15 @@ static void Main_RunOverlayManager(void);
 static void ShowCommunicationErrorAndReset(u32 resetParam, int errorScreen);
 static BOOL IsLinkModeWithSoftResetCancel(int linkMode);
 
+#if defined(SDK_PORT)
+static BOOL sForce30Hz;
+void Main_SetForce30Hz(BOOL force) { sForce30Hz = force; }
+
+#endif
 void NitroMain(void) {
+#if defined(SDK_PORT)
+    SIM_Config_prj_Load();
+#endif
     InitSystemForTheGame();
     InitGraphicMemory();
     InitKeypadAndTouchpad();
@@ -104,11 +116,20 @@ void NitroMain(void) {
         if (Comm_Update()) {
             HandleCommunicationErrorScreen();
             OS_GetTick();
+#if defined(SDK_PORT)
+            BattleTiming_BeginFrame();
+#endif
             Main_RunOverlayManager();
             OS_GetTick();
             SysTaskQueue_RunTasks(gSystem.mainTaskQueue);
             SysTaskQueue_RunTasks(gSystem.printTaskQueue);
+#if defined(SDK_PORT)
+            if (!gSystem.frameCounter
+                && (!SIM_Config_prj_GetConfig()->enable60fps || sForce30Hz)
+            ) {
+#else
             if (!gSystem.frameCounter) {
+#endif
                 OS_WaitIrq(TRUE, OS_IE_VBLANK);
                 gSystem.vblankCounter++;
             }

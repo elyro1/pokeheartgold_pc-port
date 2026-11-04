@@ -6,6 +6,11 @@
 #include "sound_system.h"
 #include "sound_chatot.h"
 #include "system.h"
+#if defined(SDK_PORT)
+#include "sys_task.h"
+
+#include <stdio.h>
+#endif
 
 #define ASM_EXTERN extern
 
@@ -14,9 +19,15 @@ struct SND_WORK {
     /* 0x00094 */ NNSSndHeapHandle heap;
     /* 0x00098 */ u8 heap_buf[SND_HEAP_SIZE];
     /* 0xBEB78 */ NNSSndHandle soundHandles[SND_HANDLE_MAX];
+#if defined(SDK_PORT)
+    /* 0xBEB9C */ NNSSndWaveOutHandle unk_BEB9C;
+    /* 0xBEBA0 */ NNSSndWaveOutHandle unk_BEBA0;
+    /* 0xBEBA4 */ const NNSSndArcBankInfo *unk_BEBA4;
+#else
     /* 0xBEB9C */ u32 unk_BEB9C;
     /* 0xBEBA0 */ u32 unk_BEBA0;
     /* 0xBEBA4 */ u32 unk_BEBA4;
+#endif
     /* 0xBEBA8 */ u8 unk_BEBA8[0x18];
     /* 0xBEBC0 */ u8 unk_BEBC0[16];
     /* 0xBEBD0 */ u8 unk_BEBD0[28];
@@ -44,8 +55,16 @@ struct SND_WORK {
     /* 0xBEC29 */ u8 chatotForceDefaultCry;
     /* 0xBEC2A */ u16 fieldSeqNo;
     /* 0xBEC2C */ u32 unk_BEC2C;
+#if defined(SDK_PORT)
+    /* 0xBEC30 */ union {
+        u8 unk_BEC30[8];
+        void *reversedWaveBuffer;
+    };
+    /* 0xBEC38 */ SysTask *cryStopTask;
+#else
     /* 0xBEC30 */ u8 unk_BEC30[8];
     /* 0xBEC38 */ u32 cryStopTask;
+#endif
     /* 0xBEC3C */ SOUND_CHATOT *myChatot;
     /* 0xBEC40 */ SOUND_CHATOT *otherChatots[4];
     /* 0xBEC50 */ u32 cryPattern[2];
@@ -75,9 +94,27 @@ void GF_InitMic(SND_WORK *work);
 void SndRadio_Init(NNSSndHeapHandle *heap_p);
 void GF_SndHandleInitAll(SND_WORK *work);
 void GF_SndLoadGlobalData(struct SND_WORK *work);
+#if defined(SDK_PORT)
+u8 GF_GetPlayerNoBySeq(u16 seqNo);
+#endif
 void GF_SndCallback(void);
 BOOL GF_SndIsFanfarePlaying(void);
 BOOL GF_SndWorkMicCounterFull(void);
+#if defined(SDK_PORT)
+
+static void Sound_InitFastForwardPlayers(void) {
+    NNS_SndPlayerSetFastForward(PLAYER_PV, TRUE);
+    NNS_SndPlayerSetFastForward(PLAYER_FIELD, FALSE);
+    NNS_SndPlayerSetFastForward(PLAYER_ME, TRUE);
+    NNS_SndPlayerSetFastForward(PLAYER_SE_1, TRUE);
+    NNS_SndPlayerSetFastForward(PLAYER_SE_2, TRUE);
+    NNS_SndPlayerSetFastForward(PLAYER_SE_3, TRUE);
+    NNS_SndPlayerSetFastForward(PLAYER_SE_4, TRUE);
+    NNS_SndPlayerSetFastForward(PLAYER_BGM, FALSE);
+    NNS_SndPlayerSetFastForward(PLAYER_OPED, FALSE);
+    NNS_SndPlayerSetFastForward(PLAYER_RADIO, FALSE);
+}
+#endif
 
 void InitSoundData(SOUND_CHATOT *chatot, Options *options) {
     SND_WORK *work = GetSoundDataPointer();
@@ -88,6 +125,10 @@ void InitSoundData(SOUND_CHATOT *chatot, Options *options) {
     NNS_SndArcInit(&work->arc, "data/sound/gs_sound_data.sdat", work->heap, FALSE);
     NNS_SndArcPlayerSetup(work->heap);
     SndRadio_Init(&work->heap);
+#if defined(SDK_PORT)
+    // Classify logical players before they allocate runtime players/channels.
+    Sound_InitFastForwardPlayers();
+#endif
     GF_SndHandleInitAll(work);
     sSndHeapFreeSize = NNS_SndHeapGetSize(work->heap);
     GF_SndHeapGetFreeSize();
@@ -281,7 +322,11 @@ void *GF_SdatGetAttrPtr(u32 attr) {
     case 33:
         return &work->unk_BEC2C;
     case 34:
+#if defined(SDK_PORT)
+        return &work->reversedWaveBuffer;
+#else
         return &work->unk_BEC30;
+#endif
     case 35:
         return &work->cryStopTask;
     case 36:
@@ -491,7 +536,15 @@ void GF_SndStopPlayerField(void) {
 }
 
 void GF_SndOnStartSeqFailed(u16 unk) {
+#if defined(SDK_PORT)
+    int player = GF_GetPlayerNoBySeq(unk);
+    if (player == PLAYER_BGM || player == PLAYER_FIELD) {
+        fprintf(stderr, "sound: failed to start music %u (%u sound heap bytes free)\n",
+            unk, NNS_SndHeapGetFreeSize(GetSoundDataPointer()->heap));
+    }
+#else
 #pragma unused(unk)
+#endif
 }
 
 BOOL GF_SndWorkMicCounterFull(void) {

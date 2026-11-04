@@ -4021,3 +4021,227 @@ static BOOL TrainerAI_ShouldUseItem(BattleSystem *battleSystem, int battler) {
 
     return result;
 }
+#if defined(SDK_PORT)
+
+/* Native tables from asm/trainer_ai_data.s; adapters give differing originals the table's signature. */
+void AICmd_IfRandomLessThan(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfRandomGreaterThan(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfRandomEqualTo(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfRandomNotEqualTo(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_AddToMoveScore(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfHPPercentLessThan(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfHPPercentGreaterThan(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfHPPercentEqualTo(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfHPPercentNotEqualTo(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfStatus(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfNotStatus(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfStatus2(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfNotStatus2(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfMoveEffect(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfNotMoveEffect(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfSideCondition(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfNotSideCondition(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfLoadedLessThan(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfLoadedGreaterThan(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfLoadedEqualTo(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfLoadedNotEqualTo(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfLoadedMask(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfLoadedNotMask(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfMoveEqualTo(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfMoveNotEqualTo(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfLoadedInTable(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfLoadedNotInTable(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfAttackerHasDamagingMoves(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfAttackerHasNoDamagingMoves(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_LoadTurnCount(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_LoadTypeFrom(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_LoadMovePower(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_FlagMoveDamageScore(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_LoadBattlerPreviousMove(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfTempEqualTo(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfTempNotEqualTo(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfSpeedCompareEqualTo(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfSpeedCompareNotEqualTo(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_CountAlivePartyBattlers(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_LoadCurrentMove(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_LoadCurrentMoveEffect(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_LoadBattlerAbility(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_CalcMaxEffectiveness(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfMoveEffectivenessEquals(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfPartyMemberStatus(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfPartyMemberNotStatus(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_LoadCurrentWeather(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfCurrentMoveEffectEqualTo(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfCurrentMoveEffectNotEqualTo(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfStatStageLessThan(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfStatStageGreaterThan(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfStatStageEqualTo(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfStatStageNotEqualTo(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfCurrentMoveKOs(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfCurrentMoveDoesNotKO(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfMoveKnown(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfMoveNotKnown(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfMoveEffectKnown(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfMoveEffectNotKnown(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfBattlerUnderEffect(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfCurrentMoveMatchesEffect(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_Escape(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_Dummy3E(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_Dummy3F(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_LoadHeldItem(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_LoadHeldItemEffect(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_LoadGender(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_LoadIsFirstTurnInBattle(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_LoadStockpileCount(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_LoadBattleType(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_LoadRecycleItem(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_LoadTypeOfLoadedMove(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_LoadPowerOfLoadedMove(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_LoadEffectOfLoadedMove(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_LoadProtectSuccessChain(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_PushAndGoTo(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_GoTo(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_PopOrEnd(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfLevel(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfTargetIsTaunted(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfTargetIsNotTaunted(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfTargetIsPartner(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_FlagBattlerIsType(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_CheckBattlerAbility(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfActivatedFlashFire(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfHeldItemEqualTo(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfFieldConditionActive(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_LoadSpikesLayers(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfAnyPartyMemberMissingHP(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfAnyPartyMemberMissingPP(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_LoadFlingPower(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_LoadCurrentMovePP(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfCanUseLastResort(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_LoadCurrentMoveCategory(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_LoadDefenderLastUsedMoveCategory(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_LoadBattlerSpeedOrderPosition(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_LoadBattlerTurnCount(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfPartyMemberDealsMoreDamage(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfHasSuperEffectiveMove(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfBattlerDealsMoreDamage(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_SumPositiveStatStages(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_DiffStatStages(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfBattlerHasHigherStat(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfBattlerHasLowerStat(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfBattlerHasEqualStat(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_CheckIfHighestDamageWithPartner(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfBattlerFainted(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_IfBattlerNotFainted(BattleSystem *battleSystem, BattleContext *ctx);
+void AICmd_LoadAbility(BattleSystem *battleSystem, BattleContext *ctx);
+const AICommandFunc sAICommandTable[109] = {
+    AICmd_IfRandomLessThan,
+    AICmd_IfRandomGreaterThan,
+    AICmd_IfRandomEqualTo,
+    AICmd_IfRandomNotEqualTo,
+    AICmd_AddToMoveScore,
+    AICmd_IfHPPercentLessThan,
+    AICmd_IfHPPercentGreaterThan,
+    AICmd_IfHPPercentEqualTo,
+    AICmd_IfHPPercentNotEqualTo,
+    AICmd_IfStatus,
+    AICmd_IfNotStatus,
+    AICmd_IfStatus2,
+    AICmd_IfNotStatus2,
+    AICmd_IfMoveEffect,
+    AICmd_IfNotMoveEffect,
+    AICmd_IfSideCondition,
+    AICmd_IfNotSideCondition,
+    AICmd_IfLoadedLessThan,
+    AICmd_IfLoadedGreaterThan,
+    AICmd_IfLoadedEqualTo,
+    AICmd_IfLoadedNotEqualTo,
+    AICmd_IfLoadedMask,
+    AICmd_IfLoadedNotMask,
+    AICmd_IfMoveEqualTo,
+    AICmd_IfMoveNotEqualTo,
+    AICmd_IfLoadedInTable,
+    AICmd_IfLoadedNotInTable,
+    AICmd_IfAttackerHasDamagingMoves,
+    AICmd_IfAttackerHasNoDamagingMoves,
+    AICmd_LoadTurnCount,
+    AICmd_LoadTypeFrom,
+    AICmd_LoadMovePower,
+    AICmd_FlagMoveDamageScore,
+    AICmd_LoadBattlerPreviousMove,
+    AICmd_IfTempEqualTo,
+    AICmd_IfTempNotEqualTo,
+    AICmd_IfSpeedCompareEqualTo,
+    AICmd_IfSpeedCompareNotEqualTo,
+    AICmd_CountAlivePartyBattlers,
+    AICmd_LoadCurrentMove,
+    AICmd_LoadCurrentMoveEffect,
+    AICmd_LoadBattlerAbility,
+    AICmd_CalcMaxEffectiveness,
+    AICmd_IfMoveEffectivenessEquals,
+    AICmd_IfPartyMemberStatus,
+    AICmd_IfPartyMemberNotStatus,
+    AICmd_LoadCurrentWeather,
+    AICmd_IfCurrentMoveEffectEqualTo,
+    AICmd_IfCurrentMoveEffectNotEqualTo,
+    AICmd_IfStatStageLessThan,
+    AICmd_IfStatStageGreaterThan,
+    AICmd_IfStatStageEqualTo,
+    AICmd_IfStatStageNotEqualTo,
+    AICmd_IfCurrentMoveKOs,
+    AICmd_IfCurrentMoveDoesNotKO,
+    AICmd_IfMoveKnown,
+    AICmd_IfMoveNotKnown,
+    AICmd_IfMoveEffectKnown,
+    AICmd_IfMoveEffectNotKnown,
+    AICmd_IfBattlerUnderEffect,
+    AICmd_IfCurrentMoveMatchesEffect,
+    AICmd_Escape,
+    AICmd_Dummy3E,
+    AICmd_Dummy3F,
+    AICmd_LoadHeldItem,
+    AICmd_LoadHeldItemEffect,
+    AICmd_LoadGender,
+    AICmd_LoadIsFirstTurnInBattle,
+    AICmd_LoadStockpileCount,
+    AICmd_LoadBattleType,
+    AICmd_LoadRecycleItem,
+    AICmd_LoadTypeOfLoadedMove,
+    AICmd_LoadPowerOfLoadedMove,
+    AICmd_LoadEffectOfLoadedMove,
+    AICmd_LoadProtectSuccessChain,
+    AICmd_PushAndGoTo,
+    AICmd_GoTo,
+    AICmd_PopOrEnd,
+    AICmd_IfLevel,
+    AICmd_IfTargetIsTaunted,
+    AICmd_IfTargetIsNotTaunted,
+    AICmd_IfTargetIsPartner,
+    AICmd_FlagBattlerIsType,
+    AICmd_CheckBattlerAbility,
+    AICmd_IfActivatedFlashFire,
+    AICmd_IfHeldItemEqualTo,
+    AICmd_IfFieldConditionActive,
+    AICmd_LoadSpikesLayers,
+    AICmd_IfAnyPartyMemberMissingHP,
+    AICmd_IfAnyPartyMemberMissingPP,
+    AICmd_LoadFlingPower,
+    AICmd_LoadCurrentMovePP,
+    AICmd_IfCanUseLastResort,
+    AICmd_LoadCurrentMoveCategory,
+    AICmd_LoadDefenderLastUsedMoveCategory,
+    AICmd_LoadBattlerSpeedOrderPosition,
+    AICmd_LoadBattlerTurnCount,
+    AICmd_IfPartyMemberDealsMoreDamage,
+    AICmd_IfHasSuperEffectiveMove,
+    AICmd_IfBattlerDealsMoreDamage,
+    AICmd_SumPositiveStatStages,
+    AICmd_DiffStatStages,
+    AICmd_IfBattlerHasHigherStat,
+    AICmd_IfBattlerHasLowerStat,
+    AICmd_IfBattlerHasEqualStat,
+    AICmd_CheckIfHighestDamageWithPartner,
+    AICmd_IfBattlerFainted,
+    AICmd_IfBattlerNotFainted,
+    AICmd_LoadAbility,
+};
+#endif

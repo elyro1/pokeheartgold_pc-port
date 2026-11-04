@@ -52,11 +52,19 @@ BattleCursor *BattleCursor_New(SpriteSystem *renderer, SpriteManager *gfxHandler
     MI_CpuFill8(cursor, 0, sizeof(BattleCursor));
 
     for (i = 0; i < 5; i++) {
+#if defined(SDK_PORT)
+        cursor->sprites[i] = SpriteSystem_NewBattleUISprite(renderer, gfxHandler, &unkStruct);
+#else
         cursor->sprites[i] = SpriteSystem_NewSprite(renderer, gfxHandler, &unkStruct);
+#endif
         ManagedSprite_SetDrawFlag(cursor->sprites[i], FALSE);
     }
 
+#if defined(SDK_PORT)
+    cursor->task = SysTask_CreateBattleUI(BattleCursor_Update, cursor, 0x9C40);
+#else
     cursor->task = SysTask_CreateOnMainQueue(BattleCursor_Update, cursor, 0x9C40);
+#endif
 
     return cursor;
 }

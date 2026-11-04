@@ -56,7 +56,11 @@ BattleHallData *BattleHallData_Alloc(SaveData *saveData, BOOL resume, u8 type, u
     BattleHallData *data5;
     BattleHallData *data6;
     HallChallenge *challenge;
+#if defined(SDK_PORT)
+    void *flags;
+#else
     int flags;
+#endif
     u8 partySize;
     u16 i;
     u8 hasStreak;
@@ -232,7 +236,11 @@ void BattleHallData_Save(BattleHallData *data, int mode) {
     } temp;
     FrontierSave *frontierSave;
     Pokemon *mon;
+#if defined(SDK_PORT)
+    void *flags;
+#else
     int flags;
+#endif
     u16 species, savedSpecies, i;
     u8 type;
     int stat;

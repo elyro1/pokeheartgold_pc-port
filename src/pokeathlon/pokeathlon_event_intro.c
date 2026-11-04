@@ -1088,3 +1088,13 @@ BOOL PokeathlonEventIntro_FadeOut(PokeathlonCourseData *course, u8 *state) {
     }
     return FALSE;
 }
+#if defined(SDK_PORT)
+
+/* Native writable templates from asm/pokeathlon_course_data.s (CreateSprites patches the positions in). */
+ManagedSpriteTemplate gPokeathlonEventIntroSpriteTemplates[4] = {
+    { 0, 0, 0, 5, 0, 0xFFFF, (NNS_G2D_VRAM_TYPE)1, { 0 }, 0, 0 },
+    { 0, 0, 0, 4, 0, 0xFFFF, (NNS_G2D_VRAM_TYPE)1, { 0 }, 0, 0 },
+    { 0, 0, 0, 0, 0, 0xFFFF, (NNS_G2D_VRAM_TYPE)1, { 0 }, 0, 0 },
+    { 0, 0, 0, 16, 0, 0xFFFF, (NNS_G2D_VRAM_TYPE)1, { 0 }, 0, 0 },
+};
+#endif

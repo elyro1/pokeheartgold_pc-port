@@ -19,7 +19,13 @@ enum {
     PLATE_STATE_FLASH,
 };
 
+#if defined(SDK_PORT)
+// NitroSDK MATH_QSort (no header declares it)
+#include <hg/qsort.h>
+#define MATH_QSort HG_QSort
+#else
 void MATH_QSort(void *base, u32 count, u32 width, int (*compare)(const void *, const void *), void *context);
+#endif
 
 void PokeathlonCourse_SetRecordScore(PokeathlonCourseData *course, u32 score);
 Sprite *PokeathlonCourseSprites_CreateTimerDigit(PokeathlonCourseSpriteResources *resources, SpriteList *spriteList, int priority, enum HeapID heapId);
@@ -287,7 +293,11 @@ void PokeathlonGoalRoll_SortOtherMonsOrder(PokeathlonGoalRoll *goalRoll, Pokeath
             count++;
         }
     }
+#if defined(SDK_PORT)
+    HG_QSort(mons, 9, sizeof(PokeathlonGoalRollMonY), PokeathlonGoalRoll_CompareMonY, goalRoll->sortWork);
+#else
     MATH_QSort(mons, 9, sizeof(PokeathlonGoalRollMonY), PokeathlonGoalRoll_CompareMonY, goalRoll->sortWork);
+#endif
     {
         u8 j;
         for (j = 0; j < 9; j++) {

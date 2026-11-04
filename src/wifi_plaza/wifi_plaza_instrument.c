@@ -94,10 +94,19 @@ static void WiFiPlazaInstrumentBurst_Start(WiFiPlazaInstrumentBurst *burst, u32 
 static BOOL WiFiPlazaInstrumentBurst_Update(WiFiPlazaInstrumentBurst *burst);
 static void WiFiPlazaInstrumentBurst_StartHop(WiFiPlazaInstrumentBurst *burst, u32 index, VecFx32 *origin, fx32 dx01, fx32 dy01, fx32 dx23, fx32 dy23, s32 duration);
 
+#if defined(SDK_PORT)
+static s64 Native_Mul64(s64 a, s64 b) { return a * b; }
+#else
 s64 _ll_mul(s64 a, s64 b);
+#endif
 u32 _fflt(s32 value);
+#if defined(SDK_PORT)
+static u32 Native_FloatAdd(u32 a, u32 b) { union { u32 bits; float value; } x = {.bits = a}, y = {.bits = b}; x.value += y.value; return x.bits; }
+static s32 Native_FloatToInt(u32 value) { union { u32 bits; float value; } x = {.bits = value}; return (s32)x.value; }
+#else
 u32 _fadd(u32 a, u32 b);
 s32 _ffix(u32 value);
+#endif
 
 WiFiPlazaInstrumentManager *WiFiPlazaInstrument_Create(struct WiFiPlazaWork *lobby, WiFiPlazaMap *map, WiFiPlazaCamera *camera, WiFiPlazaObjManager *objManager, enum HeapID heapID, enum HeapID gfxHeapID) {
     NARC *narc;
@@ -192,7 +201,11 @@ static BOOL WiFiPlazaInstrumentTween_Update(WiFiPlazaInstrumentTween *tween, s32
         } else {
             durationX = (float)(tween->duration << 12) - 0.5f;
         }
+#if defined(SDK_PORT)
+        scaled = (s32)((Native_Mul64((s64)(s32)(frame > 0 ? (float)(frame << 12) + 0.5f : (float)(frame << 12) - 0.5f), (s64)delta) + 0x800) >> 12);
+#else
         scaled = (s32)((_ll_mul((s64)(s32)(frame > 0 ? (float)(frame << 12) + 0.5f : (float)(frame << 12) - 0.5f), (s64)delta) + 0x800) >> 12);
+#endif
         tween->x = tween->startX + FX_Div(scaled, (s32)durationX);
     }
 
@@ -203,7 +216,11 @@ static BOOL WiFiPlazaInstrumentTween_Update(WiFiPlazaInstrumentTween *tween, s32
         } else {
             durationY = (float)(tween->duration << 12) - 0.5f;
         }
+#if defined(SDK_PORT)
+        scaled = (s32)((Native_Mul64((s64)(s32)(frame > 0 ? (float)(frame << 12) + 0.5f : (float)(frame << 12) - 0.5f), (s64)delta) + 0x800) >> 12);
+#else
         scaled = (s32)((_ll_mul((s64)(s32)(frame > 0 ? (float)(frame << 12) + 0.5f : (float)(frame << 12) - 0.5f), (s64)delta) + 0x800) >> 12);
+#endif
         tween->y = tween->startY + FX_Div(scaled, (s32)durationY);
     }
 
@@ -214,7 +231,11 @@ static BOOL WiFiPlazaInstrumentTween_Update(WiFiPlazaInstrumentTween *tween, s32
         } else {
             durationZ = (float)(tween->duration << 12) - 0.5f;
         }
+#if defined(SDK_PORT)
+        scaled = (s32)((Native_Mul64((s64)(s32)(frame > 0 ? (float)(frame << 12) + 0.5f : (float)(frame << 12) - 0.5f), (s64)delta) + 0x800) >> 12);
+#else
         scaled = (s32)((_ll_mul((s64)(s32)(frame > 0 ? (float)(frame << 12) + 0.5f : (float)(frame << 12) - 0.5f), (s64)delta) + 0x800) >> 12);
+#endif
         tween->z = tween->startZ + FX_Div(scaled, (s32)durationZ);
     }
     return finished;
@@ -897,21 +918,40 @@ BOOL WiFiPlazaInstrument_UpdatePop(WiFiPlazaInstrumentManager *manager, WiFiPlaz
     done = TRUE;
     ModelInstance *model = &effect->models[0];
     model++;
+#if defined(SDK_PORT)
+    for (; i <= 3; i++, model++) {
+#else
     WiFiPlazaInstrumentEffect *descView = (WiFiPlazaInstrumentEffect *)((u8 *)effect + 4);
     for (; i <= 3; i++, model++, descView = (WiFiPlazaInstrumentEffect *)((u8 *)descView + 4)) {
+#endif
         if (WiFiPlazaInstrument_HasModel(effect, i) == TRUE) {
             if (effect->frame > i - 1) {
                 ModelInstance_SetVisible(model, TRUE);
                 if (!WiFiPlazaInstrument_PlayAnimBy(manager, effect, i, 0, FX32_CONST(2.5))) {
                     done = FALSE;
                 } else {
+#if defined(SDK_PORT)
+                    u32 *fade = &effect->work.fade.fade[i - 1];
+                    NNSG3dResMdl *resource = model->render.resMdl;
+                    if (*fade == 0) {
+#else
                     WiFiPlazaInstrumentEffect *fadeView = (WiFiPlazaInstrumentEffect *)((u8 *)effect + (i - 1) * 4);
                     if (fadeView->work.fade.fade[0] == 0) {
+#endif
                         ModelInstance_SetVisible(model, FALSE);
+#if defined(SDK_PORT)
+                        NNS_G3dMdlSetMdlAlphaAll(resource, 31);
+#else
                         NNS_G3dMdlSetMdlAlphaAll(manager->models[descView->descs[0]->model].model, 31);
+#endif
                     } else {
+#if defined(SDK_PORT)
+                        (*fade)--;
+                        NNS_G3dMdlSetMdlAlphaAll(resource, (s32)(*fade * 20) / 8);
+#else
                         fadeView->work.fade.fade[0]--;
                         NNS_G3dMdlSetMdlAlphaAll(manager->models[descView->descs[0]->model].model, (s32)(fadeView->work.fade.fade[0] * 20) / 8);
+#endif
                         done = FALSE;
                     }
                 }
@@ -1394,20 +1434,46 @@ static void WiFiPlazaInstrument_PlaceBalloons(WiFiPlazaInstrumentEffect *effect)
     count = effect->work.hop.count;
     switch (count) {
     case 1:
+#if defined(SDK_PORT)
+        y = Native_FloatAdd(0x3F000000, _fflt(15 << 14));
+        x = Native_FloatAdd(0x3F000000, _fflt(2 << 14));
+        ModelInstance_SetPosition(&effect->models[0], pos.x + Native_FloatToInt(x), pos.y + Native_FloatToInt(y), pos.z + FX32_ONE);
+#else
         y = _fadd(0x3F000000, _fflt(15 << 14));
         x = _fadd(0x3F000000, _fflt(2 << 14));
         ModelInstance_SetPosition(&effect->models[0], pos.x + _ffix(x), pos.y + _ffix(y), pos.z + FX32_ONE);
+#endif
         break;
     case 2:
+#if defined(SDK_PORT)
+        y = Native_FloatAdd(0x3F000000, _fflt(14 << 14));
+        x = Native_FloatAdd(0x3F000000, _fflt(2 << 12));
+        ModelInstance_SetPosition(&effect->models[0], pos.x + Native_FloatToInt(x), pos.y + Native_FloatToInt(y), pos.z + FX32_ONE);
+        y = Native_FloatAdd(0x3F000000, _fflt(14 << 14));
+        x = Native_FloatAdd(0x3F000000, _fflt(14 << 12));
+        ModelInstance_SetPosition(&effect->models[1], pos.x + Native_FloatToInt(x), pos.y + Native_FloatToInt(y), pos.z + FX32_ONE);
+#else
         y = _fadd(0x3F000000, _fflt(14 << 14));
         x = _fadd(0x3F000000, _fflt(2 << 12));
         ModelInstance_SetPosition(&effect->models[0], pos.x + _ffix(x), pos.y + _ffix(y), pos.z + FX32_ONE);
         y = _fadd(0x3F000000, _fflt(14 << 14));
         x = _fadd(0x3F000000, _fflt(14 << 12));
         ModelInstance_SetPosition(&effect->models[1], pos.x + _ffix(x), pos.y + _ffix(y), pos.z + FX32_ONE);
+#endif
         break;
     case 3:
     default:
+#if defined(SDK_PORT)
+        y = Native_FloatAdd(0x3F000000, _fflt(15 << 14));
+        x = Native_FloatAdd(0x3F000000, _fflt(2 << 14));
+        ModelInstance_SetPosition(&effect->models[0], pos.x + Native_FloatToInt(x), pos.y + Native_FloatToInt(y), pos.z + FX32_ONE);
+        y = Native_FloatAdd(0x3F000000, _fflt(14 << 14));
+        x = Native_FloatAdd(0x3F000000, _fflt(2 << 12));
+        ModelInstance_SetPosition(&effect->models[1], pos.x + Native_FloatToInt(x), pos.y + Native_FloatToInt(y), pos.z + FX32_ONE);
+        y = Native_FloatAdd(0x3F000000, _fflt(14 << 14));
+        x = Native_FloatAdd(0x3F000000, _fflt(14 << 12));
+        ModelInstance_SetPosition(&effect->models[2], pos.x + Native_FloatToInt(x), pos.y + Native_FloatToInt(y), pos.z + FX32_ONE);
+#else
         y = _fadd(0x3F000000, _fflt(15 << 14));
         x = _fadd(0x3F000000, _fflt(2 << 14));
         ModelInstance_SetPosition(&effect->models[0], pos.x + _ffix(x), pos.y + _ffix(y), pos.z + FX32_ONE);
@@ -1417,6 +1483,7 @@ static void WiFiPlazaInstrument_PlaceBalloons(WiFiPlazaInstrumentEffect *effect)
         y = _fadd(0x3F000000, _fflt(14 << 14));
         x = _fadd(0x3F000000, _fflt(14 << 12));
         ModelInstance_SetPosition(&effect->models[2], pos.x + _ffix(x), pos.y + _ffix(y), pos.z + FX32_ONE);
+#endif
         break;
     }
 }
@@ -1432,20 +1499,46 @@ static void WiFiPlazaInstrument_PlaceBalloonsLifted(WiFiPlazaInstrumentEffect *e
     count = effect->work.hop.count;
     switch (count) {
     case 1:
+#if defined(SDK_PORT)
+        y = Native_FloatAdd(0x3F000000, _fflt(3 << 16));
+        x = Native_FloatAdd(0x3F000000, _fflt(2 << 14));
+        ModelInstance_SetPosition(&effect->models[0], pos.x + Native_FloatToInt(x), pos.y + Native_FloatToInt(y), pos.z - FX32_CONST(8));
+#else
         y = _fadd(0x3F000000, _fflt(3 << 16));
         x = _fadd(0x3F000000, _fflt(2 << 14));
         ModelInstance_SetPosition(&effect->models[0], pos.x + _ffix(x), pos.y + _ffix(y), pos.z - FX32_CONST(8));
+#endif
         break;
     case 2:
+#if defined(SDK_PORT)
+        y = Native_FloatAdd(0x3F000000, _fflt(11 << 14));
+        x = Native_FloatAdd(0x3F000000, _fflt(2 << 12));
+        ModelInstance_SetPosition(&effect->models[0], pos.x + Native_FloatToInt(x), pos.y + Native_FloatToInt(y), pos.z - FX32_CONST(8));
+        y = Native_FloatAdd(0x3F000000, _fflt(11 << 14));
+        x = Native_FloatAdd(0x3F000000, _fflt(14 << 12));
+        ModelInstance_SetPosition(&effect->models[1], pos.x + Native_FloatToInt(x), pos.y + Native_FloatToInt(y), pos.z - FX32_CONST(8));
+#else
         y = _fadd(0x3F000000, _fflt(11 << 14));
         x = _fadd(0x3F000000, _fflt(2 << 12));
         ModelInstance_SetPosition(&effect->models[0], pos.x + _ffix(x), pos.y + _ffix(y), pos.z - FX32_CONST(8));
         y = _fadd(0x3F000000, _fflt(11 << 14));
         x = _fadd(0x3F000000, _fflt(14 << 12));
         ModelInstance_SetPosition(&effect->models[1], pos.x + _ffix(x), pos.y + _ffix(y), pos.z - FX32_CONST(8));
+#endif
         break;
     case 3:
     default:
+#if defined(SDK_PORT)
+        y = Native_FloatAdd(0x3F000000, _fflt(3 << 16));
+        x = Native_FloatAdd(0x3F000000, _fflt(2 << 14));
+        ModelInstance_SetPosition(&effect->models[0], pos.x + Native_FloatToInt(x), pos.y + Native_FloatToInt(y), pos.z - FX32_CONST(8));
+        y = Native_FloatAdd(0x3F000000, _fflt(11 << 14));
+        x = Native_FloatAdd(0x3F000000, _fflt(2 << 12));
+        ModelInstance_SetPosition(&effect->models[1], pos.x + Native_FloatToInt(x), pos.y + Native_FloatToInt(y), pos.z - FX32_CONST(8));
+        y = Native_FloatAdd(0x3F000000, _fflt(11 << 14));
+        x = Native_FloatAdd(0x3F000000, _fflt(14 << 12));
+        ModelInstance_SetPosition(&effect->models[2], pos.x + Native_FloatToInt(x), pos.y + Native_FloatToInt(y), pos.z - FX32_CONST(8));
+#else
         y = _fadd(0x3F000000, _fflt(3 << 16));
         x = _fadd(0x3F000000, _fflt(2 << 14));
         ModelInstance_SetPosition(&effect->models[0], pos.x + _ffix(x), pos.y + _ffix(y), pos.z - FX32_CONST(8));
@@ -1455,6 +1548,7 @@ static void WiFiPlazaInstrument_PlaceBalloonsLifted(WiFiPlazaInstrumentEffect *e
         y = _fadd(0x3F000000, _fflt(11 << 14));
         x = _fadd(0x3F000000, _fflt(14 << 12));
         ModelInstance_SetPosition(&effect->models[2], pos.x + _ffix(x), pos.y + _ffix(y), pos.z - FX32_CONST(8));
+#endif
         break;
     }
 }
@@ -1530,8 +1624,13 @@ static BOOL WiFiPlazaInstrument_UpdateSparkleModel(WiFiPlazaInstrumentManager *m
     timers[index]++;
     offset = index;
     offset *= sizeof(WiFiPlazaInstrumentTween);
+#if defined(SDK_PORT)
+    done = WiFiPlazaInstrumentTween_Update(&effect->work.shower.tweens[index], timers[index]);
+    WiFiPlazaInstrumentTween_GetPosition(&effect->work.shower.tweens[index], &pos.x, &pos.y, &pos.z);
+#else
     done = WiFiPlazaInstrumentTween_Update((WiFiPlazaInstrumentTween *)((u8 *)effect + 0x968 + offset), timers[index]);
     WiFiPlazaInstrumentTween_GetPosition((WiFiPlazaInstrumentTween *)(0x968 + (u32)effect + offset), &pos.x, &pos.y, &pos.z);
+#endif
     ModelInstance_SetPosition(&effect->models[index], pos.x, pos.y, pos.z);
     WiFiPlazaInstrument_LoopAnim(manager, effect, index, 0);
     return done;
@@ -1973,3 +2072,77 @@ WiFiPlazaLight *WiFiPlazaLight_Create(enum HeapID heapID, u32 colorSet, u32 ligh
     WiFiPlazaLight_Apply(light);
     return light;
 }
+#if defined(SDK_PORT)
+
+/* Native pointer tables from the corresponding DS data. */
+const WiFiPlazaInstrumentUpdateFunc gWiFiPlazaInstrumentUpdateFuncs[] = {
+    WiFiPlazaInstrument_UpdateBellDrum,
+    WiFiPlazaInstrument_UpdateBellDrum,
+    WiFiPlazaInstrument_UpdateBellDrum,
+    WiFiPlazaInstrument_UpdateBellDrum,
+    WiFiPlazaInstrument_UpdateBellDrum,
+    WiFiPlazaInstrument_UpdateBellDrum,
+    WiFiPlazaInstrument_UpdateCymbal,
+    WiFiPlazaInstrument_UpdateCymbal,
+    WiFiPlazaInstrument_UpdateCymbal,
+    WiFiPlazaInstrument_UpdateRipple,
+    WiFiPlazaInstrument_UpdateRipple,
+    WiFiPlazaInstrument_UpdateRipple,
+    WiFiPlazaInstrument_UpdateSignal01,
+    WiFiPlazaInstrument_UpdateSignal02,
+    WiFiPlazaInstrument_UpdateSignal03,
+    WiFiPlazaInstrument_UpdateWhirl,
+    WiFiPlazaInstrument_UpdateWhirl,
+    WiFiPlazaInstrument_UpdateWhirl,
+    WiFiPlazaInstrument_UpdatePop,
+    WiFiPlazaInstrument_UpdatePop,
+    WiFiPlazaInstrument_UpdatePop,
+    WiFiPlazaInstrument_UpdateSparkle,
+    WiFiPlazaInstrument_UpdateSparkle,
+    WiFiPlazaInstrument_UpdateSparkle,
+    WiFiPlazaInstrument_UpdateBalloon,
+    WiFiPlazaInstrument_UpdateBalloon,
+    WiFiPlazaInstrument_UpdateBalloon
+};
+const WiFiPlazaInstrumentInitFunc gWiFiPlazaInstrumentInitFuncs[] = {
+    WiFiPlazaInstrument_InitBell01,
+    WiFiPlazaInstrument_InitBell02,
+    WiFiPlazaInstrument_InitBell03,
+    WiFiPlazaInstrument_InitDrum01,
+    WiFiPlazaInstrument_InitDrum02,
+    WiFiPlazaInstrument_InitDrum03,
+    WiFiPlazaInstrument_InitCymbal01,
+    WiFiPlazaInstrument_InitCymbal02,
+    WiFiPlazaInstrument_InitCymbal03,
+    WiFiPlazaInstrument_InitRipple01,
+    WiFiPlazaInstrument_InitRipple02,
+    WiFiPlazaInstrument_InitRipple03,
+    WiFiPlazaInstrument_InitSignal,
+    WiFiPlazaInstrument_InitSignal,
+    WiFiPlazaInstrument_InitSignal,
+    WiFiPlazaInstrument_InitWhirl01,
+    WiFiPlazaInstrument_InitWhirl02,
+    WiFiPlazaInstrument_InitWhirl03,
+    WiFiPlazaInstrument_InitPop01,
+    WiFiPlazaInstrument_InitPop02,
+    WiFiPlazaInstrument_InitPop03,
+    WiFiPlazaInstrument_InitSparkle01,
+    WiFiPlazaInstrument_InitSparkle02,
+    WiFiPlazaInstrument_InitSparkle03,
+    WiFiPlazaInstrument_InitBalloon01,
+    WiFiPlazaInstrument_InitBalloon02,
+    WiFiPlazaInstrument_InitBalloon03
+};
+
+const WiFiPlazaInstrumentBurstUpdateFunc gWiFiPlazaInstrumentBurstUpdateFuncs[] = {
+    WiFiPlazaInstrumentBurst_UpdateBell,
+    WiFiPlazaInstrumentBurst_UpdateDrum,
+    WiFiPlazaInstrumentBurst_UpdateCymbal
+};
+
+const WiFiPlazaInstrumentBurstStartFunc gWiFiPlazaInstrumentBurstStartFuncs[] = {
+    WiFiPlazaInstrumentBurst_StartBell,
+    WiFiPlazaInstrumentBurst_StartDrum,
+    WiFiPlazaInstrumentBurst_StartCymbal
+};
+#endif

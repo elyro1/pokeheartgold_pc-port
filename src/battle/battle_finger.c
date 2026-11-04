@@ -51,11 +51,19 @@ BattleFinger *BattleFinger_New(SpriteSystem *renderer, SpriteManager *gfxHandler
     finger = Heap_Alloc(heapID, sizeof(BattleFinger));
     MI_CpuFill8(finger, 0, sizeof(BattleFinger));
 
+#if defined(SDK_PORT)
+    finger->sprite = SpriteSystem_NewBattleUISprite(renderer, gfxHandler, &unkStruct);
+#else
     finger->sprite = SpriteSystem_NewSprite(renderer, gfxHandler, &unkStruct);
+#endif
     ManagedSprite_SetDrawFlag(finger->sprite, 0);
 
     finger->yOffset = 0xC0000;
+#if defined(SDK_PORT)
+    finger->task = SysTask_CreateBattleUI(BattleFinger_Update, finger, 0x3e7);
+#else
     finger->task = SysTask_CreateOnMainQueue(BattleFinger_Update, finger, 0x3e7);
+#endif
 
     return finger;
 }

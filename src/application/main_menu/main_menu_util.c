@@ -39,7 +39,10 @@ u16 CTRDG_GetAgbMakerCode(void);
 BOOL CTRDG_IsAgbCartridge(void);
 BOOL CTRDG_IsExisting(void);
 void CTRDG_Enable(BOOL enable);
+#if defined(SDK_PORT)
+#else
 void CTRDG_Read32(const void *src, void *dest);
+#endif
 BOOL CTRDG_CpuCopy8(const void *src, void *dest, u32 size);
 BOOL CTRDG_CpuCopy16(const void *src, void *dest, u32 size);
 void CRYPTO_SetAllocator(void *(*alloc)(u32), void (*free)(void *));
@@ -57,13 +60,27 @@ typedef struct MainMenuUtilGiftPalettes {
 } MainMenuUtilGiftPalettes;
 
 extern MainMenuUtilWork gMainMenuUtilWork;
+#if defined(SDK_PORT)
+#define gMainMenuUtilSprites (gMainMenuUtilWork.sprites)
+#define gMainMenuUtilRenderer (gMainMenuUtilWork.sprites.renderer)
+#else
 extern MainMenuUtilSprites gMainMenuUtilSprites;
 extern G2dRenderer gMainMenuUtilRenderer;
+#endif
 extern u32 gMainMenuUtilGiftSpriteWork[];
 extern const u8 gGiftCartridgePublicKey[];
 extern const ObjCharTransferTemplate gMainMenuUtilObjCharTransferTemplate;
 extern const BgTemplate gMainMenuUtilBgTemplate;
+#if defined(SDK_PORT)
+const ObjCharTransferTemplate gMainMenuUtilObjCharTransferTemplate = {40, 0x1000, 0x1000, 0};
+const BgTemplate gMainMenuUtilBgTemplate = {.bufferSize = 0x800, .size = 1};
+const MainMenuUtilGiftPalettes gMainMenuUtilGiftPalettes = {{
+    0,0, 1,1, 2,1, 3,2, 4,3, 5,2, 6,2, 7,0,
+    8,5, 9,5, 10,5, 11,4, 12,5, 13,5, 14,2, 15,2, 255,0
+}};
+#else
 extern const MainMenuUtilGiftPalettes gMainMenuUtilGiftPalettes;
+#endif
 extern u32 gGiftCartridgeGameCodes[];
 
 static void *MainMenuUtil_CryptoAlloc(u32 size);
@@ -153,7 +170,11 @@ BOOL MainMenuUtil_ReadCartridgeGift(void *dest, int size) {
 }
 
 void MainMenuUtil_InitWork(enum HeapID heapID) {
+#if defined(SDK_PORT)
+    memset(&gMainMenuUtilWork, 0, sizeof(gMainMenuUtilWork));
+#else
     memset(&gMainMenuUtilCryptoHeapId + 1, 0, sizeof(MainMenuUtilWork));
+#endif
     gMainMenuUtilWork.unk_004 = 1;
     gMainMenuUtilWork.heapId = heapID;
 }
@@ -196,7 +217,11 @@ void MainMenuUtil_SetFadeWhite(u32 fadeWhite) {
 }
 
 void MainMenuUtil_StartFade(enum FadeType fadeType, u32 nextState, int *state, u32 waitingState) {
+#if defined(SDK_PORT)
+    MainMenuUtilWork *work = &gMainMenuUtilWork;
+#else
     MainMenuUtilWork *work = (MainMenuUtilWork *)(&gMainMenuUtilCryptoHeapId + 1);
+#endif
     if (!gMainMenuUtilWork.fadeWhite) {
         BeginNormalPaletteFade(FADE_BOTH_SCREENS, fadeType, fadeType, RGB_BLACK, 6, 1, work->heapId);
     } else {
@@ -339,20 +364,32 @@ u32 MainMenuUtil_SpritesActive(void) {
 }
 
 void MainMenuUtil_InitSprites(void) {
+#if defined(SDK_PORT)
+    MainMenuUtilWork *work = &gMainMenuUtilWork;
+#else
     MainMenuUtilWork *work = (MainMenuUtilWork *)(&gMainMenuUtilCryptoHeapId + 1);
+#endif
     int i;
     NNS_G2dInitOamManagerModule();
     OamManager_Create(0, 126, 0, 32, 0, 126, 0, 32, gMainMenuUtilWork.heapId);
     gMainMenuUtilWork.sprites.spriteList = G2dRenderer_Init(128, &gMainMenuUtilRenderer, gMainMenuUtilWork.heapId);
     G2dRenderer_SetSubSurfaceCoords(&gMainMenuUtilRenderer, 0, FX32_CONST(256));
+#if defined(SDK_PORT)
+    work->subScreenY = FX32_CONST(192);
+#else
     gMainMenuUtilGiftSpriteWork[4] = FX32_CONST(192);
+#endif
     for (i = 0; i < 6; i++) {
         work->sprites.resMan[i] = Create2DGfxResObjMan(32, (GfGfxResType)i, work->heapId);
     }
 }
 
 MainMenuUtilSprites *MainMenuUtil_GetSpriteList(void) {
+#if defined(SDK_PORT)
+    MainMenuUtilWork *work = &gMainMenuUtilWork;
+#else
     MainMenuUtilWork *work = (MainMenuUtilWork *)(&gMainMenuUtilCryptoHeapId + 1);
+#endif
     GF_ASSERT(gMainMenuUtilWork.sprites.spriteList != NULL);
     return &work->sprites;
 }
@@ -390,7 +427,11 @@ void MainMenuUtil_LoadSpriteResources(NarcId narcId, u32 charFileId, u32 plttFil
 
 static void MainMenuUtil_SetSubScreenOffset(fx32 x, fx32 y) {
     G2dRenderer_SetSubSurfaceCoords(&gMainMenuUtilRenderer, x, y);
+#if defined(SDK_PORT)
+    gMainMenuUtilWork.subScreenY = y;
+#else
     gMainMenuUtilGiftSpriteWork[4] = y;
+#endif
 }
 
 void MainMenuUtil_UpdateSprites(void) {
@@ -400,7 +441,11 @@ void MainMenuUtil_UpdateSprites(void) {
 // Per frame: the gift sprite of the sub screen appears after its delay and slides down; renders the sprites
 void MainMenuUtil_UpdateGiftSprite(int hideGiftSprite) {
     MainMenuUtilWork *work = &gMainMenuUtilWork;
+#if defined(SDK_PORT)
+    if (work->giftSprite != NULL) {
+#else
     if (gMainMenuUtilGiftSpriteWork[2]) {
+#endif
         if (work->giftSpriteDelay == 0) {
             VecFx32 *pos;
             if (!Sprite_GetDrawFlag(work->giftSprite) && !hideGiftSprite) {
@@ -453,7 +498,11 @@ void MainMenuUtil_FreeSprites(void) {
     MainMenuUtilWork *work = &gMainMenuUtilWork;
     MainMenuUtilSprites *sprites = &gMainMenuUtilSprites;
     int i;
+#if defined(SDK_PORT)
+    if (work->giftSprite != NULL) {
+#else
     if (gMainMenuUtilGiftSpriteWork[2]) {
+#endif
         Sprite_Delete(work->giftSprite);
         work->giftSprite = NULL;
     }
@@ -487,7 +536,11 @@ u32 MainMenuUtil_GetVersionMaskBit(int spriteId) {
 
 static void MainMenuUtil_VBlankCB(void *data) {
     MainMenuUtilWork *work = &gMainMenuUtilWork;
+#if defined(SDK_PORT)
+    if (work->vblankCallback != NULL) {
+#else
     if (gMainMenuUtilVBlankWork[9]) {
+#endif
         work->vblankCallback(work);
         work->vblankCallback = NULL;
     }
@@ -501,6 +554,11 @@ static void MainMenuUtil_VBlankCB(void *data) {
 
 // Palette of the gift graphics per gift type (pairs in gMainMenuUtilGiftPalettes, 0xFF-terminated)
 int MainMenuUtil_GetGiftPalette(int giftType) {
+#if defined(SDK_PORT)
+    for (unsigned int i = 0; i + 1 < sizeof(gMainMenuUtilGiftPalettes.data); i += 2) {
+        if (gMainMenuUtilGiftPalettes.data[i] == 0xFF) break;
+        if (gMainMenuUtilGiftPalettes.data[i] == giftType) return gMainMenuUtilGiftPalettes.data[i + 1];
+#else
     MainMenuUtilGiftPalettes palettes = gMainMenuUtilGiftPalettes;
     int i;
     u8 *entry;
@@ -515,6 +573,7 @@ int MainMenuUtil_GetGiftPalette(int giftType) {
             entry += 2;
             i++;
         } while (*entry != -1);
+#endif
     }
     return 0;
 }

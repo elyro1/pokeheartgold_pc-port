@@ -77,15 +77,33 @@ void Save_Frontier_SetTowerMessage(SaveData *saveData, int index, MailMessage *m
 MailMessage *Save_Frontier_GetTowerMessage(SaveData *save, u32 index);
 void BattleRoomDownload_MarkRoom(struct BattleRoomDownload *download, u32 rank, u32 room, const RTCDate *date);
 BOOL BattleRoomDownload_IsRoomMarked(struct BattleRoomDownload *download, u32 rank, u32 room, const RTCDate *date);
+#if defined(SDK_PORT)
+u32 BattleRoomDownload_HasTrainers(void *download);
+u32 BattleRoomDownload_HasLeaders(void *download);
+#else
 u32 BattleRoomDownload_HasTrainers(u32 download);
 u32 BattleRoomDownload_HasLeaders(u32 download);
+#endif
 void BattleRoomDownload_SetTrainers(struct BattleRoomDownload *download, const BattleRoomTrainer *trainers, u32 rank, u32 room);
 void BattleRoomDownload_GetTrainersRoom(struct BattleRoomDownload *download, u8 *out);
+#if defined(SDK_PORT)
+void BattleRoomDownload_GetTrainer(void *addr, FrontierTrainer *trainer, int index);
+#else
 void BattleRoomDownload_GetTrainer(u32 addr, FrontierTrainer *trainer, int index);
+#endif
 void BattleRoomDownload_SetLeaders(struct BattleRoomDownload *download, const BattleRoomLeader *leaders, u32 rank, u32 room);
+#if defined(SDK_PORT)
+void BattleRoomDownload_GetLeadersRoom(void *addr, u8 *out);
+BattleRoomLeader *BattleRoomDownload_CopyLeaders(void *addr, enum HeapID heapID);
+#else
 void BattleRoomDownload_GetLeadersRoom(u32 addr, u8 *out);
 BattleRoomLeader *BattleRoomDownload_CopyLeaders(u32 addr, enum HeapID heapID);
+#endif
 BattleTowerChallenge *Save_BattleTowerChallenge_Get(SaveData *saveData);
+#if defined(SDK_PORT)
+void *Save_BattleRoomDownload_Get(SaveData *saveData);
+#else
 u32 Save_BattleRoomDownload_Get(SaveData *saveData);
+#endif
 
 #endif // POKEHEARTGOLD_FRONTIER_DATA_ACCESS_H

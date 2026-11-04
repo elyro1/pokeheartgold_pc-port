@@ -96,7 +96,11 @@ static enum PCBoxState PCBox_ReturnTrayItem(PCBoxWork *work);
 static enum PCBoxState PCBox_DropTrayItem(PCBoxWork *work, u32 value);
 static enum PCBoxState PCBox_SelectItemModePartyMon(PCBoxWork *work, u32 value);
 static enum PCBoxState PCBox_StartItemModePartyDrag(PCBoxWork *work, u32 value);
+#if defined(SDK_PORT)
+static enum PCBoxState PCBox_HandleBagGiveCommand(PCBoxWork *work);
+#else
 static void PCBox_HandleBagGiveCommand(PCBoxWork *work);
+#endif
 static void PCBox_AllocHeldItemMove(PCBoxWork *work);
 static void PCBox_FreeHeldItemMove(PCBoxWork *work);
 static enum PCBoxState PCBox_StartCellPaletteFlash(PCBoxWork *work, u32 panelIndex, enum PCBoxState nextState);
@@ -251,7 +255,11 @@ enum PCBoxState PCBox_State_RunSubApp(PCBoxWork *work) {
     return PC_BOX_STATE_INIT;
 }
 
+#if defined(SDK_PORT)
+enum PCBoxState PCBox_State_Start(PCBoxWork *work) {
+#else
 void PCBox_State_Start(PCBoxWork *work) {
+#endif
     enum PCBoxState nextState;
 
     PlaySE(SEQ_SE_DP_PC_LOGIN);
@@ -279,7 +287,7 @@ void PCBox_State_Start(PCBoxWork *work) {
         nextState = PC_BOX_STATE_ITEM_MODE_INPUT;
         break;
     }
-    PCBox_StartFadeIn(work, nextState);
+    PCBOX_RETURN PCBox_StartFadeIn(work, nextState);
 }
 
 enum PCBoxState PCBox_State_MoveModeInput(PCBoxWork *work) {
@@ -436,7 +444,11 @@ enum PCBoxState PCBox_State_ApplyMonMove(PCBoxWork *work) {
     return PC_BOX_STATE_MOVE_MODE_INPUT;
 }
 
+#if defined(SDK_PORT)
+enum PCBoxState PCBox_State_ReturnToActionMenu(PCBoxWork *work) {
+#else
 void PCBox_State_ReturnToActionMenu(PCBoxWork *work) {
+#endif
     enum PCBoxState nextState;
 
     PCBox_ClearWindowFrame(work->view, 0x25);
@@ -467,10 +479,14 @@ void PCBox_State_ReturnToActionMenu(PCBoxWork *work) {
         }
     }
     PCBox_SlideInActionMenu(work->view->panels);
-    PCBox_WaitForUpdateFunc(work, PCBox_WaitActionMenuSlide, nextState);
+    PCBOX_RETURN PCBox_WaitForUpdateFunc(work, PCBox_WaitActionMenuSlide, nextState);
 }
 
+#if defined(SDK_PORT)
+enum PCBoxState PCBox_State_ReturnFromSummary(PCBoxWork *work) {
+#else
 void PCBox_State_ReturnFromSummary(PCBoxWork *work) {
+#endif
     enum PCBoxState nextState;
 
     PCBox_ShowSlotMonInfo(work, work->selectedSlot);
@@ -552,10 +568,14 @@ void PCBox_State_ReturnFromSummary(PCBoxWork *work) {
         work->summaryCursorPos = 0;
         work->summaryFromHolding = 0;
     }
-    PCBox_StartFadeIn(work, nextState);
+    PCBOX_RETURN PCBox_StartFadeIn(work, nextState);
 }
 
+#if defined(SDK_PORT)
+enum PCBoxState PCBox_State_ReturnFromNamingScreen(PCBoxWork *work) {
+#else
 void PCBox_State_ReturnFromNamingScreen(PCBoxWork *work) {
+#endif
     PCBox_CreateGridInput(work, 9, 10);
     work->view->rowCursorPos = work->trayBox % 6;
     PCBox_ShowBoxTrayAndMenu(work);
@@ -563,10 +583,14 @@ void PCBox_State_ReturnFromNamingScreen(PCBoxWork *work) {
     if (work->args->mode == PC_BOX_MODE_MOVE_ITEMS) {
         PCBox_SetIconsTranslucent(work, 0x81, 1);
     }
-    PCBox_StartFadeIn(work, PC_BOX_STATE_BOX_MENU_INPUT);
+    PCBOX_RETURN PCBox_StartFadeIn(work, PC_BOX_STATE_BOX_MENU_INPUT);
 }
 
+#if defined(SDK_PORT)
+enum PCBoxState PCBox_State_GiveItemFromBag(PCBoxWork *work) {
+#else
 void PCBox_State_GiveItemFromBag(PCBoxWork *work) {
+#endif
     enum PCBoxState nextState;
     u32 special;
     BoxPokemon *entry;
@@ -668,7 +692,7 @@ void PCBox_State_GiveItemFromBag(PCBoxWork *work) {
     } else if (work->itemId != ITEM_NONE) {
         PCBox_ShowItemInfoPanel(work->view->panels);
     }
-    PCBox_StartFadeIn(work, nextState);
+    PCBOX_RETURN PCBox_StartFadeIn(work, nextState);
 }
 
 enum PCBoxState PCBox_State_PrintItemHeld(PCBoxWork *work) {
@@ -677,16 +701,25 @@ enum PCBoxState PCBox_State_PrintItemHeld(PCBoxWork *work) {
     return PC_BOX_STATE_WAIT_BUTTON;
 }
 
+#if defined(SDK_PORT)
+enum PCBoxState PCBox_State_MarkingChosen(PCBoxWork *work) {
+    PCBOX_RETURN PCBox_State_OpenMarkingMenu(work);
+#else
 void PCBox_State_MarkingChosen(PCBoxWork *work) {
     PCBox_State_OpenMarkingMenu(work);
+#endif
 }
 
+#if defined(SDK_PORT)
+enum PCBoxState PCBox_State_OpenMarkingMenu(PCBoxWork *work) {
+#else
 void PCBox_State_OpenMarkingMenu(PCBoxWork *work) {
+#endif
     work->view->markings = PCBox_GetSlotMonData(work, *(&work->selectedSlot), MON_DATA_MARKINGS, NULL);
     PCBox_DrawMarkingMenu(work);
     PCBox_DrawConfirmCancel(work->view);
     PCBox_SlideInMarkingMenu(work->view->panels);
-    PCBox_WaitForUpdateFunc(work, PCBox_UpdateMarkingMenuSlide, PC_BOX_STATE_SETUP_MARKING_MENU_INPUT);
+    PCBOX_RETURN PCBox_WaitForUpdateFunc(work, PCBox_UpdateMarkingMenuSlide, PC_BOX_STATE_SETUP_MARKING_MENU_INPUT);
 }
 
 enum PCBoxState PCBox_State_SetupMarkingMenuInput(PCBoxWork *work) {
@@ -1087,9 +1120,16 @@ enum PCBoxState PCBox_State_SetupBoxTrayInput(PCBoxWork *work) {
     if (work->moveWithButtons != 0) {
         PCBox_CreateGridInput(work, 4, work->moveFromSlot);
         work->selectedSlot = work->moveFromSlot;
+#if defined(SDK_PORT)
+        enum PCBoxState nextState = PCBox_PickUpTrayMon(work, work->moveFromSlot);
+#else
         PCBox_PickUpTrayMon(work, work->moveFromSlot);
+#endif
         row = 0;
         work->moveWithButtons = row;
+#if defined(SDK_PORT)
+        return nextState;
+#endif
     } else {
         PCBox_CreateGridInput(work, 4, work->moveFromSlot);
         PCBox_ShowSlotMonInfo(work, work->moveFromSlot);
@@ -1460,7 +1500,11 @@ enum PCBoxState PCBox_State_OpenTrayFromBox(PCBoxWork *work) {
     return PCBox_OpenBoxTray(work, PC_BOX_STATE_SLIDE_IN_TRAY_PARTY_PANEL);
 }
 
+#if defined(SDK_PORT)
+enum PCBoxState PCBox_State_SlideInTrayPartyPanel(PCBoxWork *work) {
+#else
 void PCBox_State_SlideInTrayPartyPanel(PCBoxWork *work) {
+#endif
     PCBox_LoadPartyPanelTilemap(work->view->panels, 1);
     PCBox_PlacePartyPanelRightHidden(work->view->panels);
     PCBox_SlideInPartyPanel(work->view->panels);
@@ -1471,23 +1515,36 @@ void PCBox_State_SlideInTrayPartyPanel(PCBoxWork *work) {
     if (PCBox_GetSlotMonData(work, work->moveFromSlot, MON_DATA_SPECIES_EXISTS, NULL)) {
         PCBox_SlideInSummaryButton(work->view->panels);
     }
-    PCBox_WaitForUpdateFunc(work, PCBox_WaitPartyPanelSlide, PC_BOX_STATE_SETUP_BOX_TRAY_INPUT);
+    PCBOX_RETURN PCBox_WaitForUpdateFunc(work, PCBox_WaitPartyPanelSlide, PC_BOX_STATE_SETUP_BOX_TRAY_INPUT);
 }
 
 enum PCBoxState PCBox_State_SlideOutTray(PCBoxWork *work) {
     return PCBox_CloseBoxTray(work, PC_BOX_STATE_TRAY_CLOSED);
 }
 
+#if defined(SDK_PORT)
+enum PCBoxState PCBox_State_TrayClosed(PCBoxWork *work) {
+#else
 void PCBox_State_TrayClosed(PCBoxWork *work) {
+#endif
     if (work->trayFromPartyPanel == 1) {
+#if defined(SDK_PORT)
+        PCBOX_RETURN PCBox_CloseTrayToPartyPanel(work);
+        PCBOX_BARE_RETURN;
+#else
         PCBox_CloseTrayToPartyPanel(work);
         return;
+#endif
     }
     PCBox_SlideOutPartyPanel(work->view->panels);
-    PCBox_WaitForUpdateFunc(work, PCBox_WaitPartyPanelSlide, PC_BOX_STATE_RETURN_TO_BOX_FROM_TRAY);
+    PCBOX_RETURN PCBox_WaitForUpdateFunc(work, PCBox_WaitPartyPanelSlide, PC_BOX_STATE_RETURN_TO_BOX_FROM_TRAY);
 }
 
+#if defined(SDK_PORT)
+enum PCBoxState PCBox_State_ReturnToBoxFromTray(PCBoxWork *work) {
+#else
 void PCBox_State_ReturnToBoxFromTray(PCBoxWork *work) {
+#endif
     u32 layout;
     u32 initialPos;
     enum PCBoxState next;
@@ -1511,7 +1568,11 @@ void PCBox_State_ReturnToBoxFromTray(PCBoxWork *work) {
     PCBox_SlideInPartyButton(work->view->panels);
     PCBox_SlideInTrayTab(work->view->panels);
     PCBox_SlideInReturnButton(work->view->panels);
+#if defined(SDK_PORT)
+    PCBOX_RETURN PCBox_WaitForUpdateFunc(work, PCBox_WaitBottomButtonsSlide, next);
+#else
     PCBox_WaitForUpdateFunc(work, PCBox_WaitBottomButtonsSlide, next);
+#endif
 }
 
 enum PCBoxState PCBox_State_BoxMenuInput(PCBoxWork *work) {
@@ -1588,7 +1649,7 @@ enum PCBoxState PCBox_State_HideButtonsForBoxMenu(PCBoxWork *work) {
         PCBox_SlideOutTrayTab(work->view->panels);
         PCBox_SlideOutReturnButton(work->view->panels);
     }
-    PCBox_WaitForUpdateFunc(work, PCBox_WaitBottomButtonsSlide, PC_BOX_STATE_OPEN_BOX_MENU_TRAY);
+    PCBOX_RETURN PCBox_WaitForUpdateFunc(work, PCBox_WaitBottomButtonsSlide, PC_BOX_STATE_OPEN_BOX_MENU_TRAY);
 }
 
 enum PCBoxState PCBox_State_OpenBoxMenuTray(PCBoxWork *work) {
@@ -1600,10 +1661,14 @@ enum PCBoxState PCBox_State_ShowBoxMenuExitButton(PCBoxWork *work) {
     return PCBox_ShowExitButtonAndWait(work, PC_BOX_STATE_OPEN_BOX_MENU);
 }
 
+#if defined(SDK_PORT)
+enum PCBoxState PCBox_State_OpenBoxMenu(PCBoxWork *work) {
+#else
 void PCBox_State_OpenBoxMenu(PCBoxWork *work) {
+#endif
     PCBox_DrawBoxMenu(work);
     PCBox_SlideInBoxMenu(work->view->panels);
-    PCBox_WaitForUpdateFunc(work, PCBox_UpdateBoxMenuSlide, PC_BOX_STATE_SETUP_BOX_MENU_INPUT);
+    PCBOX_RETURN PCBox_WaitForUpdateFunc(work, PCBox_UpdateBoxMenuSlide, PC_BOX_STATE_SETUP_BOX_MENU_INPUT);
 }
 
 enum PCBoxState PCBox_State_SetupBoxMenuInput(PCBoxWork *work) {
@@ -1617,15 +1682,23 @@ enum PCBoxState PCBox_State_SetupBoxMenuInput(PCBoxWork *work) {
     return PC_BOX_STATE_BOX_MENU_INPUT;
 }
 
+#if defined(SDK_PORT)
+enum PCBoxState PCBox_State_CloseBoxMenu(PCBoxWork *work) {
+#else
 void PCBox_State_CloseBoxMenu(PCBoxWork *work) {
+#endif
     PCBox_SetSpriteVisible(work->view, PC_BOX_SPRITE_CURSOR, FALSE);
     PCBox_CloseMessageWindow(work->view, 0x27);
-    PCBox_SlideOutReturnButtonAndWait(work, PC_BOX_STATE_SLIDE_OUT_BOX_MENU);
+    PCBOX_RETURN PCBox_SlideOutReturnButtonAndWait(work, PC_BOX_STATE_SLIDE_OUT_BOX_MENU);
 }
 
+#if defined(SDK_PORT)
+enum PCBoxState PCBox_State_SlideOutBoxMenu(PCBoxWork *work) {
+#else
 void PCBox_State_SlideOutBoxMenu(PCBoxWork *work) {
+#endif
     PCBox_SlideOutBoxMenu(work->view->panels);
-    PCBox_WaitForUpdateFunc(work, PCBox_UpdateBoxMenuSlide, PC_BOX_STATE_CLOSE_BOX_MENU_TRAY);
+    PCBOX_RETURN PCBox_WaitForUpdateFunc(work, PCBox_UpdateBoxMenuSlide, PC_BOX_STATE_CLOSE_BOX_MENU_TRAY);
 }
 
 enum PCBoxState PCBox_State_CloseBoxMenuTray(PCBoxWork *work) {
@@ -1910,25 +1983,41 @@ enum PCBoxState PCBox_State_WithdrawInput(PCBoxWork *work) {
     return PC_BOX_STATE_WITHDRAW_INPUT;
 }
 
+#if defined(SDK_PORT)
+enum PCBoxState PCBox_State_ReturnToWithdrawInput(PCBoxWork *work) {
+#else
 void PCBox_State_ReturnToWithdrawInput(PCBoxWork *work) {
+#endif
     PCBox_PrintMonActionMessage(work, 0, PC_BOX_MON_MSG_WHICH_ONE, 0x27);
-    PCBox_State_ResumeWithdrawInput(work);
+    PCBOX_RETURN PCBox_State_ResumeWithdrawInput(work);
 }
 
+#if defined(SDK_PORT)
+enum PCBoxState PCBox_State_SlideInWithdrawParty(PCBoxWork *work) {
+#else
 void PCBox_State_SlideInWithdrawParty(PCBoxWork *work) {
+#endif
     PCBox_PlacePartyIconsRightHidden(work);
     PCBox_PlacePartyPanelRightHidden(work->view->panels);
     PCBox_SlideInPartyPanel(work->view->panels);
     work->partyLayout = 2;
-    PCBox_WaitForUpdateFunc(work, PCBox_WaitPartyPanelSlide, PC_BOX_STATE_START_WITHDRAW_MOVE);
+    PCBOX_RETURN PCBox_WaitForUpdateFunc(work, PCBox_WaitPartyPanelSlide, PC_BOX_STATE_START_WITHDRAW_MOVE);
 }
 
+#if defined(SDK_PORT)
+enum PCBoxState PCBox_State_StartWithdrawMove(PCBoxWork *work) {
+#else
 void PCBox_State_StartWithdrawMove(PCBoxWork *work) {
+#endif
     PCBox_AllocMoveWork(work);
-    PCBox_WaitForUpdateFunc(work, PCBox_AnimateMoveToPartyEnd, PC_BOX_STATE_END_WITHDRAW_MOVE);
+    PCBOX_RETURN PCBox_WaitForUpdateFunc(work, PCBox_AnimateMoveToPartyEnd, PC_BOX_STATE_END_WITHDRAW_MOVE);
 }
 
+#if defined(SDK_PORT)
+enum PCBoxState PCBox_State_EndWithdrawMove(PCBoxWork *work) {
+#else
 void PCBox_State_EndWithdrawMove(PCBoxWork *work) {
+#endif
     struct {
         u8 y;
         u8 x;
@@ -1943,12 +2032,16 @@ void PCBox_State_EndWithdrawMove(PCBoxWork *work) {
     PCBox_FreeMoveWork(work);
     PCBox_ClearMonInfo(work);
     PCBox_SlideOutPartyPanel(work->view->panels);
-    PCBox_WaitForUpdateFunc(work, PCBox_WaitPartyPanelSlide, PC_BOX_STATE_WITHDRAW_PARTY_CLOSED);
+    PCBOX_RETURN PCBox_WaitForUpdateFunc(work, PCBox_WaitPartyPanelSlide, PC_BOX_STATE_WITHDRAW_PARTY_CLOSED);
 }
 
+#if defined(SDK_PORT)
+enum PCBoxState PCBox_State_WithdrawPartyClosed(PCBoxWork *work) {
+#else
 void PCBox_State_WithdrawPartyClosed(PCBoxWork *work) {
+#endif
     PCBox_SlideInReturnButton(work->view->panels);
-    PCBox_WaitForUpdateFunc(work, PCBox_WaitReturnButtonSlide, PC_BOX_STATE_RETURN_TO_WITHDRAW_INPUT);
+    PCBOX_RETURN PCBox_WaitForUpdateFunc(work, PCBox_WaitReturnButtonSlide, PC_BOX_STATE_RETURN_TO_WITHDRAW_INPUT);
 }
 
 enum PCBoxState PCBox_State_EndWithdrawDrag(PCBoxWork *work) {
@@ -4216,7 +4309,11 @@ static enum PCBoxState PCBox_StartItemModePartyDrag(PCBoxWork *work, u32 value) 
     return PCBox_WaitForUpdateFunc(work, PCBox_UpdateItemModePartyDrag, PC_BOX_STATE_END_ITEM_MODE_PARTY_DRAG);
 }
 
+#if defined(SDK_PORT)
+static enum PCBoxState PCBox_HandleBagGiveCommand(PCBoxWork *work) {
+#else
 static void PCBox_HandleBagGiveCommand(PCBoxWork *work) {
+#endif
     enum PCBoxState next;
     if (work->view->heldItem == ITEM_NONE) {
         BoxPokemon *boxMon;
@@ -4224,8 +4321,13 @@ static void PCBox_HandleBagGiveCommand(PCBoxWork *work) {
         boxMon = PCBox_GetSlotBoxMon(work, work->activeBox, work->selectedSlot);
         if (GetBoxMonData(boxMon, MON_DATA_IS_EGG, NULL) == 0) {
             work->returnCursorPos = 0x24;
+#if defined(SDK_PORT)
+            PCBOX_RETURN PCBox_StartSubApp(work, 1);
+            PCBOX_BARE_RETURN;
+#else
             PCBox_StartSubApp(work, 1);
             return;
+#endif
         }
         next = PC_BOX_STATE_ITEM_MODE_PRINT_EGG_CANT_HOLD_ITEM;
     } else {
@@ -4233,7 +4335,11 @@ static void PCBox_HandleBagGiveCommand(PCBoxWork *work) {
         next = PC_BOX_STATE_ASK_PUT_AWAY_ITEM;
     }
     PCBox_SlideOutActionMenu(work->view->panels);
+#if defined(SDK_PORT)
+    PCBOX_RETURN PCBox_WaitForUpdateFunc(work, PCBox_WaitActionMenuAndButtonsSlide, next);
+#else
     PCBox_WaitForUpdateFunc(work, PCBox_WaitActionMenuAndButtonsSlide, next);
+#endif
 }
 
 static void PCBox_AllocHeldItemMove(PCBoxWork *work) {
@@ -4474,14 +4580,30 @@ enum PCBoxState PCBox_State_AskContinue(PCBoxWork *work) {
     return PCBox_ShowYesNo(work, 4);
 }
 
+#if defined(SDK_PORT)
+enum PCBoxState PCBox_State_ChooseParty(PCBoxWork *work) {
+#else
 void PCBox_State_ChooseParty(PCBoxWork *work) {
+#endif
     PCBox_ClearMonInfoAndSelection(work);
+#if defined(SDK_PORT)
+    PCBOX_RETURN PCBox_OpenPartyPanel(work);
+#else
     PCBox_OpenPartyPanel(work);
+#endif
 }
 
+#if defined(SDK_PORT)
+enum PCBoxState PCBox_State_ChooseTrayTab(PCBoxWork *work) {
+#else
 void PCBox_State_ChooseTrayTab(PCBoxWork *work) {
+#endif
     PCBox_ClearMonInfoAndSelection(work);
+#if defined(SDK_PORT)
+    PCBOX_RETURN PCBox_OpenTrayFromBox(work);
+#else
     PCBox_OpenTrayFromBox(work);
+#endif
 }
 
 enum PCBoxState PCBox_State_ChooseMoveFromBox(PCBoxWork *work) {
@@ -4496,73 +4618,133 @@ enum PCBoxState PCBox_State_ChooseSummary(PCBoxWork *work) {
     return PCBox_StartSubApp(work, 0);
 }
 
+#if defined(SDK_PORT)
+enum PCBoxState PCBox_State_ChooseItem(PCBoxWork *work) {
+    PCBOX_RETURN PCBox_HandleItemCommand(work);
+#else
 void PCBox_State_ChooseItem(PCBoxWork *work) {
     PCBox_HandleItemCommand(work);
+#endif
 }
 
+#if defined(SDK_PORT)
+enum PCBoxState PCBox_State_ChooseMarking(PCBoxWork *work) {
+    PCBOX_RETURN PCBox_StartMarking(work);
+#else
 void PCBox_State_ChooseMarking(PCBoxWork *work) {
     PCBox_StartMarking(work);
+#endif
 }
 
+#if defined(SDK_PORT)
+enum PCBoxState PCBox_State_ChooseMarkingDone(PCBoxWork *work) {
+    PCBOX_RETURN PCBox_CloseMarkingMenu(work);
+#else
 void PCBox_State_ChooseMarkingDone(PCBoxWork *work) {
     PCBox_CloseMarkingMenu(work);
+#endif
 }
 
+#if defined(SDK_PORT)
+enum PCBoxState PCBox_State_ChooseRelease(PCBoxWork *work) {
+    PCBOX_RETURN PCBox_StartRelease(work);
+#else
 void PCBox_State_ChooseRelease(PCBoxWork *work) {
     PCBox_StartRelease(work);
+#endif
 }
 
+#if defined(SDK_PORT)
+enum PCBoxState PCBox_State_CloseMoveModeActionMenu(PCBoxWork *work) {
+#else
 void PCBox_State_CloseMoveModeActionMenu(PCBoxWork *work) {
+#endif
     PCBox_SlideOutActionMenu(work->view->panels);
     PCBox_SlideInPartyButton(work->view->panels);
     PCBox_SlideInTrayTab(work->view->panels);
     PCBox_SlideInReturnButton(work->view->panels);
     PCBox_SlideOutMovesPanel(work->view);
     PCBox_SetSelectedIconOutlineVisible(work, 0);
-    PCBox_WaitForUpdateFunc(work, PCBox_WaitDeselectThenButtons, PC_BOX_STATE_END_CURSOR_SLIDE_TO_MOVE_MODE);
+    PCBOX_RETURN PCBox_WaitForUpdateFunc(work, PCBox_WaitDeselectThenButtons, PC_BOX_STATE_END_CURSOR_SLIDE_TO_MOVE_MODE);
 }
 
+#if defined(SDK_PORT)
+enum PCBoxState PCBox_State_PartyChooseTray(PCBoxWork *work) {
+#else
 void PCBox_State_PartyChooseTray(PCBoxWork *work) {
+#endif
     if (work->moveFromSlot == 0) {
         PCBox_ClearMonInfoAndSelection(work);
     } else {
         PCBox_SetSelectedIconOutlineVisible(work, 0);
     }
+#if defined(SDK_PORT)
+    PCBOX_RETURN PCBox_OpenTrayFromPartyPanel(work);
+#else
     PCBox_OpenTrayFromPartyPanel(work);
+#endif
 }
 
+#if defined(SDK_PORT)
+enum PCBoxState PCBox_State_CloseMoveModePartyActionMenu(PCBoxWork *work) {
+#else
 void PCBox_State_CloseMoveModePartyActionMenu(PCBoxWork *work) {
+#endif
     PCBox_SlideOutActionMenu(work->view->panels);
     PCBox_SlideInReturnButton(work->view->panels);
     PCBox_SlideOutMovesPanel(work->view);
     PCBox_SetSelectedIconOutlineVisible(work, 0);
-    PCBox_WaitForUpdateFunc(work, PCBox_WaitDeselectThenButtons, PC_BOX_STATE_END_CURSOR_SLIDE_TO_MOVE_MODE_PARTY);
+    PCBOX_RETURN PCBox_WaitForUpdateFunc(work, PCBox_WaitDeselectThenButtons, PC_BOX_STATE_END_CURSOR_SLIDE_TO_MOVE_MODE_PARTY);
 }
 
+#if defined(SDK_PORT)
+enum PCBoxState PCBox_State_ChoosePartyPanelExit(PCBoxWork *work) {
+#else
 void PCBox_State_ChoosePartyPanelExit(PCBoxWork *work) {
+#endif
     PCBox_ClearMonInfoAndSelection(work);
+#if defined(SDK_PORT)
+    PCBOX_RETURN PCBox_ClosePartyPanel(work);
+#else
     PCBox_ClosePartyPanel(work);
+#endif
 }
 
+#if defined(SDK_PORT)
+enum PCBoxState PCBox_State_ChooseTrayBox(PCBoxWork *work) {
+#else
 void PCBox_State_ChooseTrayBox(PCBoxWork *work) {
+#endif
     PCBox_SetSpriteVisible(work->view, PC_BOX_SPRITE_CURSOR, FALSE);
-    PCBox_JumpToTrayBox(work, 3);
+    PCBOX_RETURN PCBox_JumpToTrayBox(work, 3);
 }
 
+#if defined(SDK_PORT)
+enum PCBoxState PCBox_State_ChooseTrayExit(PCBoxWork *work) {
+#else
 void PCBox_State_ChooseTrayExit(PCBoxWork *work) {
+#endif
     PCBox_ClearMonInfoAndSelection(work);
+#if defined(SDK_PORT)
+    PCBOX_RETURN PCBox_CloseTray(work);
+#else
     PCBox_CloseTray(work);
+#endif
 }
 
 enum PCBoxState PCBox_State_BoxMenuSwitchBox(PCBoxWork *work) {
     return PCBox_JumpToTrayBox(work, 1);
 }
 
+#if defined(SDK_PORT)
+enum PCBoxState PCBox_State_ChooseWallpaper(PCBoxWork *work) {
+#else
 void PCBox_State_ChooseWallpaper(PCBoxWork *work) {
+#endif
     PCBox_CloseMessageWindow(work->view, 39);
     PCBox_SetSpriteVisible(work->view, PC_BOX_SPRITE_CURSOR, FALSE);
     PCBox_SetIconsTranslucent(work, 1, 1);
-    PCBox_CloseBoxTray(work, PC_BOX_STATE_OPEN_WALLPAPER_MENU);
+    PCBOX_RETURN PCBox_CloseBoxTray(work, PC_BOX_STATE_OPEN_WALLPAPER_MENU);
 }
 
 enum PCBoxState PCBox_State_ChooseRename(PCBoxWork *work) {
@@ -4586,48 +4768,89 @@ enum PCBoxState PCBox_State_ChooseWallpaperMenuExit(PCBoxWork *work) {
     return PC_BOX_STATE_CLOSE_WALLPAPER_MENU;
 }
 
+#if defined(SDK_PORT)
+enum PCBoxState PCBox_State_ChooseWithdraw(PCBoxWork *work) {
+#else
 void PCBox_State_ChooseWithdraw(PCBoxWork *work) {
-    PCBox_TryWithdraw(work);
+#endif
+    PCBOX_RETURN PCBox_TryWithdraw(work);
 }
 
+#if defined(SDK_PORT)
+enum PCBoxState PCBox_State_CloseWithdrawActionMenu(PCBoxWork *work) {
+#else
 void PCBox_State_CloseWithdrawActionMenu(PCBoxWork *work) {
+#endif
     PCBox_SlideOutActionMenu(work->view->panels);
     PCBox_SlideInReturnButton(work->view->panels);
     PCBox_SlideOutMovesPanel(work->view);
     PCBox_SetSelectedIconOutlineVisible(work, 0);
-    PCBox_WaitForUpdateFunc(work, PCBox_WaitDeselectThenReturnButton, PC_BOX_STATE_END_CURSOR_SLIDE_TO_WITHDRAW_PROMPT);
+    PCBOX_RETURN PCBox_WaitForUpdateFunc(work, PCBox_WaitDeselectThenReturnButton, PC_BOX_STATE_END_CURSOR_SLIDE_TO_WITHDRAW_PROMPT);
 }
 
+#if defined(SDK_PORT)
+enum PCBoxState PCBox_State_ChooseDeposit(PCBoxWork *work) {
+#else
 void PCBox_State_ChooseDeposit(PCBoxWork *work) {
-    PCBox_StartDeposit(work);
+#endif
+    PCBOX_RETURN PCBox_StartDeposit(work);
 }
 
+#if defined(SDK_PORT)
+enum PCBoxState PCBox_State_CloseDepositActionMenu(PCBoxWork *work) {
+#else
 void PCBox_State_CloseDepositActionMenu(PCBoxWork *work) {
+#endif
     PCBox_DrawReturnButton(work, 0);
     PCBox_SlideOutActionMenu(work->view->panels);
     PCBox_SlideInReturnButton(work->view->panels);
     PCBox_SlideOutMovesPanel(work->view);
     PCBox_SetSelectedIconOutlineVisible(work, 0);
-    PCBox_WaitForUpdateFunc(work, PCBox_WaitDeselectThenReturnButton, PC_BOX_STATE_END_CURSOR_SLIDE_TO_DEPOSIT_PROMPT);
+    PCBOX_RETURN PCBox_WaitForUpdateFunc(work, PCBox_WaitDeselectThenReturnButton, PC_BOX_STATE_END_CURSOR_SLIDE_TO_DEPOSIT_PROMPT);
 }
 
+#if defined(SDK_PORT)
+enum PCBoxState PCBox_State_ItemModeChooseParty(PCBoxWork *work) {
+#else
 void PCBox_State_ItemModeChooseParty(PCBoxWork *work) {
+#endif
     PCBox_ClearMonInfoAndSelection(work);
     PCBox_SetIconsTranslucent(work, 0x82, 1);
+#if defined(SDK_PORT)
+    PCBOX_RETURN PCBox_OpenPartyPanel(work);
+#else
     PCBox_OpenPartyPanel(work);
+#endif
 }
 
+#if defined(SDK_PORT)
+enum PCBoxState PCBox_State_ItemModeChooseTrayTab(PCBoxWork *work) {
+#else
 void PCBox_State_ItemModeChooseTrayTab(PCBoxWork *work) {
+#endif
     PCBox_ClearMonInfoAndSelection(work);
     PCBox_SetIconsTranslucent(work, 0x82, 1);
+#if defined(SDK_PORT)
+    PCBOX_RETURN PCBox_OpenTrayFromBox(work);
+#else
     PCBox_OpenTrayFromBox(work);
+#endif
 }
 
+#if defined(SDK_PORT)
+enum PCBoxState PCBox_State_ChooseBagGive(PCBoxWork *work) {
+    PCBOX_RETURN PCBox_HandleBagGiveCommand(work);
+#else
 void PCBox_State_ChooseBagGive(PCBoxWork *work) {
     PCBox_HandleBagGiveCommand(work);
+#endif
 }
 
+#if defined(SDK_PORT)
+enum PCBoxState PCBox_State_CloseItemModeActionMenu(PCBoxWork *work) {
+#else
 void PCBox_State_CloseItemModeActionMenu(PCBoxWork *work) {
+#endif
     PCBox_SlideOutActionMenu(work->view->panels);
     PCBox_SlideInPartyButton(work->view->panels);
     PCBox_SlideInTrayTab(work->view->panels);
@@ -4636,28 +4859,40 @@ void PCBox_State_CloseItemModeActionMenu(PCBoxWork *work) {
     if (work->view->heldItem) {
         PCBox_SlideOutItemInfoPanel(work->view->panels);
     }
-    PCBox_WaitForUpdateFunc(work, PCBox_WaitItemModeDeselect, PC_BOX_STATE_END_CURSOR_SLIDE_TO_ITEM_MODE);
+    PCBOX_RETURN PCBox_WaitForUpdateFunc(work, PCBox_WaitItemModeDeselect, PC_BOX_STATE_END_CURSOR_SLIDE_TO_ITEM_MODE);
 }
 
+#if defined(SDK_PORT)
+enum PCBoxState PCBox_State_ItemModeChooseTrayBox(PCBoxWork *work) {
+#else
 void PCBox_State_ItemModeChooseTrayBox(PCBoxWork *work) {
+#endif
     PCBox_SetSpriteVisible(work->view, PC_BOX_SPRITE_CURSOR, FALSE);
-    PCBox_JumpToTrayBox(work, 4);
+    PCBOX_RETURN PCBox_JumpToTrayBox(work, 4);
 }
 
+#if defined(SDK_PORT)
+enum PCBoxState PCBox_State_ItemModePartyChooseTray(PCBoxWork *work) {
+#else
 void PCBox_State_ItemModePartyChooseTray(PCBoxWork *work) {
+#endif
     PCBox_ClearMonInfoAndSelection(work);
     PCBox_SetSpriteVisible(work->view, PC_BOX_SPRITE_HELD_ITEM, FALSE);
-    PCBox_OpenTrayFromPartyPanel(work);
+    PCBOX_RETURN PCBox_OpenTrayFromPartyPanel(work);
 }
 
+#if defined(SDK_PORT)
+enum PCBoxState PCBox_State_CloseItemModePartyActionMenu(PCBoxWork *work) {
+#else
 void PCBox_State_CloseItemModePartyActionMenu(PCBoxWork *work) {
+#endif
     PCBox_SlideOutActionMenu(work->view->panels);
     PCBox_SlideInReturnButton(work->view->panels);
     PCBox_HideSelectedIconOutline(work);
     if (work->view->heldItem) {
         PCBox_SlideOutItemInfoPanel(work->view->panels);
     }
-    PCBox_WaitForUpdateFunc(work, PCBox_WaitItemModeDeselect, PC_BOX_STATE_END_CURSOR_SLIDE_TO_ITEM_MODE_PARTY);
+    PCBOX_RETURN PCBox_WaitForUpdateFunc(work, PCBox_WaitItemModeDeselect, PC_BOX_STATE_END_CURSOR_SLIDE_TO_ITEM_MODE_PARTY);
 }
 
 static void PCBox_InitSprites(PCBoxWork *work) {
@@ -4668,3 +4903,248 @@ static void PCBox_InitSprites(PCBoxWork *work) {
     PCBox_CreateSprites(work);
     PCBox_CreateTrayTextObjs(work->view);
 }
+#if defined(SDK_PORT)
+
+const PCBoxStateFunc gPCBoxYesNoHandlers[][2] = {
+    { PCBox_TakeHeldItemToBag, PCBox_State_ReturnToActionMenu },
+    { PCBox_ConfirmRelease, PCBox_State_CancelRelease },
+    { PCBox_PutAwayHeldItem, PCBox_State_CancelPutAwayItem },
+    { PCBox_ConfirmExit, PCBox_CancelExit },
+    { PCBox_CancelExit, PCBox_ConfirmExit },
+};
+
+static u32 Native_PCBox_State_Start(PCBoxWork * a0) { return (u32)PCBox_State_Start((PCBoxWork *)a0); }
+static u32 Native_PCBox_State_ReturnToActionMenu(PCBoxWork * a0) { return (u32)PCBox_State_ReturnToActionMenu((PCBoxWork *)a0); }
+static u32 Native_PCBox_State_ReturnFromSummary(PCBoxWork * a0) { return (u32)PCBox_State_ReturnFromSummary((PCBoxWork *)a0); }
+static u32 Native_PCBox_State_ReturnFromNamingScreen(PCBoxWork * a0) { return (u32)PCBox_State_ReturnFromNamingScreen((PCBoxWork *)a0); }
+static u32 Native_PCBox_State_GiveItemFromBag(PCBoxWork * a0) { return (u32)PCBox_State_GiveItemFromBag((PCBoxWork *)a0); }
+static u32 Native_PCBox_State_MarkingChosen(PCBoxWork * a0) { return (u32)PCBox_State_MarkingChosen((PCBoxWork *)a0); }
+static u32 Native_PCBox_State_OpenMarkingMenu(PCBoxWork * a0) { return (u32)PCBox_State_OpenMarkingMenu((PCBoxWork *)a0); }
+static u32 Native_PCBox_State_MoveModePartyInput(PCBoxWork * a0) { return (u32)PCBox_State_MoveModePartyInput((PCBoxWork *)a0); }
+static u32 Native_PCBox_State_SlideInTrayPartyPanel(PCBoxWork * a0) { return (u32)PCBox_State_SlideInTrayPartyPanel((PCBoxWork *)a0); }
+static u32 Native_PCBox_State_TrayClosed(PCBoxWork * a0) { return (u32)PCBox_State_TrayClosed((PCBoxWork *)a0); }
+static u32 Native_PCBox_State_ReturnToBoxFromTray(PCBoxWork * a0) { return (u32)PCBox_State_ReturnToBoxFromTray((PCBoxWork *)a0); }
+static u32 Native_PCBox_State_OpenBoxMenu(PCBoxWork * a0) { return (u32)PCBox_State_OpenBoxMenu((PCBoxWork *)a0); }
+static u32 Native_PCBox_State_CloseBoxMenu(PCBoxWork * a0) { return (u32)PCBox_State_CloseBoxMenu((PCBoxWork *)a0); }
+static u32 Native_PCBox_State_SlideOutBoxMenu(PCBoxWork * a0) { return (u32)PCBox_State_SlideOutBoxMenu((PCBoxWork *)a0); }
+static u32 Native_PCBox_State_WithdrawInput(PCBoxWork * a0) { return (u32)PCBox_State_WithdrawInput((PCBoxWork *)a0); }
+static u32 Native_PCBox_State_ReturnToWithdrawInput(PCBoxWork * a0) { return (u32)PCBox_State_ReturnToWithdrawInput((PCBoxWork *)a0); }
+static u32 Native_PCBox_State_SlideInWithdrawParty(PCBoxWork * a0) { return (u32)PCBox_State_SlideInWithdrawParty((PCBoxWork *)a0); }
+static u32 Native_PCBox_State_StartWithdrawMove(PCBoxWork * a0) { return (u32)PCBox_State_StartWithdrawMove((PCBoxWork *)a0); }
+static u32 Native_PCBox_State_EndWithdrawMove(PCBoxWork * a0) { return (u32)PCBox_State_EndWithdrawMove((PCBoxWork *)a0); }
+static u32 Native_PCBox_State_WithdrawPartyClosed(PCBoxWork * a0) { return (u32)PCBox_State_WithdrawPartyClosed((PCBoxWork *)a0); }
+static u32 Native_PCBox_State_DepositInput(PCBoxWork * a0) { return (u32)PCBox_State_DepositInput((PCBoxWork *)a0); }
+static u32 Native_PCBox_State_TryDeposit(PCBoxWork * a0) { return (u32)PCBox_State_TryDeposit((PCBoxWork *)a0); }
+static u32 Native_PCBox_State_ChooseParty(PCBoxWork * a0) { return (u32)PCBox_State_ChooseParty((PCBoxWork *)a0); }
+static u32 Native_PCBox_State_ChooseTrayTab(PCBoxWork * a0) { return (u32)PCBox_State_ChooseTrayTab((PCBoxWork *)a0); }
+static u32 Native_PCBox_State_ChooseItem(PCBoxWork * a0) { return (u32)PCBox_State_ChooseItem((PCBoxWork *)a0); }
+static u32 Native_PCBox_State_ChooseMarking(PCBoxWork * a0) { return (u32)PCBox_State_ChooseMarking((PCBoxWork *)a0); }
+static u32 Native_PCBox_State_ChooseMarkingDone(PCBoxWork * a0) { return (u32)PCBox_State_ChooseMarkingDone((PCBoxWork *)a0); }
+static u32 Native_PCBox_State_ChooseRelease(PCBoxWork * a0) { return (u32)PCBox_State_ChooseRelease((PCBoxWork *)a0); }
+static u32 Native_PCBox_State_CloseMoveModeActionMenu(PCBoxWork * a0) { return (u32)PCBox_State_CloseMoveModeActionMenu((PCBoxWork *)a0); }
+static u32 Native_PCBox_State_PartyChooseTray(PCBoxWork * a0) { return (u32)PCBox_State_PartyChooseTray((PCBoxWork *)a0); }
+static u32 Native_PCBox_State_CloseMoveModePartyActionMenu(PCBoxWork * a0) { return (u32)PCBox_State_CloseMoveModePartyActionMenu((PCBoxWork *)a0); }
+static u32 Native_PCBox_State_ChoosePartyPanelExit(PCBoxWork * a0) { return (u32)PCBox_State_ChoosePartyPanelExit((PCBoxWork *)a0); }
+static u32 Native_PCBox_State_ChooseTrayBox(PCBoxWork * a0) { return (u32)PCBox_State_ChooseTrayBox((PCBoxWork *)a0); }
+static u32 Native_PCBox_State_ChooseTrayExit(PCBoxWork * a0) { return (u32)PCBox_State_ChooseTrayExit((PCBoxWork *)a0); }
+static u32 Native_PCBox_State_ChooseWallpaper(PCBoxWork * a0) { return (u32)PCBox_State_ChooseWallpaper((PCBoxWork *)a0); }
+static u32 Native_PCBox_State_ChooseWallpaperMenuExit(PCBoxWork * a0) { return (u32)PCBox_State_ChooseWallpaperMenuExit((PCBoxWork *)a0); }
+static u32 Native_PCBox_State_ChooseWithdraw(PCBoxWork * a0) { return (u32)PCBox_State_ChooseWithdraw((PCBoxWork *)a0); }
+static u32 Native_PCBox_State_CloseWithdrawActionMenu(PCBoxWork * a0) { return (u32)PCBox_State_CloseWithdrawActionMenu((PCBoxWork *)a0); }
+static u32 Native_PCBox_State_ChooseDeposit(PCBoxWork * a0) { return (u32)PCBox_State_ChooseDeposit((PCBoxWork *)a0); }
+static u32 Native_PCBox_State_CloseDepositActionMenu(PCBoxWork * a0) { return (u32)PCBox_State_CloseDepositActionMenu((PCBoxWork *)a0); }
+static u32 Native_PCBox_State_ItemModeChooseParty(PCBoxWork * a0) { return (u32)PCBox_State_ItemModeChooseParty((PCBoxWork *)a0); }
+static u32 Native_PCBox_State_ItemModeChooseTrayTab(PCBoxWork * a0) { return (u32)PCBox_State_ItemModeChooseTrayTab((PCBoxWork *)a0); }
+static u32 Native_PCBox_State_ChooseBagGive(PCBoxWork * a0) { return (u32)PCBox_State_ChooseBagGive((PCBoxWork *)a0); }
+static u32 Native_PCBox_State_CloseItemModeActionMenu(PCBoxWork * a0) { return (u32)PCBox_State_CloseItemModeActionMenu((PCBoxWork *)a0); }
+static u32 Native_PCBox_State_ItemModeChooseTrayBox(PCBoxWork * a0) { return (u32)PCBox_State_ItemModeChooseTrayBox((PCBoxWork *)a0); }
+static u32 Native_PCBox_State_ItemModePartyChooseTray(PCBoxWork * a0) { return (u32)PCBox_State_ItemModePartyChooseTray((PCBoxWork *)a0); }
+static u32 Native_PCBox_State_CloseItemModePartyActionMenu(PCBoxWork * a0) { return (u32)PCBox_State_CloseItemModePartyActionMenu((PCBoxWork *)a0); }
+const PCBoxStateFunc gPCBoxStateTable[] = {
+    PCBox_State_Init,
+    PCBox_State_Exit,
+    PCBox_State_WaitFade,
+    PCBox_State_WaitPaletteBuffers,
+    PCBox_State_Delay,
+    PCBox_State_WaitUpdateFunc,
+    PCBox_State_WaitButton,
+    PCBox_State_HandleYesNo,
+    PCBox_State_WaitPaletteFlash,
+    PCBox_State_StartSubApp,
+    PCBox_State_RunSubApp,
+    Native_PCBox_State_Start,
+    PCBox_State_MoveModeInput,
+    PCBox_State_ApplyMonMove,
+    Native_PCBox_State_ReturnToActionMenu,
+    Native_PCBox_State_ReturnFromSummary,
+    Native_PCBox_State_ReturnFromNamingScreen,
+    Native_PCBox_State_GiveItemFromBag,
+    PCBox_State_PrintItemHeld,
+    Native_PCBox_State_MarkingChosen,
+    Native_PCBox_State_OpenMarkingMenu,
+    PCBox_State_SetupMarkingMenuInput,
+    PCBox_State_MarkingMenuInput,
+    PCBox_State_FinishCloseMarkingMenu,
+    PCBox_State_EndCursorSlideToMarkingMenu,
+    PCBox_State_TryRelease,
+    PCBox_State_ReleaseMoveCheck,
+    PCBox_State_PrintReleased,
+    PCBox_State_PrintByeBye,
+    PCBox_State_RemoveReleasedMon,
+    PCBox_State_ReleaseCameBack,
+    PCBox_State_PrintWorried,
+    PCBox_State_CancelRelease,
+    PCBox_State_EndPartyReleaseShift,
+    PCBox_State_OpenPartyPanel,
+    PCBox_State_SetupPartyPanelInput,
+    Native_PCBox_State_MoveModePartyInput,
+    PCBox_State_SlideOutPartyPanel,
+    PCBox_State_PartyPanelClosed,
+    PCBox_State_EndMoveModePartyDrag,
+    PCBox_State_SetupBoxTrayInput,
+    PCBox_State_BoxTrayInput,
+    PCBox_State_EndBoxTrayDrag,
+    PCBox_State_EndTrayHoldingDrop,
+    PCBox_State_ResumeBoxTrayInput,
+    PCBox_State_OpenTrayBesideParty,
+    PCBox_State_SetupPartyInputAfterTray,
+    PCBox_State_OpenTrayFromBox,
+    Native_PCBox_State_SlideInTrayPartyPanel,
+    PCBox_State_SlideOutTray,
+    Native_PCBox_State_TrayClosed,
+    Native_PCBox_State_ReturnToBoxFromTray,
+    PCBox_State_HideButtonsForBoxMenu,
+    PCBox_State_OpenBoxMenuTray,
+    PCBox_State_ShowBoxMenuExitButton,
+    Native_PCBox_State_OpenBoxMenu,
+    PCBox_State_SetupBoxMenuInput,
+    Native_PCBox_State_CloseBoxMenu,
+    Native_PCBox_State_SlideOutBoxMenu,
+    PCBox_State_CloseBoxMenuTray,
+    PCBox_State_BoxMenuClosed,
+    PCBox_State_BoxMenuInput,
+    PCBox_State_EndCursorSlideToBoxMenu,
+    PCBox_State_OpenWallpaperMenu,
+    PCBox_State_ShowWallpaperMenuTitle,
+    PCBox_State_SetupWallpaperMenuInput,
+    PCBox_State_WallpaperMenuInput,
+    PCBox_State_CloseWallpaperMenu,
+    PCBox_State_SlideOutWallpaperList,
+    PCBox_State_ReturnToBoxMenu,
+    PCBox_State_ApplyWallpaper,
+    PCBox_State_WallpaperFadeOut,
+    PCBox_State_WallpaperFadeIn,
+    PCBox_State_EndCursorSlideToWallpaperMenu,
+    PCBox_State_EndCursorSlideToMoveMode,
+    PCBox_State_EndCursorSlideToBoxTray,
+    PCBox_State_EndCursorSlideToMoveModeParty,
+    PCBox_State_ResumeBoxInput,
+    PCBox_State_ResumeMoveModePartyInput,
+    PCBox_State_PrintEggCantHoldItem,
+    PCBox_State_PrintMailCantBeTaken,
+    Native_PCBox_State_WithdrawInput,
+    Native_PCBox_State_ReturnToWithdrawInput,
+    Native_PCBox_State_SlideInWithdrawParty,
+    Native_PCBox_State_StartWithdrawMove,
+    Native_PCBox_State_EndWithdrawMove,
+    Native_PCBox_State_WithdrawPartyClosed,
+    PCBox_State_EndWithdrawDrag,
+    PCBox_State_EndCursorSlideToWithdraw,
+    PCBox_State_EndCursorSlideToWithdrawPrompt,
+    PCBox_State_ResumeWithdrawInput,
+    Native_PCBox_State_DepositInput,
+    Native_PCBox_State_TryDeposit,
+    PCBox_State_ReturnFromDepositError,
+    PCBox_State_ShowDepositBoxSelect,
+    PCBox_State_ShowDepositTitle,
+    PCBox_State_SetupDepositBoxInput,
+    PCBox_State_DepositBoxInput,
+    PCBox_State_CancelDepositBoxSelect,
+    PCBox_State_HideDepositExitButton,
+    PCBox_State_HideDepositBoxSelect,
+    PCBox_State_DepositBoxSelectClosed,
+    PCBox_State_ConfirmDepositBox,
+    PCBox_State_CheckDepositBox,
+    PCBox_State_ShiftPartyForDeposit,
+    PCBox_State_SwitchBox,
+    PCBox_State_StartDepositMove,
+    PCBox_State_EndDepositMove,
+    PCBox_State_ShowDepositReturnButton,
+    PCBox_State_ResetDepositInput,
+    PCBox_State_EndDepositDrag,
+    PCBox_State_EndCursorSlideToDeposit,
+    PCBox_State_EndCursorSlideToDepositPrompt,
+    PCBox_State_EndCursorSlideToDepositBox,
+    PCBox_State_ResumeDepositInput,
+    PCBox_State_BoxTrayHoldingInput,
+    PCBox_State_EndCursorSlideToBoxTrayHolding,
+    PCBox_State_ItemModeInput,
+    PCBox_State_EndCursorSlideToItemMode,
+    PCBox_State_CloseItemMessage,
+    PCBox_State_AskPutAwayItem,
+    PCBox_State_WaitPutAwayItem,
+    PCBox_State_CancelPutAwayItem,
+    PCBox_State_EndItemCommand,
+    PCBox_State_ItemModePrintEggCantHoldItem,
+    PCBox_State_ItemModePrintItemHeld,
+    PCBox_State_EndItemModeBoxDrag,
+    PCBox_State_SwapHeldItems,
+    PCBox_State_DropSwappedItem,
+    PCBox_State_FinishItemSwap,
+    PCBox_State_ItemModeBoxTrayInput,
+    PCBox_State_EndCursorSlideToItemModeTray,
+    PCBox_State_EndItemTrayDrag,
+    PCBox_State_ApplyItemTrayDrop,
+    PCBox_State_FinishItemTrayDrop,
+    PCBox_State_ResumeItemModeTrayInput,
+    PCBox_State_ItemTrayHoldingInput,
+    PCBox_State_EndCursorSlideToItemTrayHolding,
+    PCBox_State_ApplyItemTrayHoldingDrop,
+    PCBox_State_ItemModePartyInput,
+    PCBox_State_EndCursorSlideToItemModeParty,
+    PCBox_State_EndItemModePartyDrag,
+    PCBox_State_SwapPartyHeldItems,
+    PCBox_State_ResumeItemModePartyInput,
+    PCBox_State_DropSwappedPartyItem,
+    PCBox_State_FinishPartyItemSwap,
+    PCBox_State_ResumeItemModePartyAfterMail,
+    PCBox_State_AskExit,
+    PCBox_State_AskContinue,
+    Native_PCBox_State_ChooseParty,
+    Native_PCBox_State_ChooseTrayTab,
+    PCBox_State_ChooseSummary,
+    Native_PCBox_State_ChooseItem,
+    Native_PCBox_State_ChooseMarking,
+    Native_PCBox_State_ChooseMarkingDone,
+    Native_PCBox_State_ChooseRelease,
+    Native_PCBox_State_CloseMoveModeActionMenu,
+    Native_PCBox_State_PartyChooseTray,
+    Native_PCBox_State_CloseMoveModePartyActionMenu,
+    Native_PCBox_State_ChoosePartyPanelExit,
+    Native_PCBox_State_ChooseTrayBox,
+    Native_PCBox_State_ChooseTrayExit,
+    PCBox_State_BoxMenuSwitchBox,
+    Native_PCBox_State_ChooseWallpaper,
+    PCBox_State_ChooseRename,
+    PCBox_State_SwitchBoxForWallpaper,
+    Native_PCBox_State_ChooseWallpaperMenuExit,
+    Native_PCBox_State_ChooseWithdraw,
+    Native_PCBox_State_CloseWithdrawActionMenu,
+    Native_PCBox_State_ChooseDeposit,
+    Native_PCBox_State_CloseDepositActionMenu,
+    Native_PCBox_State_ItemModeChooseParty,
+    Native_PCBox_State_ItemModeChooseTrayTab,
+    Native_PCBox_State_ChooseBagGive,
+    Native_PCBox_State_CloseItemModeActionMenu,
+    Native_PCBox_State_ItemModeChooseTrayBox,
+    Native_PCBox_State_ItemModePartyChooseTray,
+    Native_PCBox_State_CloseItemModePartyActionMenu,
+    PCBox_State_ChooseMoveFromBox,
+};
+
+const PCBoxSubApp gPCBoxSubApps[3] = {
+    { PCBox_StartSummaryApp, PCBox_EndSummaryApp, 0x0000000F },
+    { PCBox_StartBagApp, PCBox_EndBagApp, 0x00000011 },
+    { PCBox_StartNamingScreenApp, PCBox_EndNamingScreenApp, 0x00000010 },
+};
+#endif

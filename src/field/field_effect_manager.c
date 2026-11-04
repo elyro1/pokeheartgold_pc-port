@@ -1,3 +1,32 @@
+#if defined(SDK_PORT)
+#include "field/field_flash_darkness.h"
+#include "field/field_shaymin_form_change.h"
+#include "field/map_object_model_list.h"
+#include "field_apricorn_regrowth.h"
+#include "field_emote_bubble.h"
+#include "field_follow_mon_ball.h"
+#include "field_footprints.h"
+#include "field_ground_dust.h"
+#include "field_hidden_object_cover.h"
+#include "field_mud_splash.h"
+#include "field_puddle_splash.h"
+#include "field_reflection.h"
+#include "field_rock_climb_effect.h"
+#include "field_shadow.h"
+#include "field_shallow_water_ripple.h"
+#include "field_tall_grass.h"
+#include "field_trainer_reveal.h"
+#include "field_union_chat_marker.h"
+#include "field_unused_billboard_effect.h"
+#include "field_very_tall_grass.h"
+#include "field_warp_arrow.h"
+typedef struct SurfMount SurfMount;
+SurfMount *SurfMount_New(FieldEffectManager *manager);
+void SurfMount_Free(SurfMount *mount);
+typedef struct EmoteMark EmoteMark;
+EmoteMark *EmoteMark_New(FieldEffectManager *manager);
+void EmoteMark_Free(EmoteMark *emoteMark);
+#endif
 #include "global.h"
 
 #include "constants/field/field_effect_renderer.h"
@@ -227,7 +256,10 @@ static BOOL FieldEffectRendererEntry_IsFree(FieldEffectRendererEntry *entry) {
     }
     return FALSE;
 }
+#if defined(SDK_PORT)
+#else
 
+#endif
 static const FieldEffectRendererTemplate *FieldEffect_GetRendererTemplate(u32 id) {
     const FieldEffectRendererTemplate *renderer = gFieldEffectRenderers;
     while (renderer->id != FIELD_EFFECT_RENDERER_INVALID) {
@@ -528,3 +560,78 @@ NNSG3dResTex *FieldEffectManager_GetTexture(FieldEffectManager *manager, u32 id)
     }
     return tex;
 }
+#if defined(SDK_PORT)
+
+static void *Native_Renderer_FieldShadow_New(FieldEffectManager *manager) { return FieldShadow_New(manager); }
+static void Native_Renderer_FieldShadow_Free(void *data) { FieldShadow_Free(data); }
+static void *Native_Renderer_Reflection_New(FieldEffectManager *manager) { return Reflection_New(manager); }
+static void Native_Renderer_Reflection_Free(void *data) { Reflection_Free(data); }
+static void *Native_Renderer_Footprints_New(FieldEffectManager *manager) { return Footprints_New(manager); }
+static void Native_Renderer_Footprints_Free(void *data) { Footprints_Free(data); }
+static void *Native_Renderer_WarpArrow_New(FieldEffectManager *manager) { return WarpArrow_New(manager); }
+static void Native_Renderer_WarpArrow_Free(void *data) { WarpArrow_Free(data); }
+static void *Native_Renderer_SurfMount_New(FieldEffectManager *manager) { return SurfMount_New(manager); }
+static void Native_Renderer_SurfMount_Free(void *data) { SurfMount_Free(data); }
+static void *Native_Renderer_RockClimb_New(FieldEffectManager *manager) { return RockClimb_New(manager); }
+static void Native_Renderer_RockClimb_Free(void *data) { RockClimb_Free(data); }
+static void *Native_Renderer_PuddleSplash_New(FieldEffectManager *manager) { return PuddleSplash_New(manager); }
+static void Native_Renderer_PuddleSplash_Free(void *data) { PuddleSplash_Free(data); }
+static void *Native_Renderer_MudSplash_New(FieldEffectManager *manager) { return MudSplash_New(manager); }
+static void Native_Renderer_MudSplash_Free(void *data) { MudSplash_Free(data); }
+static void *Native_Renderer_TallGrass_New(FieldEffectManager *manager) { return TallGrass_New(manager); }
+static void Native_Renderer_TallGrass_Free(void *data) { TallGrass_Free(data); }
+static void *Native_Renderer_EmoteMark_New(FieldEffectManager *manager) { return EmoteMark_New(manager); }
+static void Native_Renderer_EmoteMark_Free(void *data) { EmoteMark_Free(data); }
+static void *Native_Renderer_ShallowWaterRipple_New(FieldEffectManager *manager) { return ShallowWaterRipple_New(manager); }
+static void Native_Renderer_ShallowWaterRipple_Free(void *data) { ShallowWaterRipple_Free(data); }
+static void *Native_Renderer_GroundDust_New(FieldEffectManager *manager) { return GroundDust_New(manager); }
+static void Native_Renderer_GroundDust_Free(void *data) { GroundDust_Free(data); }
+static void *Native_Renderer_VeryTallGrass_New(FieldEffectManager *manager) { return VeryTallGrass_New(manager); }
+static void Native_Renderer_VeryTallGrass_Free(void *data) { VeryTallGrass_Free(data); }
+static void *Native_Renderer_UnusedBillboard_New(FieldEffectManager *manager) { return UnusedBillboard_New(manager); }
+static void Native_Renderer_UnusedBillboard_Free(void *data) { UnusedBillboard_Free(data); }
+static void *Native_Renderer_HiddenObjectCover_New(FieldEffectManager *manager) { return HiddenObjectCover_New(manager); }
+static void Native_Renderer_HiddenObjectCover_Free(void *data) { HiddenObjectCover_Free(data); }
+static void *Native_Renderer_TrainerReveal_New(FieldEffectManager *manager) { return TrainerReveal_New(manager); }
+static void Native_Renderer_TrainerReveal_Free(void *data) { TrainerReveal_Free(data); }
+static void *Native_Renderer_ApricornRegrowth_New(FieldEffectManager *manager) { return ApricornRegrowth_New(manager); }
+static void Native_Renderer_ApricornRegrowth_Free(void *data) { ApricornRegrowth_Free(data); }
+static void *Native_Renderer_FollowMonBall_New(FieldEffectManager *manager) { return FollowMonBall_New(manager); }
+static void Native_Renderer_FollowMonBall_Free(void *data) { FollowMonBall_Free(data); }
+static void *Native_Renderer_EmoteBubble_New(FieldEffectManager *manager) { return EmoteBubble_New(manager); }
+static void Native_Renderer_EmoteBubble_Free(void *data) { EmoteBubble_Free(data); }
+static void *Native_Renderer_FlashDarkness_New(FieldEffectManager *manager) { return FlashDarkness_New(manager); }
+static void Native_Renderer_FlashDarkness_Free(void *data) { FlashDarkness_Free(data); }
+static void *Native_Renderer_MapObjectModelList_New(FieldEffectManager *manager) { return MapObjectModelList_New(manager); }
+static void Native_Renderer_MapObjectModelList_Free(void *data) { MapObjectModelList_Free(data); }
+static void *Native_Renderer_UnionChatMarker_New(FieldEffectManager *manager) { return UnionChatMarker_New(manager); }
+static void Native_Renderer_UnionChatMarker_Free(void *data) { UnionChatMarker_Free(data); }
+static void *Native_Renderer_ShayminFormChange_New(FieldEffectManager *manager) { return ShayminFormChange_New(manager); }
+static void Native_Renderer_ShayminFormChange_Free(void *data) { ShayminFormChange_Free(data); }
+const FieldEffectRendererTemplate gFieldEffectRenderers[24] = {
+    { 0x00000000, Native_Renderer_FieldShadow_New, Native_Renderer_FieldShadow_Free },
+    { 0x00000001, Native_Renderer_Reflection_New, Native_Renderer_Reflection_Free },
+    { 0x00000002, Native_Renderer_Footprints_New, Native_Renderer_Footprints_Free },
+    { 0x00000003, Native_Renderer_WarpArrow_New, Native_Renderer_WarpArrow_Free },
+    { 0x00000004, Native_Renderer_SurfMount_New, Native_Renderer_SurfMount_Free },
+    { 0x00000005, Native_Renderer_RockClimb_New, Native_Renderer_RockClimb_Free },
+    { 0x00000006, Native_Renderer_PuddleSplash_New, Native_Renderer_PuddleSplash_Free },
+    { 0x00000007, Native_Renderer_MudSplash_New, Native_Renderer_MudSplash_Free },
+    { 0x00000008, Native_Renderer_TallGrass_New, Native_Renderer_TallGrass_Free },
+    { 0x00000009, Native_Renderer_EmoteMark_New, Native_Renderer_EmoteMark_Free },
+    { 0x0000000A, Native_Renderer_ShallowWaterRipple_New, Native_Renderer_ShallowWaterRipple_Free },
+    { 0x0000000B, Native_Renderer_GroundDust_New, Native_Renderer_GroundDust_Free },
+    { 0x0000000C, Native_Renderer_VeryTallGrass_New, Native_Renderer_VeryTallGrass_Free },
+    { 0x0000000D, Native_Renderer_UnusedBillboard_New, Native_Renderer_UnusedBillboard_Free },
+    { 0x0000000E, Native_Renderer_HiddenObjectCover_New, Native_Renderer_HiddenObjectCover_Free },
+    { 0x0000000F, Native_Renderer_TrainerReveal_New, Native_Renderer_TrainerReveal_Free },
+    { 0x00000010, Native_Renderer_ApricornRegrowth_New, Native_Renderer_ApricornRegrowth_Free },
+    { 0x00000011, Native_Renderer_FollowMonBall_New, Native_Renderer_FollowMonBall_Free },
+    { 0x00000012, Native_Renderer_EmoteBubble_New, Native_Renderer_EmoteBubble_Free },
+    { 0x00000013, Native_Renderer_FlashDarkness_New, Native_Renderer_FlashDarkness_Free },
+    { 0x00000014, Native_Renderer_MapObjectModelList_New, Native_Renderer_MapObjectModelList_Free },
+    { 0x00000015, Native_Renderer_UnionChatMarker_New, Native_Renderer_UnionChatMarker_Free },
+    { 0x00000016, Native_Renderer_ShayminFormChange_New, Native_Renderer_ShayminFormChange_Free },
+    { 0x00000017, NULL, NULL },
+};
+#endif

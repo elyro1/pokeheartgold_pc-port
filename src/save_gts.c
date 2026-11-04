@@ -4,8 +4,13 @@
 
 #include "constants/save_arrays.h"
 
+#if defined(SDK_PORT)
+GtsSave *Save_Gts_Get(SaveData *save) {
+    return SaveArray_Get(save, SAVE_GTS);
+#else
 int Save_Gts_Get(SaveData *save) {
     return (int)SaveArray_Get(save, SAVE_GTS);
+#endif
 }
 u32 Save_Gts_sizeof(void) {
     return sizeof(GtsSave);

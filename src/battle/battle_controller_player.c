@@ -1,3 +1,6 @@
+#if defined(SDK_PORT)
+#include "port/sim_config_prj.h"
+#endif
 #include "battle/battle_controller_player.h"
 
 #include "global.h"
@@ -541,6 +544,10 @@ static void BattleControllerPlayer_SelectionScreenInput(BattleSystem *battleSyst
                 if (BattleSystem_GetBattleSpecial(battleSystem) & BATTLE_SPECIAL_RECORDING) {
                     BattleSystem_PauseRecording(battleSystem, 1);
                     BattleController_TryEmitExitRecording(battleSystem, BattleSystem_GetBattleContext(battleSystem));
+#if defined(SDK_PORT)
+                } else if (SIM_Config_prj_GetConfig()->runFromTrainerBattles) {
+                    ctx->selectionState[battlerId] = SSI_STATE_12;
+#endif
                 } else {
                     msg.tag = TAG_NONE;
                     msg.id = msg_0197_00793; // There's no running from a Trainer battle!

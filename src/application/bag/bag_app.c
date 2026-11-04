@@ -232,7 +232,12 @@ BOOL Bag_Init(OverlayManager *man, int *state) {
     GXS_SetVisiblePlane(0);
     reg_G2_BLDCNT = 0;
     reg_G2S_DB_BLDCNT = 0;
+#if defined(SDK_PORT)
+    // Native sprite/animation records and heap headers exceed the DS budget.
+    Heap_Create(HEAP_ID_3, HEAP_ID_6, 0x52000);
+#else
     Heap_Create(HEAP_ID_3, HEAP_ID_6, 0x42000);
+#endif
     app = OverlayManager_CreateAndGetData(man, sizeof(BagApp), HEAP_ID_6);
     memset(app, 0, sizeof(BagApp));
     app->bagView = OverlayManager_GetArgs(man);
@@ -550,7 +555,17 @@ static void BagApp_LoadBgGraphics(BagApp *app) {
     LoadFontPal1(GF_PAL_LOCATION_SUB_BG, GF_PAL_SLOT_11_OFFSET, HEAP_ID_6);
     GfGfxLoader_LoadCharData(NARC_a_0_1_5, 0x2E, app->bgConfig, GF_BG_LYR_SUB_2, 0, 0, FALSE, HEAP_ID_6);
     app->bgPaletteBuffers[0] = GfGfxLoader_GetPlttData(NARC_a_0_1_5, 0x28, &app->bgPalettes[0], HEAP_ID_6);
+#if defined(SDK_PORT)
+    GF_ASSERT(app->bgPalettes[0]->szByte <= sizeof(app->pocketBgColors[0]));
+    memcpy(app->pocketBgColors[0], app->bgPalettes[0]->pRawData, app->bgPalettes[0]->szByte);
+    app->bgPalettes[0]->pRawData = app->pocketBgColors[0];
+#endif
     app->bgPaletteBuffers[1] = GfGfxLoader_GetPlttData(NARC_a_0_1_5, 0x29, &app->bgPalettes[1], HEAP_ID_6);
+#if defined(SDK_PORT)
+    GF_ASSERT(app->bgPalettes[1]->szByte <= sizeof(app->pocketBgColors[1]));
+    memcpy(app->pocketBgColors[1], app->bgPalettes[1]->pRawData, app->bgPalettes[1]->szByte);
+    app->bgPalettes[1]->pRawData = app->pocketBgColors[1];
+#endif
     GfGfxLoader_GXLoadPal(NARC_a_0_1_5, 8, GF_PAL_LOCATION_SUB_BG, GF_PAL_SLOT_8_OFFSET, 0x80, HEAP_ID_6);
     LoadUserFrameGfx2(app->bgConfig, GF_BG_LYR_SUB_0, 0x3E2, 0xC, Options_GetFrame(app->options), HEAP_ID_6);
 }
@@ -3352,3 +3367,41 @@ static void BagApp_DrawHMMarker(BagApp *app, Window *window, u32 y) {
     BlitBitmapRectToWindow(window, charData->pRawData, 0, 0, 104, 16, 0, y, 24, 16);
     Heap_FreeExplicit(HEAP_ID_6, buffer);
 }
+#if defined(SDK_PORT)
+
+const OverlayManagerTemplate gOverlayTemplate_Bag = { Bag_Init, Bag_Main, Bag_Exit, FS_OVERLAY_ID_NONE };
+
+extern const TouchscreenHitbox sTouchHitboxes_Main[];
+extern const TouchscreenHitbox sTouchHitboxes_ItemMenu[];
+extern const TouchscreenHitbox sTouchHitboxes_MoveItem[];
+extern const TouchscreenHitbox sTouchHitboxes_TrashQuantity[];
+extern const TouchscreenHitbox sTouchHitboxes_SellQuantity[];
+const TouchscreenHitbox *const gTouchHitboxTables[] = {
+    sTouchHitboxes_Main,
+    sTouchHitboxes_ItemMenu,
+    sTouchHitboxes_MoveItem,
+    sTouchHitboxes_TrashQuantity,
+    sTouchHitboxes_SellQuantity,
+};
+
+int (*const gItemActionFuncs[])(BagApp *app) = {
+    BagApp_ItemAction_Use,
+    BagApp_ItemAction_Use,
+    BagApp_ItemAction_Use,
+    BagApp_ItemAction_Use,
+    BagApp_ItemAction_Use,
+    BagApp_ItemAction_Trash,
+    BagApp_ItemAction_Register,
+    BagApp_ItemAction_Deselect,
+    BagApp_ItemAction_Give,
+    BagApp_ItemAction_Action9,
+    BagApp_ItemAction_Confirm,
+    0x00000000,
+    BagApp_ItemAction_Move,
+    0x00000000,
+    BagApp_ItemAction_ChooseForBerryPatch,
+    BagApp_ItemAction_Use,
+};
+
+s32 gDebugSubScreenLayout;
+#endif

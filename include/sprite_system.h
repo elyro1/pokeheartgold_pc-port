@@ -122,6 +122,9 @@ BOOL SpriteSystem_LoadCellResObjFromOpenNarc(SpriteSystem *spriteSystem, SpriteM
 BOOL SpriteSystem_LoadAnimResObj(SpriteSystem *spriteSystem, SpriteManager *spriteManager, NarcId narcId, int fileId, BOOL compressed, int resId);
 BOOL SpriteSystem_LoadAnimResObjFromOpenNarc(SpriteSystem *spriteSystem, SpriteManager *spriteManager, NARC *narc, int fileId, BOOL compressed, int resId);
 ManagedSprite *SpriteSystem_NewSprite(SpriteSystem *spriteSystem, SpriteManager *spriteManager, const ManagedSpriteTemplate *template);
+#if defined(SDK_PORT)
+ManagedSprite *SpriteSystem_NewBattleUISprite(SpriteSystem *spriteSystem, SpriteManager *spriteManager, const ManagedSpriteTemplate *template);
+#endif
 ManagedSprite *SpriteSystem_NewSpriteWithYOffset(SpriteSystem *spriteSystem, SpriteManager *spriteManager, const ManagedSpriteTemplate *template, fx32 yOffset);
 NNSG2dImagePaletteProxy *SpriteManager_FindPlttResourceProxy(SpriteManager *spriteManager, int id);
 int SpriteManager_FindPlttResourceOffset(SpriteManager *spriteManager, int id, int vram);
@@ -212,4 +215,8 @@ void SpriteManager_SetSpriteList(SpriteManager *spriteManager, SpriteList *sprit
 void SpriteSystem_ReplaceCharResObjFromOpenNarc(SpriteSystem *spriteSystem, SpriteManager *spriteManager, NARC *narc, int fileId, BOOL compressed, int resId);
 void SpriteSystem_ReplacePlttResObjFromOpenNarc(SpriteSystem *spriteSystem, SpriteManager *spriteManager, NARC *narc, int fileId, BOOL compressed, int resId);
 
+#if defined(SDK_PORT)
+ManagedSprite *SpriteSystem_NewBattleUISprite(SpriteSystem *system, SpriteManager *manager, const ManagedSpriteTemplate *template);
+
+#endif
 #endif // POKEHEARTGOLD_SPRITE_SYSTEM_H

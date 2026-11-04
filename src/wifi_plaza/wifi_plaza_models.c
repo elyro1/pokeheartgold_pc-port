@@ -919,9 +919,17 @@ static void WiFiPlazaModelSet_LoadProps(WiFiPlazaPropResources *res, NARC *narc,
         file = v.files;
         for (j = 0; j < WIFI_PLAZA_PROP_ANIM_COUNT; j++, animId++, file += sizeof(void *)) {
             if (*modelId != animId[WIFI_PLAZA_PROP_KIND_COUNT]) {
+#if defined(SDK_PORT)
+                *(void **)(file + offsetof(WiFiPlazaPropResources, animFiles)) = GfGfxLoader_LoadFromOpenNarc(v.narc, animId[WIFI_PLAZA_PROP_KIND_COUNT], FALSE, heapID, FALSE);
+#else
                 *(void **)((u32)file + offsetof(WiFiPlazaPropResources, animFiles)) = GfGfxLoader_LoadFromOpenNarc(v.narc, animId[WIFI_PLAZA_PROP_KIND_COUNT], FALSE, heapID, FALSE);
+#endif
             } else {
+#if defined(SDK_PORT)
+                *(void **)(file + offsetof(WiFiPlazaPropResources, animFiles)) = NULL;
+#else
                 *(void **)((u32)file + offsetof(WiFiPlazaPropResources, animFiles)) = NULL;
+#endif
             }
         }
         v.model += sizeof(ModelResource);

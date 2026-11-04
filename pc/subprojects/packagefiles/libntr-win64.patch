@@ -1,0 +1,75 @@
+diff --git a/include/nitro/types.h b/include/nitro/types.h
+index 5dbf65d..9ba0aff 100644
+--- a/include/nitro/types.h
++++ b/include/nitro/types.h
+@@ -24,7 +24,7 @@ extern "C" {
+ typedef unsigned char u8;
+ typedef unsigned short int u16;
+ 
+-#if defined(SDK_BUILD_LINUX) || defined(SDK_BUILD_NX)
++#if defined(SDK_BUILD_LINUX) || defined(SDK_BUILD_WIN64) || defined(SDK_BUILD_NX)
+ typedef unsigned int u32;
+ #else
+ typedef unsigned long u32;
+@@ -38,7 +38,7 @@ typedef unsigned long u32;
+ 
+ typedef signed char s8;
+ typedef signed short int s16;
+-#if defined(SDK_BUILD_LINUX) || defined(SDK_BUILD_NX)
++#if defined(SDK_BUILD_LINUX) || defined(SDK_BUILD_WIN64) || defined(SDK_BUILD_NX)
+ typedef signed int s32;
+ #else
+ typedef signed long s32;
+diff --git a/libraries/fs/src/fs_file.c b/libraries/fs/src/fs_file.c
+index b5b6523..5194a55 100644
+--- a/libraries/fs/src/fs_file.c
++++ b/libraries/fs/src/fs_file.c
+@@ -17,6 +17,7 @@
+ #include "../include/command.h"
+ 
+ #ifdef SDK_PORT
++#include <ctype.h>
+ #include <string.h>
+ #include <SDL2/SDL.h>
+ #include <simulator/sim_RomExtractor.h>
+@@ -2173,4 +2174,4 @@ STDResult FSi_ConvertStringUnicodeToSjis(char *dst, int *dst_len,
+ #include <twl/ltdmain_end.h>
+ #endif
+ 
+-#endif /* SDK_VERSION_MAJOR */
+\ No newline at end of file
++#endif /* SDK_VERSION_MAJOR */
+diff --git a/libraries/sim/include/nanotime.h b/libraries/sim/include/nanotime.h
+index d6a1b8f..8d59024 100644
+--- a/libraries/sim/include/nanotime.h
++++ b/libraries/sim/include/nanotime.h
+@@ -186,7 +186,7 @@ bool nanotime_step(nanotime_step_data* const stepper);
+ #ifndef NOMINMAX
+ #define NOMINMAX
+ #endif
+-#include <Windows.h>
++#include <windows.h>
+ 
+ #ifndef NANOTIME_NOW_IMPLEMENTED
+ uint64_t nanotime_now() {
+@@ -285,7 +285,7 @@ void nanotime_sleep(uint64_t nsec_count) {
+ #ifndef NOMINMAX
+ #define NOMINMAX
+ #endif
+-#include <Windows.h>
++#include <windows.h>
+ void nanotime_yield() {
+ 	YieldProcessor();
+ }
+diff --git a/libraries/sim/src/g3_handler.cpp b/libraries/sim/src/g3_handler.cpp
+index 270c19d..54fad8b 100644
+--- a/libraries/sim/src/g3_handler.cpp
++++ b/libraries/sim/src/g3_handler.cpp
+@@ -10,6 +10,7 @@
+ 
+ #include <stdio.h>
+ #include <stdlib.h>
++#include <math.h>
+ 
+ #include <nitro/gx/g3.h>
+ #include <nitro/hw/X86/ioreg.h>

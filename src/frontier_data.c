@@ -451,11 +451,19 @@ BOOL BattleRoomDownload_IsRoomMarked(BattleRoomDownload *download, u32 rank, u32
     return FALSE;
 }
 
+#if defined(SDK_PORT)
+u32 BattleRoomDownload_HasTrainers(void *download) {
+#else
 u32 BattleRoomDownload_HasTrainers(u32 download) {
+#endif
     return ((BattleRoomDownload *)download)->hasTrainers;
 }
 
+#if defined(SDK_PORT)
+u32 BattleRoomDownload_HasLeaders(void *download) {
+#else
 u32 BattleRoomDownload_HasLeaders(u32 download) {
+#endif
     return ((BattleRoomDownload *)download)->hasLeaders;
 }
 
@@ -471,7 +479,11 @@ void BattleRoomDownload_GetTrainersRoom(BattleRoomDownload *download, u8 *out) {
     out[1] = download->trainersRoom;
 }
 
+#if defined(SDK_PORT)
+void BattleRoomDownload_GetTrainer(void *addr, FrontierTrainer *trainer, int index) {
+#else
 void BattleRoomDownload_GetTrainer(u32 addr, FrontierTrainer *trainer, int index) {
+#endif
     BattleRoomDownload *download = (BattleRoomDownload *)addr;
     BattleTowerOpponent *out = (BattleTowerOpponent *)trainer;
     BattleRoomTrainer *roomTrainer = &download->trainers[index];
@@ -498,13 +510,21 @@ void BattleRoomDownload_SetLeaders(BattleRoomDownload *download, const BattleRoo
     download->hasLeaders = 1;
 }
 
+#if defined(SDK_PORT)
+void BattleRoomDownload_GetLeadersRoom(void *addr, u8 *out) {
+#else
 void BattleRoomDownload_GetLeadersRoom(u32 addr, u8 *out) {
+#endif
     BattleRoomDownload *download = (BattleRoomDownload *)addr;
     out[0] = download->leadersRank;
     out[1] = download->leadersRoom;
 }
 
+#if defined(SDK_PORT)
+BattleRoomLeader *BattleRoomDownload_CopyLeaders(void *addr, enum HeapID heapID) {
+#else
 BattleRoomLeader *BattleRoomDownload_CopyLeaders(u32 addr, enum HeapID heapID) {
+#endif
     BattleRoomDownload *download = (BattleRoomDownload *)addr;
     BattleRoomLeader *out = Heap_Alloc(heapID, sizeof(download->leaders));
     MI_CpuCopy8(download->leaders, out, sizeof(download->leaders));
@@ -519,6 +539,11 @@ FrontierData *Save_FrontierData_Get(SaveData *save) {
     return (FrontierData *)((u8 *)Save_Frontier_GetStatic(save) + 0x954);
 }
 
+#if defined(SDK_PORT)
+void *Save_BattleRoomDownload_Get(SaveData *save) {
+    return (u8 *)Save_Frontier_GetStatic(save) + 0xADC;
+#else
 u32 Save_BattleRoomDownload_Get(SaveData *save) {
     return (u32)Save_Frontier_GetStatic(save) + 0xADC;
+#endif
 }

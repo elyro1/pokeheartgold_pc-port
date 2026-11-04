@@ -1,8 +1,16 @@
+#if defined(SDK_PORT)
+#include "port/battle_timing.h"
+#include "port/sim_config_prj.h"
+#endif
 #include "billboard_lists.h"
 
 #include <nnsys/g3d_render_internal.h>
 
 #include "global.h"
+#if defined(SDK_PORT)
+#include "port/battle_timing.h"
+#include "port/sim_config_prj.h"
+#endif
 
 #include "billboard_internal.h"
 #include "gf_3d_render.h"
@@ -95,6 +103,9 @@ static void BillboardObject_Clear(BillboardObject *object) {
     object->scale.z = FX32_ONE;
     object->rotation = 0;
     object->sequence = 0;
+#if defined(SDK_PORT)
+    object->frame = 0;
+#endif
     object->type = BILLBOARD_OBJECT_FREE;
     object->next = NULL;
     object->prev = 0;
@@ -244,6 +255,12 @@ static void BillboardObject_LoadResource(BillboardObject *object, BillboardResou
     Billboard *billboard = object->owner;
     BillboardObject_RemoveTextureAnimation(billboard, object);
     BillboardObject_LoadModel(object, resource);
+#if defined(SDK_PORT)
+    // Registering the animation queues its initial texture immediately. A
+    // recycled object's old frame may not exist in the incoming resource.
+    object->sequence = 0;
+    object->frame = 0;
+#endif
     BillboardObject_AddTextureAnimation(billboard, object, resource);
     if (object->type == BILLBOARD_OBJECT_NEW) {
         BillboardObject_InsertBefore(&billboard->root, object);
@@ -703,6 +720,9 @@ static fx32 BillboardObject_GetSequenceStart(BillboardObject *object, u32 index)
 }
 
 static BOOL BillboardObject_StepFrame(BillboardObject *object, fx32 delta) {
+#if defined(SDK_PORT)
+    if (!BattleTiming_IsActive() && SIM_Config_prj_GetConfig()->enable60fps) delta /= 2;
+#endif
     const BillboardSequenceRange *range = BillboardSequence_Get(object->ranges, object->sequence);
     return BillboardSequence_Step(range, &object->frame, delta);
 }

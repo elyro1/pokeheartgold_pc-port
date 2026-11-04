@@ -1,6 +1,10 @@
 #include "application/main_menu/mystery_gift_wfc.h"
 
 #include "global.h"
+#if defined(SDK_PORT)
+#include <stdint.h>
+#include <nd/DWCi_Nd.h>
+#endif
 
 #include "application/main_menu/mystery_gift_app.h"
 #include "application/main_menu/mystery_gift_app_internal.h"
@@ -57,19 +61,37 @@ extern MysteryGiftWfcStatus gMysteryGiftWfcStatus;
 extern const char gStr_IPGE[];
 extern const char gStr_K5WfPEw9T3cvqzHa[];
 extern const char gMysteryGiftWfcEmptyString[];
+#if defined(SDK_PORT)
+MysteryGiftWfcStatus gMysteryGiftWfcStatus;
+const char gStr_IPGE[] = "IPGE";
+const char gStr_K5WfPEw9T3cvqzHa[] = "K5WfPEw9T3cvqzHa";
+const char gMysteryGiftWfcEmptyString[4] = {0};
+DWCNdFileInfo gMysteryGiftWfcFileList[10];
+_Static_assert(sizeof(DWCNdFileInfo) == 176, "Mystery Gift download metadata");
+#else
 extern u8 gMysteryGiftWfcFileList[];
+#endif
 
 // Allocator of the Wi-Fi library: 32-byte aligned blocks, the raw block is stored in the word before
 static void MysteryGiftWfc_OnCleanupDone(void);
 static void MysteryGiftWfc_OnRequestDone(int unused, int error);
 
 static void *MysteryGiftWfc_Alloc(void *unused, u32 size) {
+#if defined(SDK_PORT)
+    const u32 overhead = 31 + sizeof(void *);
+    if (size > UINT32_MAX - overhead) return NULL;
+    void *raw = Heap_Alloc(HEAP_ID_84, size + overhead);
+    if (raw == NULL) return NULL;
+    uintptr_t result = ((uintptr_t)raw + sizeof(void *) + 31) & ~(uintptr_t)31;
+    ((void **)result)[-1] = raw;
+#else
     void *raw;
     u32 result;
     size = ((size + 36) & ~31u) + 32;
     raw = Heap_Alloc(HEAP_ID_84, size);
     result = ((u32)raw + 32) & ~31u;
     *(void **)(result - 4) = raw;
+#endif
     return (void *)result;
 }
 

@@ -2069,3 +2069,8 @@ static void VsRecorder_FreeDetailsButtons(VsRecorderWork *work) {
     Sprite_DeleteAndFreeResources(listWork->buttons[1].sprite);
     VsRecorder_FreeButtonGfx(work);
 }
+#if defined(SDK_PORT)
+
+/* Native list configurations from asm/vs_recorder_data.s (entry/hitbox pointers are native width). */
+const VsRecorderListConfig gVsRecorderVideoListConfig = { NULL, 6, 3, 2, 8, 10, 15, 128, 2, 5, NULL };
+#endif

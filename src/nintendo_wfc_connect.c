@@ -271,8 +271,11 @@ static void NintendoWfc_SetSpritePosition(Sprite *sprite, int x, int y);
 static void NintendoWfc_MovePadCursor(Sprite *sprite, int key);
 static void NintendoWfc_MoveDigitCursor(Sprite *sprite, int index, int twoDigits);
 static void NintendoWfc_SetDigitSpritePosition(Sprite *sprite, int index, int twoDigits);
+#if defined(SDK_PORT)
+#else
 static void *NintendoWfc_Alloc(int heap, u32 size, int alignment);
 static void NintendoWfc_Free(int heap, void *ptr, u32 size);
+#endif
 static int NintendoWfc_GetWifiIconLevel(void);
 static void NintendoWfc_SetNextScreen(NintendoWfcConnect *wfc, int screen, int a2);
 static void NintendoWfc_InitGraphics(NintendoWfcConnect *wfc);
@@ -321,6 +324,169 @@ static void NintendoWfcYesNo_AddWindows(NintendoWfcYesNoMenu *menu);
 static void NintendoWfcYesNo_RemoveWindows(NintendoWfcYesNoMenu *menu);
 static void NintendoWfcYesNo_ShowCursor(NintendoWfcYesNoMenu *menu);
 static void NintendoWfcYesNo_MoveCursor(NintendoWfcYesNoMenu *menu, int choice);
+#if defined(SDK_PORT)
+
+void NintendoWfcHttp_Init(u32 profileId, u64 friendKey);
+void NintendoWfcHttp_Update(void);
+BOOL NintendoWfcHttp_IsDone(void);
+s32 NintendoWfcHttp_GetResult(void);
+void NintendoWfcHttp_RequestRoomCount(int rank);
+void NintendoWfcHttp_RequestDownload(int rank, int room, BattleRoomDownloadData *download);
+void NintendoWfcHttp_RequestUpload(int rank, int room, int winCount, FrontierWifiUploadRecord *record);
+void NintendoWfcHttp_RequestInfo(void);
+void NintendoWfcHttp_RequestSetProfile(WifiServerProfile *profile, u32 *response);
+static BOOL NintendoWfcHttp_StartRequest(const char *url, void *request, int requestSize, void *response, int responseSize);
+static enum NintendoWfcHttpResult NintendoWfcHttp_ConvertError(int error);
+BOOL NintendoWfc_Init(OverlayManager *man, int *state);
+BOOL NintendoWfc_Main(OverlayManager *man, int *state);
+BOOL NintendoWfc_Exit(OverlayManager *man, int *state);
+static void NintendoWfc_VBlankCB(void *arg);
+static void NintendoWfc_SetGfxBanks(void);
+static void NintendoWfc_InitArgs(NintendoWfcConnect *wfc, OverlayManager *man);
+static void NintendoWfc_ExitDummy(NintendoWfcConnect *wfc);
+static void NintendoWfc_InitObjTransfer(void);
+static void NintendoWfc_InitSpriteResources(NintendoWfcConnect *wfc);
+static void NintendoWfc_InitSpriteTemplate(SpriteTemplate *template, NintendoWfcConnect *wfc, SpriteResourcesHeader *header, u32 whichScreen);
+static void NintendoWfc_CreateSprites(NintendoWfcConnect *wfc);
+static int NintendoWfc_HandleYesNoPrompt(YesNoPrompt *prompt);
+static void NintendoWfc_SetState(NintendoWfcConnect *wfc, enum NintendoWfcState state, enum NintendoWfcState nextState);
+static void NintendoWfc_SetSpritePosition(Sprite *sprite, int x, int y);
+static void NintendoWfc_MovePadCursor(Sprite *sprite, int key);
+static void NintendoWfc_MoveDigitCursor(Sprite *sprite, int index, int twoDigits);
+static void NintendoWfc_SetDigitSpritePosition(Sprite *sprite, int index, int twoDigits);
+void *NintendoWfc_Alloc(DWCAllocType unused, u32 size, int alignment);
+void NintendoWfc_Free(DWCAllocType unused, void *ptr, u32 size);
+static int NintendoWfc_GetWifiIconLevel(void);
+static void NintendoWfc_SetNextScreen(NintendoWfcConnect *wfc, int screen, int a2);
+static void NintendoWfc_InitGraphics(NintendoWfcConnect *wfc);
+static void NintendoWfc_FreeGraphics(NintendoWfcConnect *wfc);
+enum NintendoWfcMainState NintendoWfc_SessionInit(NintendoWfcConnect *wfc, int state);
+enum NintendoWfcMainState NintendoWfc_SessionMain(NintendoWfcConnect *wfc, int state);
+enum NintendoWfcMainState NintendoWfc_SessionExit(NintendoWfcConnect *wfc, int state);
+static void NintendoWfc_InitBgs(BgConfig *bgConfig);
+static void NintendoWfc_FreeBgs(BgConfig *bgConfig);
+static void NintendoWfc_LoadSubScreenBg(NintendoWfcConnect *wfc, int numberPad);
+static void NintendoWfc_LoadBgGraphics(NintendoWfcConnect *wfc);
+static void NintendoWfc_PaletteCycleTask(SysTask *task, void *data);
+static void NintendoWfc_AddWindows(NintendoWfcConnect *wfc);
+static void NintendoWfc_RemoveWindows(NintendoWfcConnect *wfc);
+static void NintendoWfc_InitStrings(NintendoWfcConnect *wfc);
+static void NintendoWfc_FreeStrings(NintendoWfcConnect *wfc);
+enum NintendoWfcMainState NintendoWfc_AskConnect(NintendoWfcConnect *wfc);
+enum NintendoWfcMainState NintendoWfc_HandleConnectChoice(NintendoWfcConnect *wfc);
+enum NintendoWfcMainState NintendoWfc_AskLogOut(NintendoWfcConnect *wfc);
+enum NintendoWfcMainState NintendoWfc_HandleLogOutChoice(NintendoWfcConnect *wfc);
+enum NintendoWfcMainState NintendoWfc_StartConnect(NintendoWfcConnect *wfc);
+enum NintendoWfcMainState NintendoWfc_WaitConnect(NintendoWfcConnect *wfc);
+enum NintendoWfcMainState NintendoWfc_StartAuth(NintendoWfcConnect *wfc);
+enum NintendoWfcMainState NintendoWfc_WaitAuth(NintendoWfcConnect *wfc);
+enum NintendoWfcMainState NintendoWfc_InitHttp(NintendoWfcConnect *wfc);
+enum NintendoWfcMainState NintendoWfc_RequestInfo(NintendoWfcConnect *wfc);
+enum NintendoWfcMainState NintendoWfc_WaitInfo(NintendoWfcConnect *wfc);
+enum NintendoWfcMainState NintendoWfc_RequestSetProfile(NintendoWfcConnect *wfc);
+enum NintendoWfcMainState NintendoWfc_WaitSetProfile(NintendoWfcConnect *wfc);
+enum NintendoWfcMainState NintendoWfc_RequestRoomCount(NintendoWfcConnect *wfc);
+enum NintendoWfcMainState NintendoWfc_WaitRoomCount(NintendoWfcConnect *wfc);
+enum NintendoWfcMainState NintendoWfc_AskChallengeRoom(NintendoWfcConnect *wfc);
+enum NintendoWfcMainState NintendoWfc_StartChallengeRoomInput(NintendoWfcConnect *wfc);
+enum NintendoWfcMainState NintendoWfc_HandleChallengeRoomInput(NintendoWfcConnect *wfc);
+enum NintendoWfcMainState NintendoWfc_PrintReceivingTrainers(NintendoWfcConnect *wfc);
+enum NintendoWfcMainState NintendoWfc_PrintRoomUnavailable(NintendoWfcConnect *wfc);
+enum NintendoWfcMainState NintendoWfc_RequestTrainersDownload(NintendoWfcConnect *wfc);
+enum NintendoWfcMainState NintendoWfc_WaitTrainersDownload(NintendoWfcConnect *wfc);
+enum NintendoWfcMainState NintendoWfc_PrintTrainersReceived(NintendoWfcConnect *wfc);
+enum NintendoWfcMainState NintendoWfc_PrintSendingRecord(NintendoWfcConnect *wfc);
+enum NintendoWfcMainState NintendoWfc_RequestUpload(NintendoWfcConnect *wfc);
+enum NintendoWfcMainState NintendoWfc_WaitUpload(NintendoWfcConnect *wfc);
+enum NintendoWfcMainState NintendoWfc_PrintRecordSent(NintendoWfcConnect *wfc);
+enum NintendoWfcMainState NintendoWfc_AskLeadersRank(NintendoWfcConnect *wfc);
+enum NintendoWfcMainState NintendoWfc_StartLeadersRankInput(NintendoWfcConnect *wfc);
+enum NintendoWfcMainState NintendoWfc_HandleLeadersRankInput(NintendoWfcConnect *wfc);
+enum NintendoWfcMainState NintendoWfc_AskLeadersRoom(NintendoWfcConnect *wfc);
+enum NintendoWfcMainState NintendoWfc_StartLeadersRoomInput(NintendoWfcConnect *wfc);
+enum NintendoWfcMainState NintendoWfc_HandleLeadersRoomInput(NintendoWfcConnect *wfc);
+enum NintendoWfcMainState NintendoWfc_PrintReceivingLeaders(NintendoWfcConnect *wfc);
+enum NintendoWfcMainState NintendoWfc_RequestLeadersDownload(NintendoWfcConnect *wfc);
+enum NintendoWfcMainState NintendoWfc_WaitLeadersDownload(NintendoWfcConnect *wfc);
+enum NintendoWfcMainState NintendoWfc_PrintLeadersReceived(NintendoWfcConnect *wfc);
+enum NintendoWfcMainState NintendoWfc_StartDisconnect(NintendoWfcConnect *wfc);
+enum NintendoWfcMainState NintendoWfc_StartSave(NintendoWfcConnect *wfc);
+enum NintendoWfcMainState NintendoWfc_Save(NintendoWfcConnect *wfc);
+enum NintendoWfcMainState NintendoWfc_AskCancelChallenge(NintendoWfcConnect *wfc);
+enum NintendoWfcMainState NintendoWfc_HandleCancelChallengeChoice(NintendoWfcConnect *wfc);
+enum NintendoWfcMainState NintendoWfc_AskCancelDownload(NintendoWfcConnect *wfc);
+enum NintendoWfcMainState NintendoWfc_HandleCancelDownloadChoice(NintendoWfcConnect *wfc);
+enum NintendoWfcMainState NintendoWfc_PrintDisconnecting(NintendoWfcConnect *wfc);
+enum NintendoWfcMainState NintendoWfc_CloseConnection(NintendoWfcConnect *wfc);
+enum NintendoWfcMainState NintendoWfc_PrintDisconnected(NintendoWfcConnect *wfc);
+enum NintendoWfcMainState NintendoWfc_UnusedState_Idle(void);
+enum NintendoWfcMainState NintendoWfc_StartExit(NintendoWfcConnect *wfc);
+enum NintendoWfcMainState NintendoWfc_UnusedState_HandleYesNo(NintendoWfcConnect *wfc);
+enum NintendoWfcMainState NintendoWfc_ShowHttpError(NintendoWfcConnect *wfc);
+enum NintendoWfcMainState NintendoWfc_Disconnect(NintendoWfcConnect *wfc);
+enum NintendoWfcMainState NintendoWfc_WaitMessage(NintendoWfcConnect *wfc);
+enum NintendoWfcMainState NintendoWfc_WaitMessageAndDelay(NintendoWfcConnect *wfc);
+enum NintendoWfcMainState NintendoWfc_OpenYesNoMenu(NintendoWfcConnect *wfc);
+static void NintendoWfc_PrintFormattedMessage(NintendoWfcConnect *wfc, MsgData *msgData, int msgNo, int textSpeed, int unused);
+enum NintendoWfcMainState NintendoWfc_ShowDwcError(NintendoWfcConnect *wfc);
+enum NintendoWfcMainState NintendoWfc_WaitErrorDismiss(NintendoWfcConnect *wfc);
+static void NintendoWfc_PrintMessage(NintendoWfcConnect *wfc, MsgData *msgData, int msgNo, int textSpeed, int unused);
+static int NintendoWfc_GetAlignedTextX(const Window *window, String *string, int x, int alignment, int unused, int fontId);
+static void NintendoWfc_PrintAlignedText(Window *window, String *string, int x, int y, int alignment, u32 color);
+static void NintendoWfc_CreateWirelessIcon(NintendoWfcConnect *wfc);
+static void NintendoWfc_NumberInputDummy(NintendoWfcConnect *wfc, int unused1, int unused2);
+static void NintendoWfc_ShowWaitingIcon(NintendoWfcConnect *wfc);
+static void NintendoWfc_HideWaitingIcon(NintendoWfcConnect *wfc);
+static void NintendoWfc_PrintErrorMessage(NintendoWfcConnect *wfc, int msgNo);
+static void NintendoWfc_ShowErrorMessage(NintendoWfcConnect *wfc, int msgNo, int errorCode);
+static int NintendoWfc_StartNumberInput(NintendoWfcConnect *wfc, int a1, int maxValue);
+static int NintendoWfc_RunNumberInput(NintendoWfcConnect *wfc);
+BOOL NintendoWfc_NumberInput_FadeOut(NintendoWfcConnect *wfc);
+BOOL NintendoWfc_NumberInput_Setup(NintendoWfcConnect *wfc);
+static void NintendoWfc_ShowNumberInputSprites(NintendoWfcConnect *wfc);
+BOOL NintendoWfc_NumberInput_WaitFadeIn(NintendoWfcConnect *wfc);
+static int NintendoWfc_GetTouchedPadKey(NintendoWfcConnect *wfc);
+static u8 NintendoWfc_GetPadNeighbor(u32 key, u32 direction, u16 *padColumn);
+static int NintendoWfc_GetEnteredNumber(NintendoWfcNumberInput *input, int newDigit);
+static BOOL NintendoWfc_AreDigitsComplete(NintendoWfcNumberInput *input);
+static u8 NintendoWfc_GetCursorAfterDigit(NintendoWfcNumberInput *input);
+static void NintendoWfc_PressPadKey(NintendoWfcConnect *wfc, int key);
+static BOOL NintendoWfc_HandlePadButtons(NintendoWfcConnect *wfc);
+BOOL NintendoWfc_NumberInput_Main(NintendoWfcConnect *wfc);
+static void NintendoWfc_UpdateDigitSprites(NintendoWfcConnect *wfc);
+BOOL NintendoWfc_NumberInput_UnusedState4(void);
+BOOL NintendoWfc_NumberInput_UnusedState5(void);
+BOOL NintendoWfc_NumberInput_UnusedState6(void);
+BOOL NintendoWfc_NumberInput_StartFadeOut(NintendoWfcConnect *wfc);
+BOOL NintendoWfc_NumberInput_Teardown(NintendoWfcConnect *wfc);
+BOOL NintendoWfc_NumberInput_WaitButtonFlash(NintendoWfcConnect *wfc);
+BOOL NintendoWfc_NumberInput_WaitFadeOut(NintendoWfcConnect *wfc);
+BOOL NintendoWfc_NumberInput_Finish(void);
+static void NintendoWfc_AddNumberInputWindows(NintendoWfcConnect *wfc);
+static void NintendoWfc_PrintButtonLabel(Window *window, MsgData *msgData, int msgNo);
+static void NintendoWfc_RemoveNumberInputWindows(NintendoWfcConnect *wfc);
+static void NintendoWfc_HideNumberInput(NintendoWfcConnect *wfc);
+static void NintendoWfc_SetButtonFlashPltt(NintendoWfcConnect *wfc, u8 pltt);
+static BOOL NintendoWfc_UpdateButtonFlash(NintendoWfcConnect *wfc);
+static void NintendoWfc_StartButtonFlash(NintendoWfcConnect *wfc, int x, int y, int nextState);
+static void NintendoWfcYesNo_Init(NintendoWfcYesNoMenu *menu);
+static int NintendoWfcYesNo_Run(NintendoWfcYesNoMenu *menu);
+BOOL NintendoWfcYesNo_Start(NintendoWfcYesNoMenu *menu);
+BOOL NintendoWfcYesNo_HandleInput(NintendoWfcYesNoMenu *menu);
+BOOL NintendoWfcYesNo_UnusedState2(void);
+BOOL NintendoWfcYesNo_WaitClose(NintendoWfcYesNoMenu *menu);
+static void NintendoWfcYesNo_LoadGraphics(NintendoWfcYesNoMenu *menu);
+static void NintendoWfcYesNo_AddWindows(NintendoWfcYesNoMenu *menu);
+static void NintendoWfcYesNo_RemoveWindows(NintendoWfcYesNoMenu *menu);
+static void NintendoWfcYesNo_ShowCursor(NintendoWfcYesNoMenu *menu);
+static void NintendoWfcYesNo_MoveCursor(NintendoWfcYesNoMenu *menu, int choice);
+static enum NintendoWfcMainState Native_NintendoWfc_UnusedState_Idle(NintendoWfcConnect *wfc);
+static BOOL Native_NintendoWfc_NumberInput_UnusedState4(NintendoWfcConnect *wfc);
+static BOOL Native_NintendoWfc_NumberInput_UnusedState5(NintendoWfcConnect *wfc);
+static BOOL Native_NintendoWfc_NumberInput_UnusedState6(NintendoWfcConnect *wfc);
+static BOOL Native_NintendoWfc_NumberInput_Finish(NintendoWfcConnect *wfc);
+static BOOL Native_NintendoWfcYesNo_UnusedState2(NintendoWfcYesNoMenu *menu);
+#endif
 
 void NintendoWfcHttp_Init(u32 profileId, u64 friendKey) {
     gNintendoWfcHttp.state = NINTENDO_WFC_HTTP_IDLE;
@@ -505,8 +671,13 @@ s32 NintendoWfcHttp_GetResult(void) {
 
 void NintendoWfcHttp_RequestRoomCount(int rank) {
     GameStats_Start();
+#if defined(SDK_PORT)
+    gNintendoWfcHttpRequestBuffer[0] = rank - 1;
+    if (NintendoWfcHttp_StartRequest(gNintendoWfcRoomNumUrl, gNintendoWfcHttpRequestBuffer, 1, &gNintendoWfcHttpResponse.status, 2)) {
+#else
     gNintendoWfcHttp.rank = rank - 1;
     if (NintendoWfcHttp_StartRequest(gNintendoWfcRoomNumUrl, gNintendoWfcHttpRequestBuffer, 1, gNintendoWfcHttpShortResponse, 2)) {
+#endif
         gNintendoWfcHttp.state = NINTENDO_WFC_HTTP_ROOM_COUNT;
     } else {
         gNintendoWfcHttp.state = NINTENDO_WFC_HTTP_DONE;
@@ -518,8 +689,13 @@ void NintendoWfcHttp_RequestRoomCount(int rank) {
 void NintendoWfcHttp_RequestDownload(int rank, int room, BattleRoomDownloadData *download) {
     gNintendoWfcHttpResponse.buffer = (u8 *)download;
     GameStats_Start();
+#if defined(SDK_PORT)
+    gNintendoWfcHttpRequestBuffer[0] = rank - 1;
+    gNintendoWfcHttpRequestBuffer[1] = room - 1;
+#else
     gNintendoWfcHttp.rank = rank - 1;
     gNintendoWfcHttp.room = room - 1;
+#endif
     if (NintendoWfcHttp_StartRequest(gNintendoWfcDownloadUrl, gNintendoWfcHttpRequestBuffer, 2, download, NINTENDO_WFC_DOWNLOAD_SIZE)) {
         gNintendoWfcHttp.state = NINTENDO_WFC_HTTP_DOWNLOAD;
     } else {
@@ -536,16 +712,28 @@ void NintendoWfcHttp_RequestUpload(int rank, int room, int winCount, FrontierWif
     GameStats_Start();
     memcpy(gNintendoWfcHttpRequestBuffer, record, sizeof(FrontierWifiUploadRecord));
     // the request continues after the record: rank, room, winCount and the friend key
+#if defined(SDK_PORT)
+    gNintendoWfcHttpRequestBuffer[228] = rank - 1;
+    gNintendoWfcHttpRequestBuffer[229] = room - 1;
+    gNintendoWfcHttpRequestBuffer[230] = winCount;
+    dst = &gNintendoWfcHttpRequestBuffer[231];
+    src = (u8 *)&gNintendoWfcHttp.friendKey;
+#else
     ov72_0223B900[0x18] = rank - 1;
     ov72_0223B900[0x19] = room - 1;
     ov72_0223B900[0x1A] = winCount;
     dst = gNintendoWfcHttpUploadFriendKey;
     src = gNintendoWfcHttpFriendKey;
+#endif
     count = 8;
     do {
         *dst++ = *src++;
     } while (--count);
+#if defined(SDK_PORT)
+    if (NintendoWfcHttp_StartRequest(gNintendoWfcUploadUrl, gNintendoWfcHttpRequestBuffer, 239, &gNintendoWfcHttpResponse.status, 2)) {
+#else
     if (NintendoWfcHttp_StartRequest(gNintendoWfcUploadUrl, gNintendoWfcHttpRequestBuffer, 239, gNintendoWfcHttpShortResponse, 2)) {
+#endif
         gNintendoWfcHttp.state = NINTENDO_WFC_HTTP_UPLOAD;
     } else {
         gNintendoWfcHttp.state = NINTENDO_WFC_HTTP_DONE;
@@ -556,7 +744,11 @@ void NintendoWfcHttp_RequestUpload(int rank, int room, int winCount, FrontierWif
 
 void NintendoWfcHttp_RequestInfo(void) {
     GameStats_Start();
+#if defined(SDK_PORT)
+    if (NintendoWfcHttp_StartRequest(gNintendoWfcInfoUrl, gNintendoWfcHttpRequestBuffer, 0, &gNintendoWfcHttpResponse.status, 2)) {
+#else
     if (NintendoWfcHttp_StartRequest(gNintendoWfcInfoUrl, gNintendoWfcHttpRequestBuffer, 0, gNintendoWfcHttpShortResponse, 2)) {
+#endif
         gNintendoWfcHttp.state = NINTENDO_WFC_HTTP_INFO;
     } else {
         gNintendoWfcHttp.state = NINTENDO_WFC_HTTP_DONE;
@@ -681,7 +873,11 @@ BOOL NintendoWfc_Init(OverlayManager *man, int *state) {
         NintendoWfc_InitGraphics(wfc);
         Sound_SetSceneAndPlayBGM(52, SEQ_NONE, 0);
         wfc->heapMem = Heap_Alloc(HEAP_ID_67, 0x20020);
+#if defined(SDK_PORT)
+        wfc->expHeap = NNS_FndCreateExpHeapEx((void *)(((uintptr_t)wfc->heapMem + 31) & ~(uintptr_t)31), 0x20000, 0);
+#else
         wfc->expHeap = NNS_FndCreateExpHeapEx((void *)(((u32)wfc->heapMem + 31) & ~31), 0x20000, 0);
+#endif
         Sound_SetSceneAndPlayBGM(11, SEQ_GS_WIFI_ACCESS, 1);
         TextFlags_SetCanTouchSpeedUpPrint(TRUE);
         reg_GX_POWCNT |= REG_GX_POWCNT_DSEL_MASK;
@@ -933,14 +1129,22 @@ static void NintendoWfc_SetDigitSpritePosition(Sprite *sprite, int index, int tw
     NintendoWfc_SetSpritePosition(sprite, gNintendoWfcDigitSpritePositions[twoDigits][index][0], gNintendoWfcDigitSpritePositions[twoDigits][index][1] + 256);
 }
 
+#if defined(SDK_PORT)
+void *NintendoWfc_Alloc(DWCAllocType unused, u32 size, int alignment) {
+#else
 static void *NintendoWfc_Alloc(int heap, u32 size, int alignment) {
+#endif
     OSIntrMode enabled = OS_DisableInterrupts();
     void *result = NNS_FndAllocFromExpHeapEx(gNintendoWfcGlobal.heap, size, alignment);
     OS_RestoreInterrupts(enabled);
     return result;
 }
 
+#if defined(SDK_PORT)
+void NintendoWfc_Free(DWCAllocType unused, void *ptr, u32 size) {
+#else
 static void NintendoWfc_Free(int heap, void *ptr, u32 size) {
+#endif
     OSIntrMode enabled;
     if (!ptr) {
         return;
@@ -2818,3 +3022,107 @@ static void NintendoWfcYesNo_MoveCursor(NintendoWfcYesNoMenu *menu, int choice) 
     pos.z = 0;
     Sprite_SetMatrix(menu->cursorSprite, &pos);
 }
+#if defined(SDK_PORT)
+
+NintendoWfcHttp gNintendoWfcHttp;
+
+NintendoWfcHttpResponse gNintendoWfcHttpResponse;
+
+NintendoWfcGlobal gNintendoWfcGlobal;
+
+static enum NintendoWfcMainState Native_NintendoWfc_UnusedState_Idle(NintendoWfcConnect *wfc) { return NintendoWfc_UnusedState_Idle(); }
+enum NintendoWfcMainState (*const gNintendoWfcStates[])(NintendoWfcConnect *wfc) = {
+    NintendoWfc_AskConnect,
+    NintendoWfc_HandleConnectChoice,
+    NintendoWfc_StartConnect,
+    NintendoWfc_WaitConnect,
+    NintendoWfc_StartAuth,
+    NintendoWfc_WaitAuth,
+    NintendoWfc_InitHttp,
+    NintendoWfc_RequestInfo,
+    NintendoWfc_WaitInfo,
+    NintendoWfc_RequestSetProfile,
+    NintendoWfc_WaitSetProfile,
+    NintendoWfc_RequestRoomCount,
+    NintendoWfc_WaitRoomCount,
+    NintendoWfc_AskChallengeRoom,
+    NintendoWfc_StartChallengeRoomInput,
+    NintendoWfc_HandleChallengeRoomInput,
+    NintendoWfc_PrintReceivingTrainers,
+    NintendoWfc_RequestTrainersDownload,
+    NintendoWfc_WaitTrainersDownload,
+    NintendoWfc_PrintTrainersReceived,
+    NintendoWfc_PrintRoomUnavailable,
+    NintendoWfc_AskCancelChallenge,
+    NintendoWfc_HandleCancelChallengeChoice,
+    NintendoWfc_AskCancelDownload,
+    NintendoWfc_HandleCancelDownloadChoice,
+    NintendoWfc_PrintSendingRecord,
+    NintendoWfc_RequestUpload,
+    NintendoWfc_WaitUpload,
+    NintendoWfc_PrintRecordSent,
+    NintendoWfc_AskLeadersRank,
+    NintendoWfc_StartLeadersRankInput,
+    NintendoWfc_HandleLeadersRankInput,
+    NintendoWfc_AskLeadersRoom,
+    NintendoWfc_StartLeadersRoomInput,
+    NintendoWfc_HandleLeadersRoomInput,
+    NintendoWfc_PrintReceivingLeaders,
+    NintendoWfc_RequestLeadersDownload,
+    NintendoWfc_WaitLeadersDownload,
+    NintendoWfc_PrintLeadersReceived,
+    NintendoWfc_StartSave,
+    NintendoWfc_Save,
+    NintendoWfc_PrintDisconnecting,
+    NintendoWfc_CloseConnection,
+    NintendoWfc_PrintDisconnected,
+    Native_NintendoWfc_UnusedState_Idle,
+    NintendoWfc_StartDisconnect,
+    NintendoWfc_StartExit,
+    NintendoWfc_WaitMessage,
+    NintendoWfc_OpenYesNoMenu,
+    NintendoWfc_WaitMessageAndDelay,
+    NintendoWfc_UnusedState_HandleYesNo,
+    NintendoWfc_AskLogOut,
+    NintendoWfc_HandleLogOutChoice,
+    NintendoWfc_ShowHttpError,
+    NintendoWfc_Disconnect,
+    NintendoWfc_ShowDwcError,
+    NintendoWfc_WaitErrorDismiss,
+};
+
+static BOOL Native_NintendoWfc_NumberInput_UnusedState4(NintendoWfcConnect *wfc) { return NintendoWfc_NumberInput_UnusedState4(); }
+static BOOL Native_NintendoWfc_NumberInput_UnusedState5(NintendoWfcConnect *wfc) { return NintendoWfc_NumberInput_UnusedState5(); }
+static BOOL Native_NintendoWfc_NumberInput_UnusedState6(NintendoWfcConnect *wfc) { return NintendoWfc_NumberInput_UnusedState6(); }
+static BOOL Native_NintendoWfc_NumberInput_Finish(NintendoWfcConnect *wfc) { return NintendoWfc_NumberInput_Finish(); }
+BOOL (*const gNintendoWfcNumberInputStates[])(NintendoWfcConnect *wfc) = {
+    NintendoWfc_NumberInput_FadeOut,
+    NintendoWfc_NumberInput_Setup,
+    NintendoWfc_NumberInput_WaitFadeIn,
+    NintendoWfc_NumberInput_Main,
+    Native_NintendoWfc_NumberInput_UnusedState4,
+    Native_NintendoWfc_NumberInput_UnusedState5,
+    Native_NintendoWfc_NumberInput_UnusedState6,
+    NintendoWfc_NumberInput_StartFadeOut,
+    NintendoWfc_NumberInput_Teardown,
+    NintendoWfc_NumberInput_WaitFadeOut,
+    NintendoWfc_NumberInput_WaitButtonFlash,
+    Native_NintendoWfc_NumberInput_Finish,
+};
+
+static BOOL Native_NintendoWfcYesNo_UnusedState2(NintendoWfcYesNoMenu *menu) { return NintendoWfcYesNo_UnusedState2(); }
+BOOL (*const gNintendoWfcYesNoStates[])(NintendoWfcYesNoMenu *menu) = {
+    NintendoWfcYesNo_Start,
+    NintendoWfcYesNo_HandleInput,
+    Native_NintendoWfcYesNo_UnusedState2,
+    NintendoWfcYesNo_WaitClose,
+};
+
+const NintendoWfcScreenFuncs gNintendoWfcScreens[] = {
+    NintendoWfc_SessionInit,
+    NintendoWfc_SessionMain,
+    NintendoWfc_SessionExit,
+};
+
+u8 gNintendoWfcHttpRequestBuffer[239];
+#endif

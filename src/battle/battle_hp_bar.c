@@ -476,7 +476,11 @@ static void BattleHpBar_LoadArrowResources(SpriteSystem *spriteSystem, SpriteMan
 static ManagedSprite *BattleHpBar_CreateBoxSprite(SpriteSystem *spriteSystem, SpriteManager *spriteManager, int barType) {
     const ManagedSpriteTemplate *pRes = BattleHpBar_Util_GetHpBoxSpriteTemplate(barType);
 
+#if defined(SDK_PORT)
+    ManagedSprite *ret = SpriteSystem_NewBattleUISprite(spriteSystem, spriteManager, pRes);
+#else
     ManagedSprite *ret = SpriteSystem_NewSprite(spriteSystem, spriteManager, pRes);
+#endif
     Sprite_TickFrame(ret->sprite);
     return ret;
 }
@@ -667,19 +671,43 @@ void BattleHpBar_ToggleHpNumbers(BattleHpBar *hpBar) {
         imgProxy = Sprite_GetImageProxy(hpBar->boxObj->sprite);
         if (hpBar->showHpNumbers == 1) {
             src = BattleHpBar_Util_GetComponentRawGraphic(70);
+#if defined(SDK_PORT)
+            MI_CpuCopy16(src, (void *)((u8 *)vramBaseAddr + ov12_0226D3A8[hpBar->type].offset + 0x20 + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), 0x20);
+#else
             MI_CpuCopy16(src, (void *)((u32)vramBaseAddr + ov12_0226D3A8[hpBar->type].offset + 0x20 + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), 0x20);
+#endif
             src = BattleHpBar_Util_GetComponentRawGraphic(71);
+#if defined(SDK_PORT)
+            MI_CpuCopy16(src, (void *)((u8 *)vramBaseAddr + ov12_0226D3D8[hpBar->type].offset + 0x20 + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), 0x20);
+#else
             MI_CpuCopy16(src, (void *)((u32)vramBaseAddr + ov12_0226D3D8[hpBar->type].offset + 0x20 + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), 0x20);
+#endif
             src = BattleHpBar_Util_GetComponentRawGraphic(69);
+#if defined(SDK_PORT)
+            MI_CpuCopy16(src, (void *)((u8 *)vramBaseAddr + ov12_0226D408[hpBar->type].offset + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), ov12_0226D408[hpBar->type].size);
+#else
             MI_CpuCopy16(src, (void *)((u32)vramBaseAddr + ov12_0226D408[hpBar->type].offset + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), ov12_0226D408[hpBar->type].size);
+#endif
             BattleHpBar_Draw(hpBar, hpBar->hp, 6);
         } else {
             src = BattleHpBar_Util_GetComponentRawGraphic(66);
+#if defined(SDK_PORT)
+            MI_CpuCopy16(src, (void *)((u8 *)vramBaseAddr + ov12_0226D3A8[hpBar->type].offset + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), ov12_0226D3A8[hpBar->type].size);
+#else
             MI_CpuCopy16(src, (void *)((u32)vramBaseAddr + ov12_0226D3A8[hpBar->type].offset + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), ov12_0226D3A8[hpBar->type].size);
+#endif
             src = BattleHpBar_Util_GetComponentRawGraphic(68);
+#if defined(SDK_PORT)
+            MI_CpuCopy16(src, (void *)((u8 *)vramBaseAddr + ov12_0226D3D8[hpBar->type].offset + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), ov12_0226D3D8[hpBar->type].size);
+#else
             MI_CpuCopy16(src, (void *)((u32)vramBaseAddr + ov12_0226D3D8[hpBar->type].offset + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), ov12_0226D3D8[hpBar->type].size);
+#endif
             src = BattleHpBar_Util_GetComponentRawGraphic(38);
+#if defined(SDK_PORT)
+            MI_CpuCopy16(src, (void *)((u8 *)vramBaseAddr + ov12_0226D3D8[hpBar->type].offset + 0x20 + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), 0x20);
+#else
             MI_CpuCopy16(src, (void *)((u32)vramBaseAddr + ov12_0226D3D8[hpBar->type].offset + 0x20 + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), 0x20);
+#endif
             BattleHpBar_Draw(hpBar, hpBar->hp, 1);
         }
     }
@@ -818,7 +846,11 @@ void BattleHpBar_StartSlide(BattleHpBar *hpBar, BOOL slideOut) {
     } else {
         BattleHpBar_SetOffset(hpBar, 0, 0);
     }
+#if defined(SDK_PORT)
+    SysTask_CreateBattleUI(Task_BattleHpBarSlide, hpBar, 990);
+#else
     SysTask_CreateOnMainQueue(Task_BattleHpBarSlide, hpBar, 990);
+#endif
 }
 
 static void Task_BattleHpBarSlide(SysTask *task, void *data) {
@@ -917,10 +949,17 @@ static void BattleHpBar_DrawNickname(BattleHpBar *hpBar) {
         pixelBuffer = srcBuf;
         pixelBuffer2 = srcBuf + 0x100;
 
+#if defined(SDK_PORT)
+        MI_CpuCopy16(pixelBuffer, (void *)((u8 *)vramAddr + sNicknameVramRegions[hpBar->type][0].offset + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), sNicknameVramRegions[hpBar->type][0].size);
+        MI_CpuCopy16(pixelBuffer2, (void *)((u8 *)vramAddr + sNicknameVramRegions[hpBar->type][1].offset + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), sNicknameVramRegions[hpBar->type][1].size);
+        MI_CpuCopy16(pixelBuffer + sNicknameVramRegions[hpBar->type][0].size, (void *)((u8 *)vramAddr + sNicknameVramRegions[hpBar->type][2].offset + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), sNicknameVramRegions[hpBar->type][2].size);
+        MI_CpuCopy16(pixelBuffer2 + sNicknameVramRegions[hpBar->type][1].size, (void *)((u8 *)vramAddr + sNicknameVramRegions[hpBar->type][3].offset + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), sNicknameVramRegions[hpBar->type][3].size);
+#else
         MI_CpuCopy16(pixelBuffer, (void *)((u32)vramAddr + sNicknameVramRegions[hpBar->type][0].offset + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), sNicknameVramRegions[hpBar->type][0].size);
         MI_CpuCopy16(pixelBuffer2, (void *)((u32)vramAddr + sNicknameVramRegions[hpBar->type][1].offset + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), sNicknameVramRegions[hpBar->type][1].size);
         MI_CpuCopy16(pixelBuffer + sNicknameVramRegions[hpBar->type][0].size, (void *)((u32)vramAddr + sNicknameVramRegions[hpBar->type][2].offset + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), sNicknameVramRegions[hpBar->type][2].size);
         MI_CpuCopy16(pixelBuffer2 + sNicknameVramRegions[hpBar->type][1].size, (void *)((u32)vramAddr + sNicknameVramRegions[hpBar->type][3].offset + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), sNicknameVramRegions[hpBar->type][3].size);
+#endif
     }
     RemoveWindow(&window);
     String_Delete(string);
@@ -944,8 +983,13 @@ static void BattleHpBar_DrawGenderIcon(BattleHpBar *hpBar) {
     const u8 *topGraphic = BattleHpBar_Util_GetComponentRawGraphic(topComponentId);
     NNSG2dImageProxy *imgProxy = Sprite_GetImageProxy(hpBar->boxObj->sprite);
     void *vramAddr = G2_GetOBJCharPtr();
+#if defined(SDK_PORT)
+    MI_CpuCopy16(topGraphic, (void *)((u8 *)vramAddr + sGenderIconVramRegions[hpBar->type][0].offset + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), sGenderIconVramRegions[hpBar->type][0].size);
+    MI_CpuCopy16(bottomGraphic, (void *)((u8 *)vramAddr + sGenderIconVramRegions[hpBar->type][1].offset + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), sGenderIconVramRegions[hpBar->type][1].size);
+#else
     MI_CpuCopy16(topGraphic, (void *)((u32)vramAddr + sGenderIconVramRegions[hpBar->type][0].offset + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), sGenderIconVramRegions[hpBar->type][0].size);
     MI_CpuCopy16(bottomGraphic, (void *)((u32)vramAddr + sGenderIconVramRegions[hpBar->type][1].offset + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), sGenderIconVramRegions[hpBar->type][1].size);
+#endif
 }
 
 static void BattleHpBar_DrawLevel(BattleHpBar *hpBar) {
@@ -956,8 +1000,13 @@ static void BattleHpBar_DrawLevel(BattleHpBar *hpBar) {
     BattleNumberPrinter_PrintUInt(BattleSystem_GetLevelNumPrinter(hpBar->battleSystem), hpBar->level, 3, PRINTING_MODE_LEFT_ALIGN, (void *)numberBuf);
     NNSG2dImageProxy *imgProxy = Sprite_GetImageProxy(hpBar->boxObj->sprite);
     void *vramAddr = G2_GetOBJCharPtr();
+#if defined(SDK_PORT)
+    MI_CpuCopy16((void *)((u8 *)vramAddr + sLevelVramRegions[hpBar->type][0].offset + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), tileBuf, sLevelVramRegions[hpBar->type][0].size);
+    MI_CpuCopy16((void *)((u8 *)vramAddr + sLevelVramRegions[hpBar->type][1].offset + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), tileBuf + 0x60, sLevelVramRegions[hpBar->type][1].size);
+#else
     MI_CpuCopy16((void *)((u32)vramAddr + sLevelVramRegions[hpBar->type][0].offset + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), tileBuf, sLevelVramRegions[hpBar->type][0].size);
     MI_CpuCopy16((void *)((u32)vramAddr + sLevelVramRegions[hpBar->type][1].offset + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), tileBuf + 0x60, sLevelVramRegions[hpBar->type][1].size);
+#endif
     k = 0;
     for (i = 0; i < 0x60; i += 0x20) {
         for (j = 0; j < 0x10; ++j) {
@@ -969,8 +1018,13 @@ static void BattleHpBar_DrawLevel(BattleHpBar *hpBar) {
     }
     u8 *buf1 = tileBuf;
     u8 *buf2 = tileBuf + 0x60;
+#if defined(SDK_PORT)
+    MI_CpuCopy16(buf1, (void *)((u8 *)vramAddr + sLevelVramRegions[hpBar->type][0].offset + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), sLevelVramRegions[hpBar->type][0].size);
+    MI_CpuCopy16(buf2, (void *)((u8 *)vramAddr + sLevelVramRegions[hpBar->type][1].offset + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), sLevelVramRegions[hpBar->type][1].size);
+#else
     MI_CpuCopy16(buf1, (void *)((u32)vramAddr + sLevelVramRegions[hpBar->type][0].offset + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), sLevelVramRegions[hpBar->type][0].size);
     MI_CpuCopy16(buf2, (void *)((u32)vramAddr + sLevelVramRegions[hpBar->type][1].offset + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), sLevelVramRegions[hpBar->type][1].size);
+#endif
     Heap_Free(numberBuf);
     Heap_Free(tileBuf);
 }
@@ -982,8 +1036,13 @@ static void BattleHpBar_DrawCurrentHp(BattleHpBar *hpBar, u32 num) {
     NNSG2dImageProxy *imgProxy = Sprite_GetImageProxy(hpBar->boxObj->sprite);
     void *vramAddr = G2_GetOBJCharPtr();
 
+#if defined(SDK_PORT)
+    MI_CpuCopy16(numberBuf, (void *)((u8 *)vramAddr + sCurrentHpVramRegions[hpBar->type][0].offset + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), sCurrentHpVramRegions[hpBar->type][0].size);
+    MI_CpuCopy16(numberBuf + sCurrentHpVramRegions[hpBar->type][0].size, (void *)((u8 *)vramAddr + sCurrentHpVramRegions[hpBar->type][1].offset + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), sCurrentHpVramRegions[hpBar->type][1].size);
+#else
     MI_CpuCopy16(numberBuf, (void *)((u32)vramAddr + sCurrentHpVramRegions[hpBar->type][0].offset + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), sCurrentHpVramRegions[hpBar->type][0].size);
     MI_CpuCopy16(numberBuf + sCurrentHpVramRegions[hpBar->type][0].size, (void *)((u32)vramAddr + sCurrentHpVramRegions[hpBar->type][1].offset + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), sCurrentHpVramRegions[hpBar->type][1].size);
+#endif
     Heap_Free(numberBuf);
 }
 
@@ -994,7 +1053,11 @@ static void BattleHpBar_DrawMaxHp(BattleHpBar *hpBar) {
     NNSG2dImageProxy *imgProxy = Sprite_GetImageProxy(hpBar->boxObj->sprite);
     void *vramAddr = G2_GetOBJCharPtr();
 
+#if defined(SDK_PORT)
+    MI_CpuCopy16(numberBuf, (void *)((u8 *)vramAddr + sMaxHpVramRegions[hpBar->type].offset + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), sMaxHpVramRegions[hpBar->type].size);
+#else
     MI_CpuCopy16(numberBuf, (void *)((u32)vramAddr + sMaxHpVramRegions[hpBar->type].offset + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), sMaxHpVramRegions[hpBar->type].size);
+#endif
     Heap_Free(numberBuf);
 }
 
@@ -1008,7 +1071,11 @@ static void BattleHpBar_DrawCaughtIcon(BattleHpBar *hpBar) {
     NNSG2dImageProxy *imgProxy = Sprite_GetImageProxy(hpBar->boxObj->sprite);
     void *vramAddr = G2_GetOBJCharPtr();
 
+#if defined(SDK_PORT)
+    MI_CpuCopy16(graphic, (void *)((u8 *)vramAddr + sCaughtIconVramRegions[hpBar->type].offset + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), sCaughtIconVramRegions[hpBar->type].size);
+#else
     MI_CpuCopy16(graphic, (void *)((u32)vramAddr + sCaughtIconVramRegions[hpBar->type].offset + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), sCaughtIconVramRegions[hpBar->type].size);
+#endif
 }
 
 static void BattleHpBar_DrawStatusIcon(BattleHpBar *hpBar, int componentId) {
@@ -1016,7 +1083,11 @@ static void BattleHpBar_DrawStatusIcon(BattleHpBar *hpBar, int componentId) {
     NNSG2dImageProxy *imgProxy = Sprite_GetImageProxy(hpBar->boxObj->sprite);
     void *vramAddr = G2_GetOBJCharPtr();
 
+#if defined(SDK_PORT)
+    MI_CpuCopy16(graphic, (void *)((u8 *)vramAddr + sStatusIconVramRegions[hpBar->type].offset + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), sStatusIconVramRegions[hpBar->type].size);
+#else
     MI_CpuCopy16(graphic, (void *)((u32)vramAddr + sStatusIconVramRegions[hpBar->type].offset + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), sStatusIconVramRegions[hpBar->type].size);
+#endif
 }
 
 static void BattleHpBar_PrintSafariOrParkBallsString(BattleHpBar *hpBar, u32 flag) {
@@ -1048,10 +1119,17 @@ static void BattleHpBar_PrintSafariOrParkBallsString(BattleHpBar *hpBar, u32 fla
         imgProxy = Sprite_GetImageProxy(hpBar->boxObj->sprite);
         ptr1 = windowBuf;
         ptr2 = windowBuf + 0x1A0;
+#if defined(SDK_PORT)
+        MI_CpuCopy16(ptr1, (void *)((u8 *)vramAddr + sBallsLabelVramRegions[0].offset + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), sBallsLabelVramRegions[0].size);
+        MI_CpuCopy16(ptr2, (void *)((u8 *)vramAddr + sBallsLabelVramRegions[1].offset + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), sBallsLabelVramRegions[1].size);
+        MI_CpuCopy16(ptr1 + sBallsLabelVramRegions[0].size, (void *)((u8 *)vramAddr + sBallsLabelVramRegions[2].offset + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), sBallsLabelVramRegions[2].size);
+        MI_CpuCopy16(ptr2 + sBallsLabelVramRegions[1].size, (void *)((u8 *)vramAddr + sBallsLabelVramRegions[3].offset + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), sBallsLabelVramRegions[3].size);
+#else
         MI_CpuCopy16(ptr1, (void *)((u32)vramAddr + sBallsLabelVramRegions[0].offset + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), sBallsLabelVramRegions[0].size);
         MI_CpuCopy16(ptr2, (void *)((u32)vramAddr + sBallsLabelVramRegions[1].offset + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), sBallsLabelVramRegions[1].size);
         MI_CpuCopy16(ptr1 + sBallsLabelVramRegions[0].size, (void *)((u32)vramAddr + sBallsLabelVramRegions[2].offset + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), sBallsLabelVramRegions[2].size);
         MI_CpuCopy16(ptr2 + sBallsLabelVramRegions[1].size, (void *)((u32)vramAddr + sBallsLabelVramRegions[3].offset + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), sBallsLabelVramRegions[3].size);
+#endif
     }
 
     RemoveWindow(&window);
@@ -1093,10 +1171,17 @@ static void BattleHpBar_PrintNumRemainingSafariOrParkBalls(BattleHpBar *hpBar, u
         imgProxy = Sprite_GetImageProxy(hpBar->boxObj->sprite);
         ptr1 = windowBuf;
         ptr2 = windowBuf + 0x1A0;
+#if defined(SDK_PORT)
+        MI_CpuCopy16(ptr1, (void *)((u8 *)vramAddr + sBallsLeftVramRegions[0].offset + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), sBallsLeftVramRegions[0].size);
+        MI_CpuCopy16(ptr2, (void *)((u8 *)vramAddr + sBallsLeftVramRegions[1].offset + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), sBallsLeftVramRegions[1].size);
+        MI_CpuCopy16(ptr1 + sBallsLeftVramRegions[0].size, (void *)((u8 *)vramAddr + sBallsLeftVramRegions[2].offset + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), sBallsLeftVramRegions[2].size);
+        MI_CpuCopy16(ptr2 + sBallsLeftVramRegions[1].size, (void *)((u8 *)vramAddr + sBallsLeftVramRegions[3].offset + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), sBallsLeftVramRegions[3].size);
+#else
         MI_CpuCopy16(ptr1, (void *)((u32)vramAddr + sBallsLeftVramRegions[0].offset + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), sBallsLeftVramRegions[0].size);
         MI_CpuCopy16(ptr2, (void *)((u32)vramAddr + sBallsLeftVramRegions[1].offset + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), sBallsLeftVramRegions[1].size);
         MI_CpuCopy16(ptr1 + sBallsLeftVramRegions[0].size, (void *)((u32)vramAddr + sBallsLeftVramRegions[2].offset + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), sBallsLeftVramRegions[2].size);
         MI_CpuCopy16(ptr2 + sBallsLeftVramRegions[1].size, (void *)((u32)vramAddr + sBallsLeftVramRegions[3].offset + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), sBallsLeftVramRegions[3].size);
+#endif
     }
 
     RemoveWindow(&window);
@@ -1160,9 +1245,17 @@ static void BattleHpBar_DrawGauge(BattleHpBar *hpBar, u8 isExp) {
         sizeTop = sHpGaugeVramRegions[hpBar->type][0].size / 32;
         for (i = 0; i < 6; ++i) {
             if (i < sizeTop) {
+#if defined(SDK_PORT)
+                MI_CpuCopy16(src + pixelBuffer[i] * 32, (void *)((u8 *)vramAddr + sHpGaugeVramRegions[hpBar->type][0].offset + i * 32 + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), 0x20);
+#else
                 MI_CpuCopy16(src + pixelBuffer[i] * 32, (void *)((u32)vramAddr + sHpGaugeVramRegions[hpBar->type][0].offset + i * 32 + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), 0x20);
+#endif
             } else {
+#if defined(SDK_PORT)
+                MI_CpuCopy16(src + pixelBuffer[i] * 32, (void *)((u8 *)vramAddr + sHpGaugeVramRegions[hpBar->type][1].offset + (i - sizeTop) * 32 + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), 0x20);
+#else
                 MI_CpuCopy16(src + pixelBuffer[i] * 32, (void *)((u32)vramAddr + sHpGaugeVramRegions[hpBar->type][1].offset + (i - sizeTop) * 32 + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), 0x20);
+#endif
             }
         }
         break;
@@ -1178,9 +1271,17 @@ static void BattleHpBar_DrawGauge(BattleHpBar *hpBar, u8 isExp) {
         src = BattleHpBar_Util_GetComponentRawGraphic(29);
         for (i = 0; i < 12; ++i) {
             if (i < 5) {
+#if defined(SDK_PORT)
+                MI_CpuCopy16(src + pixelBuffer[i] * 32, (void *)((u8 *)vramAddr + 0x660 + i * 32 + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), 0x20);
+#else
                 MI_CpuCopy16(src + pixelBuffer[i] * 32, (void *)((u32)vramAddr + 0x660 + i * 32 + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), 0x20);
+#endif
             } else {
+#if defined(SDK_PORT)
+                MI_CpuCopy16(src + pixelBuffer[i] * 32, (void *)((u8 *)vramAddr + 0xE00 + (i - 5) * 32 + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), 0x20);
+#else
                 MI_CpuCopy16(src + pixelBuffer[i] * 32, (void *)((u32)vramAddr + 0xE00 + (i - 5) * 32 + imgProxy->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN]), 0x20);
+#endif
             }
         }
         break;
@@ -1408,7 +1509,11 @@ SysTask *BattleHpBar_BeginExpBarFullFlashEffect(BattleHpBar *hpBar, u8 *doneFlag
     MI_CpuFill8(taskData, 0, sizeof(BattleHpBarExpBarFullFlashEffectTaskData));
     taskData->hpBar = hpBar;
     taskData->pDoneFlag = doneFlag;
+#if defined(SDK_PORT)
+    return SysTask_CreateBattleUI(Task_ExpBarFullFlash, taskData, 1000);
+#else
     return SysTask_CreateOnMainQueue(Task_ExpBarFullFlash, taskData, 1000);
+#endif
 }
 
 static void Task_ExpBarFullFlash(SysTask *task, void *data) {
@@ -1459,7 +1564,11 @@ void BattleHpBar_MenuCloseDummy(BattleHpBar *hpBar) {
 static void BattleHpBar_StartBobTask(BattleHpBar *hpBar) {
     if (hpBar->sysTask == NULL) {
         hpBar->bobAngle = 0;
+#if defined(SDK_PORT)
+        hpBar->sysTask = SysTask_CreateBattleUI(Task_BattleHpBarBob, hpBar, 1010);
+#else
         hpBar->sysTask = SysTask_CreateOnMainQueue(Task_BattleHpBarBob, hpBar, 1010);
+#endif
     }
 }
 

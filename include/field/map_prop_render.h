@@ -26,6 +26,9 @@ typedef struct AreaMapAnimation {
     MapPropAnimationPool *pool;
     MapPropAnimation *mapPropAnimation;
 } AreaMapAnimation;
+#if defined(SDK_PORT)
+
+#endif
 
 struct MapPropAnimationPool {
     NNSFndAllocator allocator;
@@ -120,8 +123,13 @@ u8 TimeOfDayPropAnimManager_GetVisualState(TimeOfDayPropAnimManager *manager);
 
 void *NNS_FndAllocFromAllocator(NNSFndAllocator *pAllocator, u32 size);
 
+#if defined(SDK_PORT)
+/* libntrsystem provides these types and the default animation callback. */
+#define gAnmCalcFuncNsBta NNS_G3dFuncAnmMatNsBtaDefault
+#else
 typedef struct NNSG3dMatAnmResult NNSG3dMatAnmResult;
 typedef void (*NNSG3dFuncAnmMat)(NNSG3dMatAnmResult *, const NNSG3dAnmObj *, u32);
 extern NNSG3dFuncAnmMat gAnmCalcFuncNsBta; // NNS_G3dFuncAnmMatNsBtaDefault = &NNSi_G3dAnmCalcNsBta
+#endif
 
 #endif // POKEHEARTGOLD_FIELD_MAP_PROP_RENDER_H

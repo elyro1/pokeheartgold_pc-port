@@ -5,6 +5,9 @@
 
 struct FieldTerrainQueries;
 struct MapProp;
+#if defined(SDK_PORT)
+typedef s8 *FieldSlopeOutput;
+#endif
 
 // Width of one map tile in world units
 #define MAP_TILE_SIZE FX32_CONST(16)

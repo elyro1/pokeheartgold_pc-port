@@ -133,7 +133,14 @@ void *Texture_GetImageData(NNSG3dResTex *texture, u32 index) {
     if (entry == NULL) {
         return NULL;
     }
+#if defined(SDK_PORT)
+    // The dictionary address is relative to the texture bytes in the file.
+    // A key can be installed while a billboard is bound for drawing; its
+    // packed VRAM address/size must never become part of a CPU source pointer.
+    return (u8 *)texture + texture->texInfo.ofsTex + ((*entry & 0xFFFF) << 3);
+#else
     return (u8 *)texture + texture->texInfo.ofsTex + (((*entry & 0xFFFF) + texture->texInfo.vramKey) << 3);
+#endif
 }
 
 void *Texture_GetPaletteData(NNSG3dResTex *texture, u32 index) {

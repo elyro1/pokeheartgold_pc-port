@@ -1,3 +1,6 @@
+#if defined(SDK_PORT)
+#include <hg/dwc_compat.h>
+#endif
 #include "global.h"
 
 #include "constants/sndseq.h"
@@ -1359,7 +1362,11 @@ static BOOL WiiMessageSettingsScreen_WaitConnect(WiiMessageSettingsScreen *scree
     if (DWC_CheckInet()) {
         switch (DWC_GetInetStatus()) {
         case 7:
+#if defined(SDK_PORT)
+            screen->connectionResult = HG_DWC_GetLastErrorEx(&locals.errorCode, &locals.errorType);
+#else
             screen->connectionResult = DWC_GetLastErrorEx(&locals.errorCode, &locals.errorType);
+#endif
             screen->connectionErrorCode = locals.errorCode;
             screen->connectionErrorType = locals.errorType;
             DWC_ClearError();
@@ -1414,7 +1421,11 @@ static BOOL WiiMessageSettingsScreen_WaitAuth(WiiMessageSettingsScreen *screen) 
     case 4:
     case 5:
         WiiMessageSettingsScreen_HideWaitingIcon(screen);
+#if defined(SDK_PORT)
+        screen->connectionResult = HG_DWC_GetLastErrorEx(&errorCode, &errorType);
+#else
         screen->connectionResult = DWC_GetLastErrorEx(&errorCode, &errorType);
+#endif
         screen->connectionErrorCode = errorCode;
         DWC_ClearError();
         DWC_CleanupInet();

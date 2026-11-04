@@ -1116,3 +1116,91 @@ void ScriptFieldMoveEffect_Start(FieldSystem *fieldSystem, u16 *done, int kind, 
     *done = FALSE;
     SysTask_CreateOnMainQueue(Task_ScriptFieldMoveEffect, env, 0);
 }
+#if defined(SDK_PORT)
+
+/* Native templates and callback tables from asm/field_move_effects_data.s. The
+ * DS data sizes (0xF0 and so on) belong to its 32-bit work structs, so each
+ * template allocates sizeof its native work type instead; the callbacks get the
+ * manager's void * data parameter through adapters. */
+#define NATIVE_FIELD3D_TASK(function, Type) \
+    static void Native_##function(Field3dObjectTask *task, FieldSystem *fieldSystem, void *data) { function(task, fieldSystem, (Type *)data); }
+NATIVE_FIELD3D_TASK(RockSmashEffect_InitAtPlayer, FieldMoveEffect)
+NATIVE_FIELD3D_TASK(RockSmashEffect_Destroy, FieldMoveEffect)
+NATIVE_FIELD3D_TASK(RockSmashEffect_Update, FieldMoveEffect)
+NATIVE_FIELD3D_TASK(RockSmashEffect_Render, FieldMoveEffect)
+NATIVE_FIELD3D_TASK(WhirlpoolEffect_Init, WhirlpoolEffect)
+NATIVE_FIELD3D_TASK(WhirlpoolEffect_Destroy, WhirlpoolEffect)
+NATIVE_FIELD3D_TASK(WhirlpoolEffect_Update, WhirlpoolEffect)
+NATIVE_FIELD3D_TASK(WhirlpoolEffect_Render, WhirlpoolEffect)
+NATIVE_FIELD3D_TASK(HeadbuttEffect_InitAtFollower, HeadbuttEffect)
+NATIVE_FIELD3D_TASK(HeadbuttEffect_Destroy, HeadbuttEffect)
+NATIVE_FIELD3D_TASK(HeadbuttEffect_Update, HeadbuttEffect)
+NATIVE_FIELD3D_TASK(HeadbuttEffect_Render, HeadbuttEffect)
+NATIVE_FIELD3D_TASK(WaterfallEffect_Init, WaterfallEffect)
+NATIVE_FIELD3D_TASK(WaterfallEffect_Destroy, WaterfallEffect)
+NATIVE_FIELD3D_TASK(WaterfallEffect_Update, WaterfallEffect)
+NATIVE_FIELD3D_TASK(WaterfallEffect_Render, WaterfallEffect)
+NATIVE_FIELD3D_TASK(RockClimbDebris_Init, RockClimbDebris)
+NATIVE_FIELD3D_TASK(RockClimbDebris_Destroy, RockClimbDebris)
+NATIVE_FIELD3D_TASK(RockClimbDebris_Update, RockClimbDebris)
+NATIVE_FIELD3D_TASK(RockClimbDebris_Render, RockClimbDebris)
+NATIVE_FIELD3D_TASK(CutEffect_InitAtPlayer, FieldMoveEffect)
+NATIVE_FIELD3D_TASK(CutEffect_Destroy, FieldMoveEffect)
+NATIVE_FIELD3D_TASK(CutEffect_Update, FieldMoveEffect)
+NATIVE_FIELD3D_TASK(CutEffect_Render, FieldMoveEffect)
+NATIVE_FIELD3D_TASK(RockSmashEffect_InitAtFollower, FieldMoveEffect)
+NATIVE_FIELD3D_TASK(HeadbuttEffect_InitAtPlayer, HeadbuttEffect)
+NATIVE_FIELD3D_TASK(CutEffect_InitAtFollower, FieldMoveEffect)
+NATIVE_FIELD3D_TASK(RockDebris_Init, RockDebris)
+NATIVE_FIELD3D_TASK(RockDebris_Destroy, RockDebris)
+NATIVE_FIELD3D_TASK(RockDebris_Update, RockDebris)
+NATIVE_FIELD3D_TASK(RockDebris_Render, RockDebris)
+NATIVE_FIELD3D_TASK(RockDebris_InitWithFollower, RockDebris)
+#undef NATIVE_FIELD3D_TASK
+_Static_assert(sizeof(FieldMoveEffect) >= 0xF0, "gRockSmashEffectAtPlayerTemplate work size");
+_Static_assert(sizeof(WhirlpoolEffect) >= 0xF0, "gWhirlpoolEffectTemplate work size");
+_Static_assert(sizeof(HeadbuttEffect) >= 0x114, "gHeadbuttEffectAtFollowerTemplate work size");
+_Static_assert(sizeof(WaterfallEffect) >= 0x1CC, "gWaterfallEffectTemplate work size");
+_Static_assert(sizeof(RockClimbDebris) >= 0xD10, "gRockClimbDebrisTemplate work size");
+_Static_assert(sizeof(FieldMoveEffect) >= 0xF0, "gCutEffectAtPlayerTemplate work size");
+_Static_assert(sizeof(FieldMoveEffect) >= 0xF0, "gRockSmashEffectAtFollowerTemplate work size");
+_Static_assert(sizeof(HeadbuttEffect) >= 0x114, "gHeadbuttEffectAtPlayerTemplate work size");
+_Static_assert(sizeof(FieldMoveEffect) >= 0xF0, "gCutEffectAtFollowerTemplate work size");
+_Static_assert(sizeof(RockDebris) >= 0xE9C, "gRockDebrisTemplate work size");
+_Static_assert(sizeof(RockDebris) >= 0xE9C, "gRockDebrisWithFollowerTemplate work size");
+const Field3dObjectTaskTemplate gRockSmashEffectAtPlayerTemplate = { 0x400, sizeof(FieldMoveEffect), Native_RockSmashEffect_InitAtPlayer, Native_RockSmashEffect_Destroy, Native_RockSmashEffect_Update, Native_RockSmashEffect_Render };
+const Field3dObjectTaskTemplate gWhirlpoolEffectTemplate = { 0x400, sizeof(WhirlpoolEffect), Native_WhirlpoolEffect_Init, Native_WhirlpoolEffect_Destroy, Native_WhirlpoolEffect_Update, Native_WhirlpoolEffect_Render };
+const Field3dObjectTaskTemplate gHeadbuttEffectAtFollowerTemplate = { 0x400, sizeof(HeadbuttEffect), Native_HeadbuttEffect_InitAtFollower, Native_HeadbuttEffect_Destroy, Native_HeadbuttEffect_Update, Native_HeadbuttEffect_Render };
+const Field3dObjectTaskTemplate gWaterfallEffectTemplate = { 0x400, sizeof(WaterfallEffect), Native_WaterfallEffect_Init, Native_WaterfallEffect_Destroy, Native_WaterfallEffect_Update, Native_WaterfallEffect_Render };
+const Field3dObjectTaskTemplate gRockClimbDebrisTemplate = { 0x400, sizeof(RockClimbDebris), Native_RockClimbDebris_Init, Native_RockClimbDebris_Destroy, Native_RockClimbDebris_Update, Native_RockClimbDebris_Render };
+const Field3dObjectTaskTemplate gCutEffectAtPlayerTemplate = { 0x400, sizeof(FieldMoveEffect), Native_CutEffect_InitAtPlayer, Native_CutEffect_Destroy, Native_CutEffect_Update, Native_CutEffect_Render };
+const Field3dObjectTaskTemplate gRockSmashEffectAtFollowerTemplate = { 0x400, sizeof(FieldMoveEffect), Native_RockSmashEffect_InitAtFollower, Native_RockSmashEffect_Destroy, Native_RockSmashEffect_Update, Native_RockSmashEffect_Render };
+const Field3dObjectTaskTemplate gHeadbuttEffectAtPlayerTemplate = { 0x400, sizeof(HeadbuttEffect), Native_HeadbuttEffect_InitAtPlayer, Native_HeadbuttEffect_Destroy, Native_HeadbuttEffect_Update, Native_HeadbuttEffect_Render };
+const Field3dObjectTaskTemplate gCutEffectAtFollowerTemplate = { 0x400, sizeof(FieldMoveEffect), Native_CutEffect_InitAtFollower, Native_CutEffect_Destroy, Native_CutEffect_Update, Native_CutEffect_Render };
+const Field3dObjectTaskTemplate gRockDebrisTemplate = { 0x400, sizeof(RockDebris), Native_RockDebris_Init, Native_RockDebris_Destroy, Native_RockDebris_Update, Native_RockDebris_Render };
+const Field3dObjectTaskTemplate gRockDebrisWithFollowerTemplate = { 0x400, sizeof(RockDebris), Native_RockDebris_InitWithFollower, Native_RockDebris_Destroy, Native_RockDebris_Update, Native_RockDebris_Render };
+Field3dObjectTask *(*const gScriptFieldMoveEffectCreateFuncs[])(FieldSystem *fieldSystem) = {
+    CutEffect_CreateAtPlayer,
+    RockSmashEffect_CreateAtPlayer,
+    RockSmashEffect_CreateAtFollower,
+    CutEffect_CreateAtFollower,
+    HeadbuttEffect_CreateAtPlayer,
+    HeadbuttEffect_CreateAtFollower,
+};
+void (*const gScriptFieldMoveEffectDeleteFuncs[])(Field3dObjectTask *task) = {
+    CutEffect_Delete,
+    RockSmashEffect_Delete,
+    RockSmashEffect_Delete,
+    CutEffect_Delete,
+    HeadbuttEffect_Delete,
+    HeadbuttEffect_Delete,
+};
+BOOL (*const gScriptFieldMoveEffectIsFinishedFuncs[])(Field3dObjectTask *task) = {
+    CutEffect_IsFinished,
+    RockSmashEffect_IsFinished,
+    RockSmashEffect_IsFinished,
+    CutEffect_IsFinished,
+    HeadbuttEffect_IsFinished,
+    HeadbuttEffect_IsFinished,
+};
+#endif

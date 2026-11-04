@@ -865,3 +865,12 @@ static void VsRecorder_NumberPadUpdateHitboxes(VsRecorderNumberPad *pad) {
         } while (i < pad->count);
     }
 }
+#if defined(SDK_PORT)
+
+const VsRecorderNumberPadFunc gVsRecorderNumberPadStates[] = {
+    VsRecorder_NumberPadInit,
+    VsRecorder_NumberPadInput,
+    VsRecorder_NumberPadSwitchGroup,
+    VsRecorder_NumberPadFree,
+};
+#endif

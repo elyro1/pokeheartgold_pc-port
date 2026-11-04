@@ -952,3 +952,18 @@ static void PalPadRosterPage_DrawEmptySlot(PalPadRosterPage *page, PalPadGfx *gf
 void PalPadNaming_Init(PalPadNaming *naming, PalPadShared *shared, PalPadGfx *gfx, enum HeapID heapId) {
     PalPadNaming_Setup(naming, shared, gfx, heapId);
 }
+#if defined(SDK_PORT)
+
+const SpriteTemplate gPalPadDeleteEffectSpriteTemplate = {
+    .scale = {FX32_ONE, FX32_ONE, FX32_ONE}, .whichScreen = 1
+};
+
+const NNSG2dViewRect gPalPadRenderSurfaceRect = {{0, 1048576}, {1044480, 786432}};
+
+const PalPadRosterScrollCallback gPalPadRosterScrollCallbacks[4] = {
+    PalPadRoster_DeselectTab,
+    0,
+    PalPadRoster_DrawTabsOnScroll,
+    0,
+};
+#endif

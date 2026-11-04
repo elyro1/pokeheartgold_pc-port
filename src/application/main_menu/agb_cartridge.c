@@ -5,7 +5,11 @@
 #include "constants/pokemon.h"
 #include "constants/species.h"
 
+#if defined(SDK_PORT)
+#include <nitro/ctrdg.h>
+#else
 #include "CTRDG_task.h"
+#endif
 #include "config.h"
 #include "item.h"
 #include "pm_version.h"
@@ -13,6 +17,8 @@
 #include "system.h"
 
 // GBA cartridge access (NitroSDK CTRDG)
+#if defined(SDK_PORT)
+#else
 BOOL CTRDG_IsAgbCartridge(void);
 u32 CTRDG_GetAgbGameCode(void);
 void CTRDG_Enable(BOOL enable);
@@ -20,6 +26,7 @@ void CTRDG_CpuCopy32(const void *src, void *dest, u32 size);
 int CTRDG_IdentifyAgbBackup(int type);
 void CTRDG_ReadAgbFlash(u16 sector, u32 offset, void *dest, u32 size);
 void CTRDG_WriteAndVerifyAgbFlashAsync(u8 sector, void *src, u32 verifySize, CTRDG_TASK_FUNC callback);
+#endif
 
 // Save sizes of the game (read from the ROM by FireRed/LeafGreen/Emerald, fixed for Ruby/Sapphire)
 typedef struct PmAgbSaveSizes {
@@ -413,7 +420,11 @@ static void PmAgbCartridge_WriteSectorAsync(int id) {
     sector->signature = AGB_SAVE_SECTOR_SIGNATURE;
     sector->checksum = PmAgbCartridge_CalcSectorChecksum((u32 *)sector, PmAgbCartridge_GetSectorDataSize(id));
     flashSector = (id + (int)gPmAgbSave.firstSector + 1) % AGB_SAVE_SECTORS_PER_SLOT + AGB_SAVE_SECTORS_PER_SLOT * gPmAgbCartridgeSpec.saveSlot;
+#if defined(SDK_PORT)
+    CTRDG_WriteAndVerifyAgbFlashAsync(flashSector, (u8 *)sector, 4, PmAgbCartridge_WriteSectorCallback);
+#else
     CTRDG_WriteAndVerifyAgbFlashAsync(flashSector, sector, 4, PmAgbCartridge_WriteSectorCallback);
+#endif
 }
 
 static u32 PmAgbCartridge_WriteSectorCallback(CTRDGTaskInfo *task) {

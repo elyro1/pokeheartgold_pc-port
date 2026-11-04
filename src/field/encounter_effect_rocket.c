@@ -50,6 +50,9 @@ typedef struct RocketExecutiveIntroParams {
     u8 spriteMembers[4]; // character, palette, cell, animation
     u32 trainerId;
 } RocketExecutiveIntroParams;
+#if defined(SDK_PORT)
+_Static_assert(sizeof(RocketExecutiveIntroParams) == 8, "fixed assembly Rocket intro parameters");
+#endif
 
 typedef struct RocketExecutiveEffectWork {
     Sprite *sprite;
@@ -301,7 +304,11 @@ static void RocketEffect_RunExecutiveIntro(SysTask *task, EncounterEffectTask *e
         work->position.x = FX32_CONST(320);
         work->position.y = FX32_CONST(128);
         work->position.z = 0;
+#if defined(SDK_PORT)
+        G2_SetBlendAlpha(GX_BLEND_PLANEMASK_BG1, GX_BLEND_PLANEMASK_BG0 | GX_BLEND_PLANEMASK_BG2 | GX_BLEND_PLANEMASK_BG3 | GX_BLEND_PLANEMASK_OBJ | GX_BLEND_PLANEMASK_BD, 12, 4);
+#else
         G2x_SetBlendAlpha_((u32)&reg_G2_BLDCNT, GX_BLEND_PLANEMASK_BG1, GX_BLEND_PLANEMASK_BG0 | GX_BLEND_PLANEMASK_BG2 | GX_BLEND_PLANEMASK_BG3 | GX_BLEND_PLANEMASK_OBJ | GX_BLEND_PLANEMASK_BD, 12, 4);
+#endif
         SetBgPriority(GF_BG_LYR_MAIN_2, 0);
         SetBgPriority(GF_BG_LYR_MAIN_3, 1);
         SetBgPriority(GF_BG_LYR_MAIN_1, 2);
@@ -367,7 +374,11 @@ static void RocketEffect_RunExecutiveIntro(SysTask *task, EncounterEffectTask *e
         RocketEffect_LoadBgScreen(effect, GF_BG_LYR_MAIN_1, 221);
         SetBgPriority(GF_BG_LYR_MAIN_1, 1);
         SetBgPriority(GF_BG_LYR_MAIN_3, 2);
+#if defined(SDK_PORT)
+        G2_SetBlendAlpha(GX_BLEND_PLANEMASK_BG1, GX_BLEND_PLANEMASK_BG0 | GX_BLEND_PLANEMASK_BG2 | GX_BLEND_PLANEMASK_BG3 | GX_BLEND_PLANEMASK_OBJ | GX_BLEND_PLANEMASK_BD, 0, 16);
+#else
         G2x_SetBlendAlpha_((u32)&reg_G2_BLDCNT, GX_BLEND_PLANEMASK_BG1, GX_BLEND_PLANEMASK_BG0 | GX_BLEND_PLANEMASK_BG2 | GX_BLEND_PLANEMASK_BG3 | GX_BLEND_PLANEMASK_OBJ | GX_BLEND_PLANEMASK_BD, 0, 16);
+#endif
         Sprite_SetDrawFlag(work->sprite, TRUE);
         work->timer = 0;
         effect->state++;
@@ -381,7 +392,11 @@ static void RocketEffect_RunExecutiveIntro(SysTask *task, EncounterEffectTask *e
                 work->timer = 16;
                 blendDone = TRUE;
             }
+#if defined(SDK_PORT)
+            G2_SetBlendAlpha(GX_BLEND_PLANEMASK_BG1, GX_BLEND_PLANEMASK_BG0 | GX_BLEND_PLANEMASK_BG2 | GX_BLEND_PLANEMASK_BG3 | GX_BLEND_PLANEMASK_OBJ | GX_BLEND_PLANEMASK_BD, work->timer, 16 - work->timer);
+#else
             G2x_SetBlendAlpha_((u32)&reg_G2_BLDCNT, GX_BLEND_PLANEMASK_BG1, GX_BLEND_PLANEMASK_BG0 | GX_BLEND_PLANEMASK_BG2 | GX_BLEND_PLANEMASK_BG3 | GX_BLEND_PLANEMASK_OBJ | GX_BLEND_PLANEMASK_BD, work->timer, 16 - work->timer);
+#endif
         }
         work->position.x += (FX32_CONST(128) - work->position.x) * 2 / 3;
         if ((work->position.x >> FX32_SHIFT) <= 130) {

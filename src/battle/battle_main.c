@@ -1,6 +1,9 @@
 #include "battle/battle_main.h"
 
+#if defined(SDK_PORT)
+#else
 #include <nitro/wm/wm_internal.h>
+#endif
 
 #include "global.h"
 
@@ -23,7 +26,11 @@
 #include "battle/battle_terrain.h"
 #include "battle/battle_util.h"
 #include "battle/link_battle_screen.h"
+#if defined(SDK_PORT)
+extern int DWC_GetLinkLevel(void);
+#else
 #include "dwc/net_common_internal.h"
+#endif
 #include "msgdata/msg.naix"
 #include "msgdata/msg/msg_0197.h"
 
@@ -330,9 +337,15 @@ void Battle_BattleInit(OverlayManager *manager) {
     PaletteData_FillPaletteInBuffer(battleSystem->palette, PLTTBUF_SUB_OBJ, PLTTSEL_TRANSPARENT, 65535, 0, 255);
     battleSystem->msgIcon = PaletteBlink_New(battleSystem->palette, PM_LCD_TOP, 11, HEAP_ID_BATTLE);
     PaletteBlink_SetState(battleSystem->msgIcon, 1);
+#if defined(SDK_PORT)
+    battleSystem->drawGraphicsTask = (BattleTaskHandle)SysTask_CreateUnscaled(Task_DrawBattleGraphics, battleSystem, 60000);
+    battleSystem->criticalHpMusicTask = (BattleTaskHandle)SysTask_CreateBattleUI(Task_UpdateCriticalHpMusic, battleSystem, 50000);
+    battleSystem->scrollBgTask = (BattleTaskHandle)SysTask_CreateOnVBlankQueue(VBlankTask_ScrollBattleBackground, battleSystem, 1200);
+#else
     battleSystem->drawGraphicsTask = (u32)SysTask_CreateOnMainQueue(Task_DrawBattleGraphics, battleSystem, 60000);
     battleSystem->criticalHpMusicTask = (u32)SysTask_CreateOnMainQueue(Task_UpdateCriticalHpMusic, battleSystem, 50000);
     battleSystem->scrollBgTask = (u32)SysTask_CreateOnVBlankQueue(VBlankTask_ScrollBattleBackground, battleSystem, 1200);
+#endif
     battleSystem->bgScrollY = -51;
     BattleSystem_SetupTextFlags(battleSystem);
     BagCursor_Battle_Init(BattleSystem_GetBagCursor(battleSystem));
@@ -1012,6 +1025,9 @@ static void Task_DrawBattleGraphics(SysTask *task, void *data) {
         if (battleSystem->graphicsMode == 0) {
             BattleParticleSystem_DrawAll();
         }
+#if defined(SDK_PORT)
+        SpriteList_DrawSkippedBattleLists();
+#endif
         PokepicManager_DrawAll(battleSystem->pokepicManager);
         SpriteSystem_DrawSprites(battleSystem->gfxHandler);
         SpriteSystem_UpdateTransfer();

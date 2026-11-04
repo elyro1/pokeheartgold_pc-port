@@ -153,3 +153,21 @@ BOOL SpinTradeFlow_Finish(SpinTradeFlow *work) {
     SpinTradeArgs_Free(work->subwork);
     return TRUE;
 }
+#if defined(SDK_PORT)
+
+/* Native tables from asm/spin_trade_flow_data.s; adapters give differing originals the table's signature. */
+BOOL SpinTradeFlow_LaunchGroupApp(SpinTradeFlow *work);
+BOOL SpinTradeFlow_WaitGroupApp(SpinTradeFlow *work);
+BOOL SpinTradeFlow_WaitPartyMenu(SpinTradeFlow *work);
+BOOL SpinTradeFlow_WaitSummary(SpinTradeFlow *work);
+BOOL SpinTradeFlow_WaitSpinTradeApp(SpinTradeFlow *work);
+BOOL SpinTradeFlow_Finish(SpinTradeFlow *work);
+const SpinTradeFlowStateFunc gSpinTradeFlowStates[6] = {
+    SpinTradeFlow_LaunchGroupApp,
+    SpinTradeFlow_WaitGroupApp,
+    SpinTradeFlow_WaitPartyMenu,
+    SpinTradeFlow_WaitSummary,
+    SpinTradeFlow_WaitSpinTradeApp,
+    SpinTradeFlow_Finish,
+};
+#endif

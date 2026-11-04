@@ -190,3 +190,17 @@ void UnusedBillboardEffect_Draw(FieldEffect *effect, UnusedBillboardEffect *work
     FieldEffect_GetPosition(effect, &position);
     BillboardObject_SetPosition(work->billboard, &position);
 }
+#if defined(SDK_PORT)
+
+/* Native effect templates from asm/field_very_tall_grass_data.s: native state sizes and exact-signature adapters. */
+BOOL UnusedBillboardEffect_Init(FieldEffect *effect, UnusedBillboardEffect *work);
+void UnusedBillboardEffect_Destroy(FieldEffect *effect, UnusedBillboardEffect *work);
+void UnusedBillboardEffect_Update(FieldEffect *effect, UnusedBillboardEffect *work);
+void UnusedBillboardEffect_Draw(FieldEffect *effect, UnusedBillboardEffect *work);
+static BOOL Native_UnusedBillboardEffect_Init(FieldEffect *a0, void *a1) { return (BOOL)UnusedBillboardEffect_Init(a0, a1); }
+static void Native_UnusedBillboardEffect_Destroy(FieldEffect *a0, void *a1) { UnusedBillboardEffect_Destroy(a0, a1); }
+static void Native_UnusedBillboardEffect_Update(FieldEffect *a0, void *a1) { UnusedBillboardEffect_Update(a0, a1); }
+static void Native_UnusedBillboardEffect_Draw(FieldEffect *a0, void *a1) { UnusedBillboardEffect_Draw(a0, a1); }
+_Static_assert(sizeof(UnusedBillboardEffect) >= 0x40, "sUnusedBillboardEffectTemplate state size");
+const FieldEffectBasicTemplate sUnusedBillboardEffectTemplate = { sizeof(UnusedBillboardEffect), Native_UnusedBillboardEffect_Init, Native_UnusedBillboardEffect_Destroy, Native_UnusedBillboardEffect_Update, Native_UnusedBillboardEffect_Draw };
+#endif

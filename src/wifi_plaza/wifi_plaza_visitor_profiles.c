@@ -2597,3 +2597,8 @@ static s32 VisitorProfiles_FindFirstVisitor(WiFiPlazaPlace *visitors) {
     }
     return VISITOR_PROFILES_NUM_VISITORS;
 }
+#if defined(SDK_PORT)
+
+/* Native tables from asm/wifi_plaza_lobby_data.s; adapters give differing originals the field signatures. */
+const OverlayManagerTemplate sWiFiPlazaVisitorProfilesOverlayTemplate = { VisitorProfiles_Init, VisitorProfiles_Main, VisitorProfiles_Exit, FS_OVERLAY_ID(OVY_48) };
+#endif

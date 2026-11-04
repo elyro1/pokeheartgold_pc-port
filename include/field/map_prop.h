@@ -11,6 +11,9 @@ struct MapPropAnimationManager;
 
 typedef struct MapPropManager MapPropManager;
 typedef struct MapProp MapProp;
+#if defined(SDK_PORT)
+typedef void *MapPropLoadContext;
+#endif
 
 MapPropManager *MapPropManager_New(enum HeapID heapID, Field3dRenderObjManager *renderObjManager);
 void MapPropManager_Free(MapPropManager *mapPropManager);

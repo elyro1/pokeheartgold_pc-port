@@ -17,6 +17,9 @@ typedef struct FieldEffectManager FieldEffectManager;
 // userData passed to FieldEffectManager_CreateEffect is read back with FieldEffect_GetUserData and the
 // position with FieldEffect_GetPosition.
 typedef struct FieldEffect FieldEffect;
+#if defined(SDK_PORT)
+typedef FieldEffect *FieldEffectHandle;
+#endif
 
 // A billboard resource (FieldEffectManager_AddRecord); layout in billboard_internal.h.
 struct BillboardResource;
@@ -37,9 +40,19 @@ typedef struct FieldEffectBasicTemplate {
 } FieldEffectBasicTemplate;
 
 typedef struct {
+#if defined(SDK_PORT)
+    u32 loaded;
+    NNSG3dResFileHeader *file;
+    NNSG3dResMdlSet *set;
+#else
     u8 unk0[0xc];
+#endif
     NNSG3dResMdl *model;
+#if defined(SDK_PORT)
+    NNSG3dResTex *texture;
+#else
     u8 unk10[4];
+#endif
 } RenderModelStorage;
 
 FieldEffectManager *FieldEffectManager_New(FieldSystem *fieldSystem, u32 rendererCount, enum HeapID heapID);

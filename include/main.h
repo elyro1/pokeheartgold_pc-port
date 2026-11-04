@@ -10,6 +10,9 @@ typedef struct MainOverlayArgs {
     SaveData *saveData;
 } MainOverlayArgs;
 
+#if defined(SDK_PORT)
+void Main_SetForce30Hz(BOOL force);
+#endif
 void NitroMain(void);
 void Main_ResetOverlayManager(void);
 void RegisterMainOverlay(FSOverlayID overlayId, const OverlayManagerTemplate *template);

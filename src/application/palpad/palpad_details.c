@@ -839,3 +839,56 @@ void PalPadDetails_PrintReturnPage(PalPadDetailsSlot *slot, PalPadShared *shared
     PalPadDetailsSlot_Print(slot, 7, 0, shared, gfx, msg_0779_00014, 0, 0, 0x10200, gfx->pageText, gfx->pageBuffer, 0);
     PalPadDetailsSlot_CopyWindowsToVram(slot, 7);
 }
+#if defined(SDK_PORT)
+
+/* Native-width tables from asm/palpad_data.s. Page printers share the
+ * four-argument pointer type; three of the originals ignore the heap ID. */
+extern const PalPadWindowSpec sPalPadDetailsPage0WindowSpecs[];
+extern const PalPadWindowSpec sPalPadDetailsPage1WindowSpecs[];
+extern const PalPadWindowSpec sPalPadDetailsPage2WindowSpecs[];
+extern const PalPadWindowSpec sPalPadDetailsPage3WindowSpecs[];
+extern const PalPadWindowSpec sPalPadDetailsPage4WindowSpecs[];
+extern const PalPadWindowSpec sPalPadDetailsPage5WindowSpecs[];
+extern const PalPadWindowSpec sPalPadDetailsPage6WindowSpecs[];
+extern const PalPadWindowSpec sPalPadDetailsPage7WindowSpecs[];
+_Static_assert(sizeof(PalPadWindowSpec) == 4, "Pal Pad detail window specs");
+#define NATIVE_PALPAD_PRINTER3(function) \
+    static void Native_##function(PalPadDetailsSlot *slot, PalPadShared *shared, PalPadGfx *gfx, enum HeapID heapId) { function(slot, shared, gfx); }
+#define NATIVE_PALPAD_PRINTER4(function) \
+    static void Native_##function(PalPadDetailsSlot *slot, PalPadShared *shared, PalPadGfx *gfx, enum HeapID heapId) { function(slot, shared, gfx, heapId); }
+NATIVE_PALPAD_PRINTER3(PalPadDetails_PrintUnionRoomPage)
+NATIVE_PALPAD_PRINTER4(PalPadDetails_PrintWiFiPlazaPage)
+NATIVE_PALPAD_PRINTER3(PalPadDetails_PrintBattleTowerPage)
+NATIVE_PALPAD_PRINTER4(PalPadDetails_PrintBattleFactoryPage)
+NATIVE_PALPAD_PRINTER4(PalPadDetails_PrintBattleCastlePage)
+NATIVE_PALPAD_PRINTER4(PalPadDetails_PrintBattleHallPage)
+NATIVE_PALPAD_PRINTER4(PalPadDetails_PrintBattleArcadePage)
+NATIVE_PALPAD_PRINTER3(PalPadDetails_PrintReturnPage)
+#undef NATIVE_PALPAD_PRINTER3
+#undef NATIVE_PALPAD_PRINTER4
+const PalPadDetailsPagePrinter gPalPadDetailsPagePrinters[3] = {
+    Native_PalPadDetails_PrintUnionRoomPage,
+    Native_PalPadDetails_PrintWiFiPlazaPage,
+    Native_PalPadDetails_PrintReturnPage,
+};
+const PalPadDetailsPagePrinter gPalPadDetailsFrontierPagePrinters[8] = {
+    Native_PalPadDetails_PrintUnionRoomPage,
+    Native_PalPadDetails_PrintWiFiPlazaPage,
+    Native_PalPadDetails_PrintBattleTowerPage,
+    Native_PalPadDetails_PrintBattleFactoryPage,
+    Native_PalPadDetails_PrintBattleCastlePage,
+    Native_PalPadDetails_PrintBattleHallPage,
+    Native_PalPadDetails_PrintBattleArcadePage,
+    Native_PalPadDetails_PrintReturnPage,
+};
+const PalPadWindowSpec *const gPalPadDetailsPageWindowSpecs[8] = {
+    sPalPadDetailsPage0WindowSpecs,
+    sPalPadDetailsPage1WindowSpecs,
+    sPalPadDetailsPage2WindowSpecs,
+    sPalPadDetailsPage3WindowSpecs,
+    sPalPadDetailsPage4WindowSpecs,
+    sPalPadDetailsPage5WindowSpecs,
+    sPalPadDetailsPage6WindowSpecs,
+    sPalPadDetailsPage7WindowSpecs,
+};
+#endif

@@ -830,7 +830,11 @@ static void TakePhoto_RestorePlayerSprite(PlayerAvatar *playerAvatar, u8 state, 
     MapObject_SetSpriteAndInitDraw(mapObject, spriteId);
     FieldEffect *surfMountEffect = PlayerAvatar_GetSurfMountEffect(playerAvatar);
     if (surfMountEffect != 0) {
+#if defined(SDK_PORT)
+        FieldEffectManager_DestroyEffect((FieldEffectHandle)surfMountEffect);
+#else
         FieldEffectManager_DestroyEffect(surfMountEffect);
+#endif
     }
     PlayerAvatar_SetSurfMountEffect(playerAvatar, 0);
 }

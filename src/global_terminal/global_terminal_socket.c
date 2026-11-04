@@ -1,4 +1,7 @@
 #include "global.h"
+#if defined(SDK_PORT)
+#include <hg/dwc_compat.h>
+#endif
 
 #include "constants/dwc_status.h"
 
@@ -130,12 +133,27 @@ typedef struct GlobalTerminalServerVideoList {
     int data[6];
 } GlobalTerminalServerVideoList;
 
+#if defined(SDK_PORT)
+/* Native storage for the .bss block of asm/global_terminal_socket_data.s. The DS
+ * splits one socket object across several labels and puts the thread stack right
+ * after the mutex; here the aliases are views of the real object and the stack is
+ * its own 0x800-byte array whose end is passed to OS_CreateThread. */
+GlobalTerminalSocket sGlobalTerminalSocket;
+#define sGlobalTerminalSocketHost (sGlobalTerminalSocket.host)
+#define sGlobalTerminalSocketSettings (*(GlobalTerminalSocketSettings *)&sGlobalTerminalSocket.unk_200)
+_Static_assert(offsetof(GlobalTerminalSocket, port) == offsetof(GlobalTerminalSocket, unk_200) + 0x40, "socket settings alias");
+OSThread sGlobalTerminalSocketThread;
+OSMutex sGlobalTerminalSocketMutex;
+static u8 sGlobalTerminalSocketThreadStack[0x800] __attribute__((aligned(8)));
+#define sGlobalTerminalSocketThreadStackEnd (sGlobalTerminalSocketThreadStack + 0x800)
+#else
 extern GlobalTerminalSocket sGlobalTerminalSocket;
 extern char sGlobalTerminalSocketHost[];
 extern GlobalTerminalSocketSettings sGlobalTerminalSocketSettings;
 extern OSThread sGlobalTerminalSocketThread;
 extern OSMutex sGlobalTerminalSocketMutex;
 extern u8 sGlobalTerminalSocketThreadStackEnd[];
+#endif
 extern const GlobalTerminalServerCommandIds sGlobalTerminalServerCommandIds;
 extern u8 sGlobalTerminalSocketSvl[];
 extern char sGlobalTerminalServerHostName[];
@@ -179,6 +197,9 @@ static int GlobalTerminalSocket_GetRequestSize(int command);
 static int GlobalTerminalSocket_GetResponseBufferSize(int command);
 static void GlobalTerminalSocket_PrepareUploadStub(void *request, void *arg);
 
+#if defined(SDK_PORT)
+#include <hg/native_socket.h>
+#else
 void *DWC_Alloc(int category, int size);
 void DWC_Free(int category, void *ptr, int size);
 int gsSocketInetAddr(char *address);
@@ -194,6 +215,7 @@ int SOC_Send(int socket, void *buffer, int length, int flags);
 int SOC_Recv(int socket, void *buffer, int length, int flags);
 int SOC_Shutdown(int socket, int how);
 int SOC_Close(int socket);
+#endif
 
 static void GlobalTerminalSocket_Reset(void) {
     GlobalTerminalSocket_ClearRequest();
@@ -509,9 +531,18 @@ static BOOL GlobalTerminalSocket_IsIPv4Address(signed char *str) {
 
 static int GlobalTerminalSocket_ResolveHost(char *host, char *out) {
     if (!GlobalTerminalSocket_IsIPv4Address((signed char *)host)) {
+#if defined(SDK_PORT)
+        SOCHostEnt *entry = SOC_GetHostByName(host);
+#else
         GlobalTerminalSocketHostEntry *entry = SOC_GetHostByName(host);
+#endif
         if (entry) {
+#if defined(SDK_PORT)
+            SOCInAddr address;
+            memcpy(&address.addr, entry->addrList[0], sizeof(address.addr));
+#else
             GlobalTerminalSocketInAddr address = { **entry->addresses };
+#endif
             strcpy(out, SOC_InetNtoA(address));
         } else {
             return 0;
@@ -566,7 +597,11 @@ static int GlobalTerminalSocket_Connect(void) {
     address.address = sGlobalTerminalSocket.address;
     start = OS_GetTick() / GTS_SOCKET_TICKS_PER_SECOND;
     for (;;) {
+#if defined(SDK_PORT)
+        result = SOC_Connect(sGlobalTerminalSocket.socket, (const void *)&address);
+#else
         result = SOC_Connect(sGlobalTerminalSocket.socket, &address);
+#endif
         if (result >= 0) {
             break;
         }
@@ -689,11 +724,19 @@ static void GlobalTerminalSocket_Sleep(u32 msec) {
 
 static int GlobalTerminalSocket_FetchToken(void) {
     int errorType, errorCode;
+#if defined(SDK_PORT)
+    DWCSvlResult request;
+#else
     GlobalTerminalSocketTokenRequest request;
+#endif
     if (sGlobalTerminalSocket.hasToken == TRUE) {
         return 1;
     }
+#if defined(SDK_PORT)
+    if (!DWC_SVLGetTokenAsync((char *)sGlobalTerminalSocketSvl, &request)) {
+#else
     if (!DWC_SVLGetTokenAsync((const char *)sGlobalTerminalSocketSvl, &request)) {
+#endif
         sGlobalTerminalSocket.error = GTS_SOCKET_ERROR_TOKEN;
         return 0;
     }
@@ -701,12 +744,20 @@ static int GlobalTerminalSocket_FetchToken(void) {
         int status = DWC_SVLProcess();
         if (status == DWC_SVL_STATE_SUCCESS) {
             GlobalTerminalSocketToken *token = (GlobalTerminalSocketToken *)sGlobalTerminalSocket.login.token;
+#if defined(SDK_PORT)
+            memcpy(token, request.svltoken, sizeof(*token));
+#else
             *token = request.token;
+#endif
             sGlobalTerminalSocket.hasToken = TRUE;
             return 1;
         }
         if (status == DWC_SVL_STATE_ERROR) {
+#if defined(SDK_PORT)
+            HG_DWC_GetLastErrorEx(&errorCode, &errorType);
+#else
             DWC_GetLastErrorEx(&errorCode, &errorType);
+#endif
             sGlobalTerminalSocket.error = GTS_SOCKET_ERROR_TOKEN;
             return 0;
         }

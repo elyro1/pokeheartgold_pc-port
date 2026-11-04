@@ -20,8 +20,13 @@ enum GlobalTerminalAppState {
 
 static void GlobalTerminalApp_LoadWifi(GlobalTerminalApp *data);
 static void GlobalTerminalApp_UnloadWifi(GlobalTerminalApp *data);
+#if defined(SDK_PORT)
+static void *GlobalTerminalApp_DwcAlloc(DWCAllocType name, u32 size, int align);
+static void GlobalTerminalApp_DwcFree(DWCAllocType name, void *ptr, u32 size);
+#else
 static void *GlobalTerminalApp_DwcAlloc(int name, u32 size, int align);
 static void GlobalTerminalApp_DwcFree(int name, void *ptr, u32 size);
+#endif
 
 // DWC allocations of the Wi-Fi apps run by GlobalTerminalApp_Main (set once the DWC heap exists).
 static NNSFndHeapHandle sDwcHeap;
@@ -130,7 +135,11 @@ static void GlobalTerminalApp_LoadWifi(GlobalTerminalApp *data) {
         LoadOVY38();
         Comm_InitDwc(HEAP_ID_123);
         data->heapBuffer = Heap_Alloc(HEAP_ID_123, 0x20020);
+#if defined(SDK_PORT)
+        data->dwcHeap = NNS_FndCreateExpHeapEx((void *)(((uintptr_t)data->heapBuffer + 0x1F) & ~(uintptr_t)0x1F), 0x20000, 0);
+#else
         data->dwcHeap = NNS_FndCreateExpHeapEx((void *)(((u32)data->heapBuffer + 0x1F) & ~0x1F), 0x20000, 0);
+#endif
         CommWireless_StartUp();
         Sys_ClearSleepDisableFlag(4);
     }
@@ -147,7 +156,11 @@ static void GlobalTerminalApp_UnloadWifi(GlobalTerminalApp *data) {
     }
 }
 
+#if defined(SDK_PORT)
+static void *GlobalTerminalApp_DwcAlloc(DWCAllocType name, u32 size, int align) {
+#else
 static void *GlobalTerminalApp_DwcAlloc(int name, u32 size, int align) {
+#endif
     void *ptr;
     OSIntrMode intrMode = OS_DisableInterrupts();
     ptr = NNS_FndAllocFromExpHeapEx(sDwcHeap, size, align);
@@ -155,10 +168,19 @@ static void *GlobalTerminalApp_DwcAlloc(int name, u32 size, int align) {
     return ptr;
 }
 
+#if defined(SDK_PORT)
+static void GlobalTerminalApp_DwcFree(DWCAllocType name, void *ptr, u32 size) {
+#else
 static void GlobalTerminalApp_DwcFree(int name, void *ptr, u32 size) {
+#endif
     if (ptr != NULL) {
         OSIntrMode intrMode = OS_DisableInterrupts();
         NNS_FndFreeToExpHeap(sDwcHeap, ptr);
         OS_RestoreInterrupts(intrMode);
     }
 }
+#if defined(SDK_PORT)
+
+/* Native storage for the otherwise unreferenced .bss word of asm/global_terminal_app_data.s. */
+u32 _021D1108;
+#endif

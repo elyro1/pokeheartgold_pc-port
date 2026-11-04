@@ -1093,3 +1093,14 @@ static void PokeathlonBlockSmash_StartShake(PokeathlonBlockSmash *work, int offs
     work->shakeDecay = decay;
     work->shakeTask = SysTask_CreateOnMainQueue(PokeathlonBlockSmash_ShakeTask, work, 2);
 }
+#if defined(SDK_PORT)
+
+extern const TouchscreenHitbox gPokeathlonBlockSmashSpotHitboxes_Kind0[];
+extern const TouchscreenHitbox gPokeathlonBlockSmashSpotHitboxes_Kind1[];
+extern const TouchscreenHitbox gPokeathlonBlockSmashSpotHitboxes_Kind2[];
+const TouchscreenHitbox *gPokeathlonBlockSmashSpotHitboxes[3] = {
+    gPokeathlonBlockSmashSpotHitboxes_Kind0,
+    gPokeathlonBlockSmashSpotHitboxes_Kind1,
+    gPokeathlonBlockSmashSpotHitboxes_Kind2,
+};
+#endif

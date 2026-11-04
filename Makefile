@@ -1,3 +1,11 @@
+# Native builds bypass DS toolchain configuration when requested on their own.
+.PHONY: linux
+linux:
+	$(MAKE) -f Makefile.pc linux
+
+ifneq ($(MAKECMDGOALS),linux)
+.DEFAULT_GOAL := default
+
 MWCCVER        := 2.0/sp2p2
 PROC           := arm946e
 PROC_S         := arm5te
@@ -385,3 +393,5 @@ $(BUILD_DIR)/lib/NitroSystem/src/g3d_anm_bca_scale.o: private MWCCVER := 2.0/sp1
 $(BUILD_DIR)/lib/NitroSystem/src/g3d_anm_bca_scale.o: private MWCFLAGS := $(filter-out -ipa file,$(MWCFLAGS))
 $(BUILD_DIR)/lib/NitroSystem/src/g2d_char_canvas_letter.o: private MWCCVER := 2.0/sp2p3
 $(BUILD_DIR)/lib/NitroSystem/src/g2d_char_canvas_letter.o: private MWCFLAGS := $(filter-out -ipa file,$(MWCFLAGS))
+
+endif # DS build configuration

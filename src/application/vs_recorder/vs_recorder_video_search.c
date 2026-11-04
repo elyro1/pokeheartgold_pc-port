@@ -1718,3 +1718,18 @@ BOOL VsRecorder_VideoSearchSave(VsRecorderWork *work) {
     VsRecorder_FoundVideoSave(work);
     return FALSE;
 }
+#if defined(SDK_PORT)
+
+/* Native list configurations from asm/vs_recorder_data.s (entry/hitbox pointers are native width). */
+extern VsRecorderListEntry sVsRecorderSearchFacilityListEntries[];
+extern VsRecorderListEntry sVsRecorderSearchFacilityListEntriesLong[];
+extern TouchscreenHitbox sVsRecorderSearchFacilityListHitboxes[];
+extern VsRecorderListEntry sVsRecorderSearchLocationListEntries[];
+extern TouchscreenHitbox sVsRecorderSearchLocationListHitboxes[];
+extern TouchscreenHitbox sVsRecorderSearchSpeciesListHitboxes[];
+const VsRecorderListConfig gVsRecorderSearchLocationListConfig = { sVsRecorderSearchLocationListEntries, 1, 2, 8, 2, 16, 12, 32, 6, 1, sVsRecorderSearchLocationListHitboxes };
+const VsRecorderListConfig gVsRecorderSearchFacilityListConfig = { sVsRecorderSearchFacilityListEntries, 5, 2, 7, 3, 18, 12, 32, 6, 3, sVsRecorderSearchFacilityListHitboxes };
+const VsRecorderListConfig gVsRecorderSearchFacilityListConfigLong = { sVsRecorderSearchFacilityListEntriesLong, 23, 2, 7, 3, 18, 12, 32, 6, 3, sVsRecorderSearchFacilityListHitboxes };
+const VsRecorderListConfig gVsRecorderSearchResultListConfig = { sVsRecorderSearchFacilityListEntriesLong, 6, 3, 2, 8, 10, 15, 128, 2, 5, NULL };
+const VsRecorderListConfig gVsRecorderSearchSpeciesListConfig = { NULL, 0, 1, 9, 3, 14, 12, 32, 6, 6, sVsRecorderSearchSpeciesListHitboxes };
+#endif

@@ -607,7 +607,12 @@ void *BattleAnimUtil_GetBgOffsetRegister(int bgLayer) {
     case GF_BG_LYR_MAIN_3:
         return (void *)REG_BG3HOFS_ADDR;
     }
+#if defined(SDK_PORT)
+    GF_ASSERT(FALSE);
+    return NULL;
+#else
     return (void *)bgLayer;
+#endif
 }
 
 void BattleAnimUtil_CalcMidpoint(int x0, int y0, int x1, int y1, s16 *x, s16 *y) {
@@ -766,3 +771,244 @@ BattleAnimSpriteFunc BattleAnimSystem_GetSpriteFunc(u32 id) {
 
 void BattleAnimFunc_None(BattleAnimSystem *system) {
 }
+#if defined(SDK_PORT)
+
+/* Native tables from asm/battle_anim_data.s; adapters give differing originals the table's signature. */
+void BattleAnimSpriteFunc_SpreadSpriteCopies(BattleAnimSystem *system, SpriteSystem *spriteSystem, SpriteManager *spriteManager, ManagedSprite *sprite);
+void BattleAnimSpriteFunc_BlinkScaleFadeSprites(BattleAnimSystem *system, SpriteSystem *spriteSystem, SpriteManager *spriteManager, ManagedSprite *sprite);
+void BattleAnimSpriteFunc_OrbitingSpriteTrail(BattleAnimSystem *system, SpriteSystem *spriteSystem, SpriteManager *spriteManager, ManagedSprite *sprite);
+void BattleAnimSpriteFunc_CrossingSprites(BattleAnimSystem *system, SpriteSystem *spriteSystem, SpriteManager *spriteManager, ManagedSprite *sprite);
+void BattleAnimSpriteFunc_GrowRockShrinkSprite(BattleAnimSystem *system, SpriteSystem *spriteSystem, SpriteManager *spriteManager, ManagedSprite *sprite);
+void BattleAnimSpriteFunc_StackedSpritesOnDefender(BattleAnimSystem *system, SpriteSystem *spriteSystem, SpriteManager *spriteManager, ManagedSprite *sprite);
+void BattleAnimSpriteFunc_BoomerangSprite(BattleAnimSystem *system, SpriteSystem *spriteSystem, SpriteManager *spriteManager, ManagedSprite *sprite);
+void BattleAnimSpriteFunc_RisingSpriteStretchAttacker(BattleAnimSystem *system, SpriteSystem *spriteSystem, SpriteManager *spriteManager, ManagedSprite *sprite);
+void BattleAnimSpriteFunc_ZigzagSlash(BattleAnimSystem *system, SpriteSystem *spriteSystem, SpriteManager *spriteManager, ManagedSprite *sprite);
+void BattleAnimSpriteFunc_ZigzagFlash(BattleAnimSystem *system, SpriteSystem *spriteSystem, SpriteManager *spriteManager, ManagedSprite *sprite);
+void BattleAnimSpriteFunc_SpritePops(BattleAnimSystem *system, SpriteSystem *spriteSystem, SpriteManager *spriteManager, ManagedSprite *sprite);
+void BattleAnimSpriteFunc_PulseSpriteBrightnessFlash(BattleAnimSystem *system, SpriteSystem *spriteSystem, SpriteManager *spriteManager, ManagedSprite *sprite);
+void BattleAnimSpriteFunc_FanSpritesAroundAttacker(BattleAnimSystem *system, SpriteSystem *spriteSystem, SpriteManager *spriteManager, ManagedSprite *sprite);
+void BattleAnimSpriteFunc_ShrinkAttackerIntoSprite(BattleAnimSystem *system, SpriteSystem *spriteSystem, SpriteManager *spriteManager, ManagedSprite *sprite);
+void BattleAnimSpriteFunc_ScaleSpritesOverDefender(BattleAnimSystem *system, SpriteSystem *spriteSystem, SpriteManager *spriteManager, ManagedSprite *sprite);
+void BattleAnimSpriteFunc_SpritesOrbitAttackerBobbing(BattleAnimSystem *system, SpriteSystem *spriteSystem, SpriteManager *spriteManager, ManagedSprite *sprite);
+void BattleAnimSpriteFunc_FloatingSpriteStream(BattleAnimSystem *system, SpriteSystem *spriteSystem, SpriteManager *spriteManager, ManagedSprite *sprite);
+void BattleAnimSpriteFunc_ThrowSpriteArc(BattleAnimSystem *system, SpriteSystem *spriteSystem, SpriteManager *spriteManager, ManagedSprite *sprite);
+void BattleAnimSpriteFunc_FadeSpriteAnim(BattleAnimSystem *system, SpriteSystem *spriteSystem, SpriteManager *spriteManager, ManagedSprite *sprite);
+void BattleAnimSpriteFunc_BlinkSpritesCenter(BattleAnimSystem *system, SpriteSystem *spriteSystem, SpriteManager *spriteManager, ManagedSprite *sprite);
+void BattleAnimSpriteFunc_SlidingSpritePairs(BattleAnimSystem *system, SpriteSystem *spriteSystem, SpriteManager *spriteManager, ManagedSprite *sprite);
+void BattleAnimSpriteFunc_PopAndScatterSprites(BattleAnimSystem *system, SpriteSystem *spriteSystem, SpriteManager *spriteManager, ManagedSprite *sprite);
+void BattleAnimSpriteFunc_SpriteQuad(BattleAnimSystem *system, SpriteSystem *spriteSystem, SpriteManager *spriteManager, ManagedSprite *sprite);
+void BattleAnimSpriteFunc_FlashingSpritesAroundAttacker(BattleAnimSystem *system, SpriteSystem *spriteSystem, SpriteManager *spriteManager, ManagedSprite *sprite);
+void BattleAnimSpriteFunc_SpriteTrailToDefender(BattleAnimSystem *system, SpriteSystem *spriteSystem, SpriteManager *spriteManager, ManagedSprite *sprite);
+void BattleAnimSpriteFunc_MoveSpriteAndAnimate(BattleAnimSystem *system, SpriteSystem *spriteSystem, SpriteManager *spriteManager, ManagedSprite *sprite);
+void BattleAnimSpriteFunc_SpriteOrbit(BattleAnimSystem *system, SpriteSystem *spriteSystem, SpriteManager *spriteManager, ManagedSprite *sprite);
+void BattleAnimSpriteFunc_SpriteAboveDefender(BattleAnimSystem *system, SpriteSystem *spriteSystem, SpriteManager *spriteManager, ManagedSprite *sprite);
+void BattleAnimSpriteFunc_SpriteArc(BattleAnimSystem *system, SpriteSystem *spriteSystem, SpriteManager *spriteManager, ManagedSprite *sprite);
+void BattleAnimSpriteFunc_RisingShrinkSprites(BattleAnimSystem *system, SpriteSystem *spriteSystem, SpriteManager *spriteManager, ManagedSprite *sprite);
+void BattleAnimSpriteFunc_SpriteRowSequence(BattleAnimSystem *system, SpriteSystem *spriteSystem, SpriteManager *spriteManager, ManagedSprite *sprite);
+void BattleAnimSpriteFunc_PaletteCycleSprite(BattleAnimSystem *system, SpriteSystem *spriteSystem, SpriteManager *spriteManager, ManagedSprite *sprite);
+void BattleAnimSpriteFunc_SpritesOrbitAttacker(BattleAnimSystem *system, SpriteSystem *spriteSystem, SpriteManager *spriteManager, ManagedSprite *sprite);
+const BattleAnimSpriteFunc gBattleAnimSpriteFuncTable[] = {
+    BattleAnimSpriteFunc_SpreadSpriteCopies,
+    BattleAnimSpriteFunc_BlinkScaleFadeSprites,
+    BattleAnimSpriteFunc_OrbitingSpriteTrail,
+    BattleAnimSpriteFunc_CrossingSprites,
+    BattleAnimSpriteFunc_GrowRockShrinkSprite,
+    BattleAnimSpriteFunc_StackedSpritesOnDefender,
+    BattleAnimSpriteFunc_BoomerangSprite,
+    BattleAnimSpriteFunc_RisingSpriteStretchAttacker,
+    BattleAnimSpriteFunc_ZigzagSlash,
+    BattleAnimSpriteFunc_ZigzagFlash,
+    BattleAnimSpriteFunc_SpritePops,
+    BattleAnimSpriteFunc_PulseSpriteBrightnessFlash,
+    BattleAnimSpriteFunc_FanSpritesAroundAttacker,
+    BattleAnimSpriteFunc_ShrinkAttackerIntoSprite,
+    BattleAnimSpriteFunc_ScaleSpritesOverDefender,
+    BattleAnimSpriteFunc_SpritesOrbitAttackerBobbing,
+    BattleAnimSpriteFunc_FloatingSpriteStream,
+    BattleAnimSpriteFunc_ThrowSpriteArc,
+    BattleAnimSpriteFunc_FadeSpriteAnim,
+    BattleAnimSpriteFunc_BlinkSpritesCenter,
+    BattleAnimSpriteFunc_SlidingSpritePairs,
+    BattleAnimSpriteFunc_PopAndScatterSprites,
+    BattleAnimSpriteFunc_SpriteQuad,
+    BattleAnimSpriteFunc_FlashingSpritesAroundAttacker,
+    BattleAnimSpriteFunc_SpriteTrailToDefender,
+    BattleAnimSpriteFunc_MoveSpriteAndAnimate,
+    BattleAnimSpriteFunc_SpriteOrbit,
+    BattleAnimSpriteFunc_SpriteAboveDefender,
+    BattleAnimSpriteFunc_SpriteArc,
+    BattleAnimSpriteFunc_RisingShrinkSprites,
+    BattleAnimSpriteFunc_SpriteRowSequence,
+    BattleAnimSpriteFunc_PaletteCycleSprite,
+    BattleAnimSpriteFunc_SpritesOrbitAttacker,
+};
+void BattleAnimFunc_OneFrameTask(BattleAnimSystem *system);
+void BattleAnimFunc_OneFrameSoundTask(BattleAnimSystem *system);
+void BattleAnimFunc_OneFrameUncountedTask(BattleAnimSystem *system);
+void BattleAnimFunc_RotateBattler(BattleAnimSystem *system);
+void BattleAnimFunc_AttackerGrowFlashRed(BattleAnimSystem *system);
+void BattleAnimFunc_AttackerSquashStretch(BattleAnimSystem *system);
+void BattleAnimFunc_AttackerAfterimages(BattleAnimSystem *system);
+void BattleAnimFunc_PicOrbit(BattleAnimSystem *system);
+void BattleAnimFunc_AttackerRecoilTilt(BattleAnimSystem *system);
+void BattleAnimFunc_CircleBattler(BattleAnimSystem *system);
+void BattleAnimFunc_ShakeDefenderWithOverlay(BattleAnimSystem *system);
+void BattleAnimFunc_SkewSlideAttackerBg(BattleAnimSystem *system);
+void BattleAnimFunc_AttackerPulseWhite(BattleAnimSystem *system);
+void BattleAnimFunc_AttackerStretchSteps(BattleAnimSystem *system);
+void BattleAnimFunc_AttackerLeapOffscreen(BattleAnimSystem *system);
+void BattleAnimFunc_AttackerSilhouette(BattleAnimSystem *system);
+void BattleAnimFunc_FadeInShrinkSprite(BattleAnimSystem *system);
+void BattleAnimFunc_ShakeDefenderBlackFlash(BattleAnimSystem *system);
+void BattleAnimFunc_AttackerHop(BattleAnimSystem *system);
+void BattleAnimFunc_WaveDefenderOnBg(BattleAnimSystem *system);
+void BattleAnimFunc_ShowAttackerObjWindowSprites(BattleAnimSystem *system);
+void BattleAnimFunc_AttackerSquashAfterimages(BattleAnimSystem *system);
+void BattleAnimFunc_AttackerCircleFade(BattleAnimSystem *system);
+void BattleAnimFunc_ShakeBattlefieldFlashing(BattleAnimSystem *system);
+void BattleAnimFunc_WaddlePic(BattleAnimSystem *system);
+void BattleAnimFunc_SpriteDriftFade(BattleAnimSystem *system);
+void BattleAnimFunc_RockOrShakeAttacker(BattleAnimSystem *system);
+void BattleAnimFunc_ShakeBattlefieldByPower(BattleAnimSystem *system);
+void BattleAnimFunc_AttackerDip(BattleAnimSystem *system);
+void BattleAnimFunc_AttackerLungeKnockback(BattleAnimSystem *system);
+void BattleAnimFunc_AttackerStretchUp(BattleAnimSystem *system);
+void BattleAnimFunc_DarkSpriteJump(BattleAnimSystem *system);
+void BattleAnimFunc_FadeBgPalette(BattleAnimSystem *system);
+void BattleAnimFunc_BattlerPaletteFade(BattleAnimSystem *system);
+void BattleAnimFunc_PulseBattlerSprite(BattleAnimSystem *system);
+void BattleAnimFunc_ShakeTargets(BattleAnimSystem *system);
+void BattleAnimFunc_WobbleDefenderOnBg(BattleAnimSystem *system);
+void BattleAnimFunc_BlendBattlerSprites(BattleAnimSystem *system);
+void BattleAnimFunc_ShakeSpritePair(BattleAnimSystem *system);
+void BattleAnimFunc_SetBattlerVanished(BattleAnimSystem *system);
+void BattleAnimFunc_WindowSweepFlashWhite(BattleAnimSystem *system);
+void BattleAnimFunc_StretchBattler(BattleAnimSystem *system);
+void BattleAnimFunc_StretchShakeDefender(BattleAnimSystem *system);
+void BattleAnimFunc_SlidingBg(BattleAnimSystem *system);
+void BattleAnimFunc_SlidingBg2(BattleAnimSystem *system);
+void BattleAnimFunc_ShootSpriteFromAttacker(BattleAnimSystem *system);
+void BattleAnimFunc_AttackerShakeLunge(BattleAnimSystem *system);
+void BattleAnimFunc_DefenderKnockback(BattleAnimSystem *system);
+void BattleAnimFunc_StretchFadeSprite(BattleAnimSystem *system);
+void BattleAnimFunc_BlinkBattler(BattleAnimSystem *system);
+void BattleAnimFunc_SlideBattler(BattleAnimSystem *system);
+void BattleAnimFunc_SlideBattler2(BattleAnimSystem *system);
+void BattleAnimFunc_ShakeAndScaleBattler(BattleAnimSystem *system);
+void BattleAnimFunc_ShakeAndScaleBattlerXY(BattleAnimSystem *system);
+void BattleAnimFunc_WaveAttackerOnBg(BattleAnimSystem *system);
+void BattleAnimFunc_ShowBattleBgInObjWindow(BattleAnimSystem *system);
+void BattleAnimFunc_MoveBattlerBy(BattleAnimSystem *system);
+void BattleAnimFunc_ShrinkSpriteOnDefender(BattleAnimSystem *system);
+void BattleAnimFunc_AttackerDashAfterimages(BattleAnimSystem *system);
+void BattleAnimFunc_MoveBattlerSin(BattleAnimSystem *system);
+void BattleAnimFunc_MoveBattlerLinear(BattleAnimSystem *system);
+void BattleAnimFunc_ResetBattlerPosition(BattleAnimSystem *system);
+void BattleAnimFunc_BlendSpritePalette(BattleAnimSystem *system);
+void BattleAnimFunc_ChangeBattlerHeight(BattleAnimSystem *system);
+void BattleAnimFunc_MoveEmitter(BattleAnimSystem *system);
+void BattleAnimFunc_MoveEmitterArc(BattleAnimSystem *system);
+void BattleAnimFunc_RevealBattler(BattleAnimSystem *system);
+void BattleAnimFunc_ShakeBg(BattleAnimSystem *system);
+void BattleAnimFunc_SpriteMosaic(BattleAnimSystem *system);
+void BattleAnimFunc_SquashSprite(BattleAnimSystem *system);
+void BattleAnimFunc_SlideOutAndTransform(BattleAnimSystem *system);
+void BattleAnimFunc_EmitterSinMotion(BattleAnimSystem *system);
+void BattleAnimFunc_MoveEmitterVertical(BattleAnimSystem *system);
+void BattleAnimFunc_SetBgPaletteGrayscale(BattleAnimSystem *system);
+void BattleAnimFunc_DropSpriteStepwise(BattleAnimSystem *system);
+void BattleAnimFunc_BattleBgWave(BattleAnimSystem *system);
+void BattleAnimFunc_MoveBattlerOffscreen(BattleAnimSystem *system);
+void BattleAnimFunc_AnimateSprites(BattleAnimSystem *system);
+void BattleAnimFunc_WipeOutDefender(BattleAnimSystem *system);
+void BattleAnimFunc_ObjWindowBgScrollUp(BattleAnimSystem *system);
+void BattleAnimFunc_ObjWindowBgScrollDown(BattleAnimSystem *system);
+void BattleAnimFunc_ObjWindowBgScrollUpAlt(BattleAnimSystem *system);
+void BattleAnimFunc_ObjWindowBgScrollDownFast(BattleAnimSystem *system);
+const BattleAnimFunc gBattleAnimFuncTable[] = {
+    BattleAnimFunc_None,
+    BattleAnimFunc_OneFrameTask,
+    BattleAnimFunc_OneFrameSoundTask,
+    BattleAnimFunc_OneFrameUncountedTask,
+    BattleAnimFunc_RotateBattler,
+    BattleAnimFunc_AttackerGrowFlashRed,
+    BattleAnimFunc_AttackerSquashStretch,
+    BattleAnimFunc_AttackerAfterimages,
+    BattleAnimFunc_PicOrbit,
+    BattleAnimFunc_AttackerRecoilTilt,
+    BattleAnimFunc_CircleBattler,
+    BattleAnimFunc_ShakeDefenderWithOverlay,
+    BattleAnimFunc_SkewSlideAttackerBg,
+    BattleAnimFunc_AttackerPulseWhite,
+    BattleAnimFunc_AttackerStretchSteps,
+    BattleAnimFunc_AttackerLeapOffscreen,
+    BattleAnimFunc_AttackerSilhouette,
+    BattleAnimFunc_FadeInShrinkSprite,
+    BattleAnimFunc_ShakeDefenderBlackFlash,
+    BattleAnimFunc_AttackerHop,
+    BattleAnimFunc_WaveDefenderOnBg,
+    BattleAnimFunc_ShowAttackerObjWindowSprites,
+    BattleAnimFunc_AttackerSquashAfterimages,
+    BattleAnimFunc_AttackerCircleFade,
+    BattleAnimFunc_ShakeBattlefieldFlashing,
+    BattleAnimFunc_WaddlePic,
+    BattleAnimFunc_SpriteDriftFade,
+    BattleAnimFunc_RockOrShakeAttacker,
+    BattleAnimFunc_ShakeBattlefieldByPower,
+    BattleAnimFunc_AttackerDip,
+    BattleAnimFunc_AttackerLungeKnockback,
+    BattleAnimFunc_AttackerStretchUp,
+    BattleAnimFunc_DarkSpriteJump,
+    BattleAnimFunc_FadeBgPalette,
+    BattleAnimFunc_BattlerPaletteFade,
+    BattleAnimFunc_PulseBattlerSprite,
+    BattleAnimFunc_ShakeTargets,
+    BattleAnimFunc_WobbleDefenderOnBg,
+    BattleAnimFunc_BlendBattlerSprites,
+    BattleAnimFunc_ShakeSpritePair,
+    BattleAnimFunc_SetBattlerVanished,
+    BattleAnimFunc_WindowSweepFlashWhite,
+    BattleAnimFunc_StretchBattler,
+    BattleAnimFunc_StretchShakeDefender,
+    BattleAnimFunc_SlidingBg,
+    BattleAnimFunc_SlidingBg2,
+    BattleAnimFunc_ShootSpriteFromAttacker,
+    BattleAnimFunc_AttackerShakeLunge,
+    BattleAnimFunc_DefenderKnockback,
+    BattleAnimFunc_StretchFadeSprite,
+    BattleAnimFunc_BlinkBattler,
+    BattleAnimFunc_SlideBattler,
+    BattleAnimFunc_SlideBattler2,
+    BattleAnimFunc_ShakeAndScaleBattler,
+    BattleAnimFunc_ShakeAndScaleBattlerXY,
+    BattleAnimFunc_WaveAttackerOnBg,
+    BattleAnimFunc_ShowBattleBgInObjWindow,
+    BattleAnimFunc_MoveBattlerBy,
+    BattleAnimFunc_ShrinkSpriteOnDefender,
+    BattleAnimFunc_AttackerDashAfterimages,
+    BattleAnimFunc_MoveBattlerSin,
+    BattleAnimFunc_MoveBattlerLinear,
+    BattleAnimFunc_ResetBattlerPosition,
+    BattleAnimFunc_BlendSpritePalette,
+    BattleAnimFunc_ChangeBattlerHeight,
+    BattleAnimFunc_MoveEmitter,
+    BattleAnimFunc_MoveEmitterArc,
+    BattleAnimFunc_RevealBattler,
+    BattleAnimFunc_ShakeBg,
+    BattleAnimFunc_SpriteMosaic,
+    BattleAnimFunc_SquashSprite,
+    BattleAnimFunc_SlideOutAndTransform,
+    BattleAnimFunc_EmitterSinMotion,
+    BattleAnimFunc_MoveEmitterVertical,
+    BattleAnimFunc_SetBgPaletteGrayscale,
+    BattleAnimFunc_DropSpriteStepwise,
+    BattleAnimFunc_BattleBgWave,
+    BattleAnimFunc_MoveBattlerOffscreen,
+    BattleAnimFunc_AnimateSprites,
+    BattleAnimFunc_WipeOutDefender,
+    BattleAnimFunc_ObjWindowBgScrollUp,
+    BattleAnimFunc_ObjWindowBgScrollDown,
+    BattleAnimFunc_ObjWindowBgScrollUpAlt,
+    BattleAnimFunc_ObjWindowBgScrollDownFast,
+};
+#endif

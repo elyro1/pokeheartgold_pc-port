@@ -1,3 +1,6 @@
+#if defined(SDK_PORT)
+#include "port/sim_config_prj.h"
+#endif
 #include "player_avatar_movement.h"
 
 #include "global.h"
@@ -925,6 +928,11 @@ static void PlayerAvatar_SetObjectMovement(PlayerAvatar *avatar, LocalMapObject 
 }
 
 u32 PlayerAvatar_CheckCollision(PlayerAvatar *avatar, LocalMapObject *mapObject, int direction) {
+#if defined(SDK_PORT)
+    if (SIM_Config_prj_GetConfig()->walkThroughWalls) {
+        return 0;
+    }
+#endif
     u32 result = 0;
     u32 collision = MapObject_GetCollisionInDirection(avatar, mapObject, direction);
 

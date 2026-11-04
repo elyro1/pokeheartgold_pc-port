@@ -430,3 +430,7 @@ static void PokeathlonBox_CalcStatChanges(PokeathlonBox_MonStats *stats1, Pokeat
     mon->statChanges[3].direction = PokemonSummary_GetPokeathlonStarStates(mon->statChanges[3].stars, stats1->jump, stats2->jump, stats2->jumpColor, (s8)aprijuiceModifier->stats[3]);
     mon->statChanges[4].direction = PokemonSummary_GetPokeathlonStarStates(mon->statChanges[4].stars, stats1->stamina, stats2->stamina, stats2->staminaColor, (s8)aprijuiceModifier->stats[4]);
 }
+#if defined(SDK_PORT)
+
+const OverlayManagerTemplate subOverlayTemplate = { PokeathlonBox_Init, PokeathlonBox_Main, PokeathlonBox_Exit, FS_OVERLAY_ID(OVY_97) };
+#endif

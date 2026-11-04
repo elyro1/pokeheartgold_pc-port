@@ -14,12 +14,18 @@ extern void CARD_SetSpiWriteWaitCycles(u32 cycles);
 extern void CARD_SetSpiReadWaitCycles(u32 cycles);
 extern u32 CARD_SpiWaitReadRange(void *dst);
 extern void CARD_SpiWaitWriteRange(void *src, u32 len);
+#if defined(SDK_PORT)
+#else
 extern int MI_CompressLZImpl(const void *src, u32 size, void *dst, int unk);
+#endif
 extern float _f_ulltof(u64 value);
 extern float _fdiv(float a, float b);
 extern u64 _ll_udiv(u64 a, u64 b);
+#if defined(SDK_PORT)
+#else
 extern int RTC_GetTime(RTCTime *time);
 extern int RTC_GetDate(RTCDate *date);
+#endif
 
 #define TICKS_TO_MS(ticks) (((ticks) << 6) / 0x82EA)
 

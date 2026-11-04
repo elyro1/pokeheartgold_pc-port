@@ -1,3 +1,6 @@
+#if defined(SDK_PORT)
+#include <dwc.h>
+#else
 #ifndef POKEHEARTGOLD_DWCACCOUNT_H
 #define POKEHEARTGOLD_DWCACCOUNT_H
 
@@ -27,6 +30,7 @@ int DWC_Init(int);
 int DWC_IsEqualFriendData(DWCFriendData *friendData0, DWCFriendData *friendData1);
 
 #endif // POKEHEARTGOLD_DWCACCOUNT_H
+#endif
 
 #ifndef POKEHEARTGOLD_FRIEND_ROSTER_H
 #define POKEHEARTGOLD_FRIEND_ROSTER_H
@@ -72,11 +76,15 @@ void Comm_EnableKeySync(void);
 u16 Comm_GetLocalNetId(void);
 BOOL Comm_HasLinkError(void);
 
+#if defined(SDK_PORT)
+
+#else
 typedef struct {
     u64 x;
     u64 mul;
     u64 add;
 } MATHRandContext32;
+#endif
 
 void CommRandom_Init(MATHRandContext32 *seed);
 void Comm_FreeCommandTable(void);
@@ -84,8 +92,11 @@ void CommWireless_Terminate(void);
 void Comm_ResetWorkAndParents(void);
 int CommWireless_Stop(void);
 void Comm_Shutdown(void);
+#if defined(SDK_PORT)
+#else
 int DWC_GetLinkLevel(void);
 s32 WM_GetLinkLevel(void);
+#endif
 int CommWireless_IsIdle(void);
 void CommWireless_SetManagerEnded(int end);
 void Comm_ResetWork(void);
@@ -111,10 +122,17 @@ void WifiConnection_SetReceiveCallbacks(void (*func0)(), void (*func1)());
 s32 WifiConnection_CheckError(void);
 int WifiConnection_Disconnect(int checkOnly);
 int WifiConnection_FinishDisconnect(void);
+#if defined(SDK_PORT)
+#else
 int DWC_GetLastErrorEx(s32 *code, s32 *category);
 void DWC_ClearError(void);
+#endif
 s32 WifiConnection_UpdateLogin(void);
+#if defined(SDK_PORT)
+BOOL WiFiPlazaLobbyClient_Initialize(void *value);
+#else
 int WiFiPlazaLobbyClient_Initialize(int value);
+#endif
 void WifiConnection_Init(SaveData *saveData, int heapId, int heapSize, int maxPlayers);
 void WifiConnection_SetErrorCallback(void (*func)(u32));
 int WiFiPlazaLobbyClient_IsMatchActive(int index);
@@ -129,6 +147,8 @@ int WiFiPlazaLobbyClient_IsInLobby(void);
 int WiFiPlazaLobbyClient_Update(void);
 int WiFiPlazaLobbyClient_IsDisconnected(void);
 
+#if defined(SDK_PORT)
+#else
 u32 CommState_GetSyncPacketSize(void);
 void CommState_Init(SaveData *saveData, s8 linkMode);
 void CommState_Free(void);
@@ -220,7 +240,10 @@ void CommState_WifiTimedOut(void);
 void CommState_WifiDisconnected(void);
 void CommState_WifiCancelled(void);
 void CommState_WifiConnected(void);
+#endif
 
+#if defined(SDK_PORT)
+#else
 void CommState_SetWifiError(u32 error, s32 type, s32 status);
 void CommState_WifiLobby(void);
 void CommState_WifiStartMatch(void);
@@ -264,7 +287,10 @@ u8 CommState_GetBeaconId(void);
 void CommState_SetSelectedOrder(void *order);
 void CommState_GetSelectedOrder(void *order);
 int CommState_IsWifi(void);
+#endif
 
+#if defined(SDK_PORT)
+#else
 void CommState_SetErrorScreen(s8 errorScreen);
 u8 CommState_GetErrorScreen(void);
 void CommState_ShowErrorAndHalt(u32 errorCode);
@@ -293,6 +319,7 @@ void CommState_PlazaMatching(void);
 void CommState_PlazaEndMatch(void);
 void CommState_PlazaTimedOut(void);
 void CommState_SetFrontierWifiLinkMode(void);
+#endif
 void Comm_InitSyncedSave(s32 *state);
 BOOL Comm_SyncedSave(SaveData *saveData, s32 arg1, s32 *state);
 void Comm_RecordPlayerLocations(SaveWiFiHistory *wifiHistory);

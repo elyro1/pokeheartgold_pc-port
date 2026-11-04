@@ -140,9 +140,15 @@ u32 FrontierSpeciesRecords_Get(SaveData *saveData, u32 *buffer, u32 type, u32 in
 BOOL FrontierSpeciesRecords_UpdateFromStat(SaveData *save, int stat, int indexStat, int slot, u32 type, enum HeapID heapId, u32 *loadResult, int *saveResult);
 
 void FactoryFlags_Init(u8 *flags);
+#if defined(SDK_PORT)
+void FactoryFlags_SetField(void *flags, u32 field, u8 index, u8 *value);
+u32 FactoryFlags_GetField(void *flags, int field, u8 index, int unused);
+void *Save_Frontier_GetFactoryFlags(SaveData *save);
+#else
 void FactoryFlags_SetField(u32 flags, u32 field, u8 index, u8 *value);
 u32 FactoryFlags_GetField(u32 flags, int field, u8 index, int unused);
 u32 Save_Frontier_GetFactoryFlags(SaveData *save);
+#endif
 void HallChallenge_Clear(HallChallenge *challenge);
 HallChallenge *Save_Frontier_GetHallChallenge(SaveData *save);
 u32 HallChallenge_GetSaved(HallChallenge *challenge);
@@ -153,9 +159,15 @@ u8 HallTypeRanks_Get(u8 cell, u8 *ranks);
 void HallTypeRanks_Set(u8 cell, u8 *ranks, u8 rank);
 void HallTypeRanks_Clear(u8 *ranks);
 void HallFlags_Init(u8 *flags);
+#if defined(SDK_PORT)
+void *Save_Frontier_GetHallFlags(SaveData *save);
+void HallFlags_SetField(void *flags, u32 field, u32 index, u32 unused, void *input);
+u32 HallFlags_GetField(void *flags, int field, u8 index, int unused, int unused2);
+#else
 u32 Save_Frontier_GetHallFlags(SaveData *save);
 void HallFlags_SetField(u32 flags, u32 field, u32 index, u32 unused, void *input);
 u32 HallFlags_GetField(u32 flags, int field, u8 index, int unused, int unused2);
+#endif
 void CastleChallenge_Clear(CastleChallenge *challenge);
 CastleChallenge *Save_Frontier_GetCastleChallenge(SaveData *save);
 u32 CastleChallenge_GetSaved(CastleChallenge *challenge);
@@ -163,9 +175,15 @@ void CastleChallenge_SetSaved(CastleChallenge *challenge, int saved);
 void CastleChallenge_SetField(CastleChallenge *challenge, int field, u8 index, int column, void *value);
 u32 CastleChallenge_GetField(CastleChallenge *challenge, int field, u8 index, int column, int unused);
 void CastleFlags_Init(u8 *flags);
+#if defined(SDK_PORT)
+void *Save_Frontier_GetCastleFlags(SaveData *save);
+void CastleFlags_SetField(void *flags, u32 field, u32 index, u32 unused, void *input);
+u32 CastleFlags_GetField(void *flags, u32 field, u8 index, u32 unused, u32 unused2);
+#else
 u32 Save_Frontier_GetCastleFlags(SaveData *save);
 void CastleFlags_SetField(u32 flags, u32 field, u32 index, u32 unused, void *input);
 u32 CastleFlags_GetField(u32 flags, u32 field, u8 index, u32 unused, u32 unused2);
+#endif
 void ArcadeChallenge_Clear(ArcadeChallenge *challenge);
 ArcadeChallenge *Save_Frontier_GetArcadeChallenge(SaveData *save);
 u32 ArcadeChallenge_GetSaved(ArcadeChallenge *challenge);

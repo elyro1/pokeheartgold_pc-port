@@ -941,3 +941,20 @@ static void WiFiPlazaPlayerObject_ApplyLightFlags(BillboardObject *billboard, vo
     NNSG3dResMdl *model = BillboardObject_GetModelNoCast(billboard);
     NNS_G3dMdlSetMdlLightEnableFlagAll(model, object->lightFlags);
 }
+#if defined(SDK_PORT)
+
+void (*const gWiFiPlazaPlayerObjectActions[])(WiFiPlazaPlayerObject *) = {
+    WiFiPlazaPlayerObject_ShowStandingSprite,
+    WiFiPlazaPlayerObject_HoldWalkFrameThenRestart,
+    WiFiPlazaPlayerObject_PlayStandingSequence,
+    WiFiPlazaPlayerObject_PlayWalkingSequence,
+    WiFiPlazaPlayerObject_ShowStandingSprite,
+    WiFiPlazaPlayerObject_PlayStandingSequence,
+    WiFiPlazaPlayerObject_PlayStandingSequence,
+    WiFiPlazaPlayerObject_PlayStandingSequence,
+    WiFiPlazaPlayerObject_PlayStandingSequence,
+    WiFiPlazaPlayerObject_PlayStandingSequence,
+    WiFiPlazaPlayerObject_PlayStandingSequence,
+    0
+};
+#endif

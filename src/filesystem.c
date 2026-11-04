@@ -144,7 +144,13 @@ u32 GetNarcMemberSizeByIdPair(NarcId narc_id, s32 file_idx) {
     FS_SeekFile(&file, (s32)(gmif_start + 8 + file_start + 0), FS_SEEK_SET);
     chunk_size = file_end - file_start;
     GF_ASSERT(chunk_size != 0);
+#if defined(SDK_PORT)
+    // The DS original leaked this handle. On PC each query owns a host file
+    // descriptor, so repeated graphics loads eventually exhaust the process.
+    FS_CloseFile(&file);
+#else
     // Bug: File is never closed
+#endif
     return chunk_size;
 }
 

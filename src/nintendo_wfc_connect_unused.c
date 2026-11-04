@@ -40,8 +40,13 @@ static void NintendoWfcUnused_InitObjTransfer(void);
 static void NintendoWfcUnused_InitSpriteResources(NintendoWfcUnused *wfc);
 static void NintendoWfcUnused_InitSpriteTemplate(SpriteTemplate *template, NintendoWfcUnused *wfc, SpriteResourcesHeader *header, u32 whichScreen);
 static void NintendoWfcUnused_CreateSprites(NintendoWfcUnused *wfc);
+#if defined(SDK_PORT)
+static void *NintendoWfcUnused_Alloc(DWCAllocType heap, u32 size, int alignment);
+static void NintendoWfcUnused_Free(DWCAllocType heap, void *ptr, u32 size);
+#else
 static void *NintendoWfcUnused_Alloc(int heap, u32 size, int alignment);
 static void NintendoWfcUnused_Free(int heap, void *ptr, u32 size);
+#endif
 static void NintendoWfcUnused_InitGraphics(NintendoWfcUnused *wfc);
 static void NintendoWfcUnused_FreeGraphics(NintendoWfcUnused *wfc);
 
@@ -112,7 +117,11 @@ BOOL NintendoWfcUnused_Init(OverlayManager *man, int *state) {
         Sound_SetSceneAndPlayBGM(52, SEQ_NONE, 0);
         heapMem = Heap_Alloc(HEAP_ID_150, 0x20020);
         wfc->heapMem = heapMem;
+#if defined(SDK_PORT)
+        wfc->expHeap = NNS_FndCreateExpHeapEx((void *)(((uintptr_t)heapMem + 31) & ~(uintptr_t)31), 0x20000, 0);
+#else
         wfc->expHeap = NNS_FndCreateExpHeapEx((void *)(((u32)heapMem + 31) & ~31), 0x20000, 0);
+#endif
         Sound_SetSceneAndPlayBGM(11, SEQ_GS_WIFI_ACCESS, 1);
         reg_GX_POWCNT &= ~REG_GX_POWCNT_DSEL_MASK;
         *state = NINTENDO_WFC_INIT_START_WIRELESS;
@@ -297,14 +306,22 @@ void NintendoWfcUnused_SetState(NintendoWfcUnused *wfc, enum NintendoWfcUnusedSt
     wfc->nextState = nextState;
 }
 
+#if defined(SDK_PORT)
+static void *NintendoWfcUnused_Alloc(DWCAllocType heap, u32 size, int alignment) {
+#else
 static void *NintendoWfcUnused_Alloc(int heap, u32 size, int alignment) {
+#endif
     OSIntrMode enabled = OS_DisableInterrupts();
     void *result = NNS_FndAllocFromExpHeapEx(sNintendoWfcUnusedGlobal.heap, size, alignment);
     OS_RestoreInterrupts(enabled);
     return result;
 }
 
+#if defined(SDK_PORT)
+static void NintendoWfcUnused_Free(DWCAllocType heap, void *ptr, u32 size) {
+#else
 static void NintendoWfcUnused_Free(int heap, void *ptr, u32 size) {
+#endif
     if (ptr) {
         OSIntrMode enabled = OS_DisableInterrupts();
         NNS_FndFreeToExpHeap(sNintendoWfcUnusedGlobal.heap, ptr);
@@ -343,3 +360,69 @@ static void NintendoWfcUnused_FreeGraphics(NintendoWfcUnused *wfc) {
     ObjCharTransfer_Destroy();
     ObjPlttTransfer_Destroy();
 }
+#if defined(SDK_PORT)
+static enum NintendoWfcMainState Native_NintendoWfcUnused_StartConnect(NintendoWfcUnused *wfc) { NintendoWfcUnused_StartConnect(wfc); return 0; }
+static enum NintendoWfcMainState Native_NintendoWfcUnused_UnusedState_Idle(NintendoWfcUnused *wfc) { return NintendoWfcUnused_UnusedState_Idle(wfc); }
+
+
+
+enum NintendoWfcMainState (*const sNintendoWfcUnusedStates[57])(NintendoWfcUnused *wfc) = {
+    NintendoWfcUnused_AskConnect,
+    NintendoWfcUnused_HandleConnectChoice,
+    Native_NintendoWfcUnused_StartConnect,
+    NintendoWfcUnused_WaitConnect,
+    NintendoWfcUnused_StartAuth,
+    NintendoWfcUnused_WaitAuth,
+    NintendoWfcUnused_InitHttp,
+    NintendoWfcUnused_RequestInfo,
+    NintendoWfcUnused_WaitInfo,
+    NintendoWfcUnused_RequestSetProfile,
+    NintendoWfcUnused_WaitSetProfile,
+    NintendoWfcUnused_RequestRoomCount,
+    NintendoWfcUnused_WaitRoomCount,
+    NintendoWfcUnused_AskChallengeRoom,
+    NintendoWfcUnused_StartChallengeRoomInput,
+    NintendoWfcUnused_HandleChallengeRoomInput,
+    NintendoWfcUnused_PrintReceivingTrainers,
+    NintendoWfcUnused_RequestTrainersDownload,
+    NintendoWfcUnused_WaitTrainersDownload,
+    NintendoWfcUnused_PrintTrainersReceived,
+    NintendoWfcUnused_PrintRoomUnavailable,
+    NintendoWfcUnused_AskCancelChallenge,
+    NintendoWfcUnused_HandleCancelChallengeChoice,
+    NintendoWfcUnused_AskCancelDownload,
+    NintendoWfcUnused_HandleCancelDownloadChoice,
+    NintendoWfcUnused_PrintSendingRecord,
+    NintendoWfcUnused_RequestUpload,
+    NintendoWfcUnused_WaitUpload,
+    NintendoWfcUnused_PrintRecordSent,
+    NintendoWfcUnused_AskLeadersRank,
+    NintendoWfcUnused_StartLeadersRankInput,
+    NintendoWfcUnused_HandleLeadersRankInput,
+    NintendoWfcUnused_AskLeadersRoom,
+    NintendoWfcUnused_StartLeadersRoomInput,
+    NintendoWfcUnused_HandleLeadersRoomInput,
+    NintendoWfcUnused_PrintReceivingLeaders,
+    NintendoWfcUnused_RequestLeadersDownload,
+    NintendoWfcUnused_WaitLeadersDownload,
+    NintendoWfcUnused_PrintLeadersReceived,
+    NintendoWfcUnused_StartSave,
+    NintendoWfcUnused_Save,
+    NintendoWfcUnused_PrintDisconnecting,
+    NintendoWfcUnused_CloseConnection,
+    NintendoWfcUnused_PrintDisconnected,
+    Native_NintendoWfcUnused_UnusedState_Idle,
+    NintendoWfcUnused_StartDisconnect,
+    NintendoWfcUnused_StartExit,
+    NintendoWfcUnused_WaitMessage,
+    NintendoWfcUnused_OpenYesNoPrompt,
+    NintendoWfcUnused_WaitMessageAndDelay,
+    NintendoWfcUnused_UnusedState_HandleYesNo,
+    NintendoWfcUnused_AskLogOut,
+    NintendoWfcUnused_HandleLogOutChoice,
+    NintendoWfcUnused_ShowHttpError,
+    NintendoWfcUnused_Disconnect,
+    NintendoWfcUnused_ShowDwcError,
+    NintendoWfcUnused_WaitErrorDismiss,
+};
+#endif

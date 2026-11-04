@@ -4,6 +4,9 @@
 #include "party_menu.h"
 
 u32 GetPartyMenuContextMenuActionFunc(int index);
+#if defined(SDK_PORT)
+PartyMonContextMenuActionFunc PartyMenu_GetContextMenuAction(u32 action);
+#endif
 int PartyMenu_Subtask_PrintTakeItemMessage(PartyMenu *partyMenu);
 int PartyMenu_Subtask_PrintTakeGriseousOrbMessage(PartyMenu *partyMenu);
 int PartyMenu_Subtask_WaitTakeGriseousOrbAnim(PartyMenu *partyMenu);

@@ -1,13 +1,24 @@
 #include "application/main_menu/mystery_gift_beacon.h"
 
+#if defined(SDK_PORT)
+#include <nitro/wm.h>
+#else
 #include <nitro/wm/wm_internal.h>
+#endif
 
 #include "global.h"
 
 #include "library/nitrocrypto_rc4.h"
+#if defined(SDK_PORT)
+#include <stdint.h>
+#endif
 
 // Mystery Gift > Get via Wireless Communication: downloads a gift that a distribution station broadcasts in its
 // beacons (no connection); the gift is RC4-encrypted, its id is the checksum of the decrypted data.
+#if defined(SDK_PORT)
+
+#define MYSTERY_GIFT_BEACON_RECEIVE_FLAGS_SIZE 0x520
+#endif
 
 #define MYSTERY_GIFT_BEACON_GGID 0x400318
 
@@ -33,9 +44,15 @@ typedef struct MysteryGiftBeaconScanResult {
 // argument of the other WM callbacks (common head)
 
 typedef struct MysteryGiftBeaconWork {
+#if defined(SDK_PORT)
+    _Alignas(32) u8 wmBuffer[WM_SYSTEM_BUF_SIZE]; // WM_Initialize
+    _Alignas(32) u8 scanBuffer[sizeof(WMBssDesc)];
+    _Alignas(32) WMScanParam scanParam;
+#else
     u8 wmBuffer[0xF00]; // WM_Initialize
     u8 scanBuffer[0xC0];
     WmScanParam scanParam;
+#endif
     u8 unk_FD0[0x10];
     u16 title[MYSTERY_GIFT_BEACON_PACKET_DATA_SIZE / 2]; // packet 0xFFFF
     BOOL titleReceived;
@@ -110,9 +127,15 @@ static BOOL MysteryGiftBeacon_StartScan(void) {
         OS_Terminate();
     }
     MysteryGiftBeacon_SetState(MYSTERY_GIFT_BEACON_STATE_SCANNING);
+#if defined(SDK_PORT)
+    *(u16 *)&gMysteryGiftBeacon.work->scanParam.bssid[4] = 0xFFFF;
+    *(u16 *)&gMysteryGiftBeacon.work->scanParam.bssid[2] = 0xFFFF;
+    *(u16 *)&gMysteryGiftBeacon.work->scanParam.bssid[0] = 0xFFFF;
+#else
     *(u16 *)&gMysteryGiftBeacon.work->scanParam.address[4] = 0xFFFF;
     *(u16 *)&gMysteryGiftBeacon.work->scanParam.address[2] = 0xFFFF;
     *(u16 *)&gMysteryGiftBeacon.work->scanParam.address[0] = 0xFFFF;
+#endif
     if (!MysteryGiftBeacon_ScanChannel()) {
         MysteryGiftBeacon_SetState(MYSTERY_GIFT_BEACON_STATE_ERROR);
         void (*callback)(int) = gMysteryGiftBeacon.work->callback;
@@ -164,11 +187,20 @@ static BOOL MysteryGiftBeacon_ScanChannel(void) {
     } else {
         gMysteryGiftBeacon.work->scanParam.channel = index;
     }
+#if defined(SDK_PORT)
+    gMysteryGiftBeacon.work->scanParam.maxChannelTime = 220;
+    gMysteryGiftBeacon.work->scanParam.scanBuf = (WMBssDesc *)gMysteryGiftBeacon.work->scanBuffer;
+#else
     gMysteryGiftBeacon.work->scanParam.time = 220;
     gMysteryGiftBeacon.work->scanParam.buffer = gMysteryGiftBeacon.work->scanBuffer;
+#endif
     if (gMysteryGiftBeacon.work->mode == MYSTERY_GIFT_BEACON_MODE_RECEIVE) {
         for (i = 0; i < 6; i++) {
+#if defined(SDK_PORT)
+            gMysteryGiftBeacon.work->scanParam.bssid[i] = gMysteryGiftBeacon.work->parentMac[i];
+#else
             gMysteryGiftBeacon.work->scanParam.address[i] = gMysteryGiftBeacon.work->parentMac[i];
+#endif
         }
     }
     int result = WM_StartScan(MysteryGiftBeacon_ScanCallback, &gMysteryGiftBeacon.work->scanParam);
@@ -375,7 +407,11 @@ static void MysteryGiftBeacon_ResetCallback(void *arg) {
 }
 
 BOOL MysteryGiftBeacon_Init(void *dest, void (*callback)(int event), void *memory) {
+#if defined(SDK_PORT)
+    gMysteryGiftBeacon.work = (MysteryGiftBeaconWork *)(((uintptr_t)memory + 31) & ~(uintptr_t)31);
+#else
     gMysteryGiftBeacon.work = (MysteryGiftBeaconWork *)(((u32)memory + 31) & ~31);
+#endif
     gMysteryGiftBeacon.work->state = MYSTERY_GIFT_BEACON_STATE_STOP;
     gMysteryGiftBeacon.work->mode = MYSTERY_GIFT_BEACON_MODE_INIT;
     gMysteryGiftBeacon.work->dest = dest;
@@ -407,6 +443,9 @@ static void MysteryGiftBeacon_StartReceive(MysteryGiftBeaconPacket *packet) {
 static BOOL MysteryGiftBeacon_ReceivePacket(MysteryGiftBeaconPacket *packet) {
     MysteryGiftBeaconWork *work;
     void (*callback)(int);
+#if defined(SDK_PORT)
+    if (gMysteryGiftBeacon.work->state == MYSTERY_GIFT_BEACON_STATE_ERROR) return FALSE;
+#endif
     if (gMysteryGiftBeacon.work->dataId != packet->id || gMysteryGiftBeacon.work->dataSize != packet->size) {
         u32 mismatches = gMysteryGiftBeacon.work->mismatches++;
         if (mismatches >= 16) { // the station sends another gift now: start over
@@ -431,6 +470,9 @@ static BOOL MysteryGiftBeacon_ReceivePacket(MysteryGiftBeaconPacket *packet) {
                 callback(MYSTERY_GIFT_BEACON_EVENT_ERROR);
             }
             MysteryGiftBeacon_SetState(MYSTERY_GIFT_BEACON_STATE_ERROR);
+#if defined(SDK_PORT)
+            return FALSE;
+#endif
         }
         work = gMysteryGiftBeacon.work;
         {
@@ -497,7 +539,11 @@ BOOL MysteryGiftBeacon_DecryptGift(void) {
 
 // Size of the memory to pass to MysteryGiftBeacon_Init
 u32 MysteryGiftBeacon_GetWorkSize(void) {
+#if defined(SDK_PORT)
+    return sizeof(MysteryGiftBeaconWork) + MYSTERY_GIFT_BEACON_RECEIVE_FLAGS_SIZE + 31;
+#else
     return 0x16A0;
+#endif
 }
 
 const u16 *MysteryGiftBeacon_GetTitle(void) {
@@ -506,3 +552,20 @@ const u16 *MysteryGiftBeacon_GetTitle(void) {
     }
     return NULL;
 }
+#if defined(SDK_PORT)
+
+MysteryGiftBeacon gMysteryGiftBeacon;
+
+const char *gMysteryGiftBeaconStateNames[] = {
+    "mywh_SYSSTATE_STOP", "mywh_SYSSTATE_IDLE", "mywh_SYSSTATE_SCANNING",
+    "mywh_SYSSTATE_BUSY", "mywh_SYSSTATE_CONNECTED", "mywh_SYSSTATE_DATASHARING",
+    "mywh_SYSSTATE_KEYSHARING", "mywh_SYSSTATE_MEASURECHANNEL",
+    "mywh_SYSSTATE_CONNECT_FAIL", "mywh_SYSSTATE_ERROR"
+};
+
+const char gFmt_StrSpaceDashGtSpace[] = "%s -> ";
+
+const char gFmt_StrLf[] = "%s\n";
+
+const char gFmt_NotMyParentGgid[] = "not my parent ggid (%d != %d)\n";
+#endif

@@ -530,4 +530,8 @@ static void GtsSearchResult_ScrollBgs(GtsApp *app) {
     BgSetPosTextAndCommit(app->bgConfig, GF_BG_LYR_SUB_3, BG_POS_OP_SET_Y, -app->scrollY);
 }
 
+#if defined(SDK_PORT)
+/* Native tables from asm/gts_data.s; adapters give differing originals the table's signature. */
+#else
 // SEEK POKEMON (screen 4): the trainers found stand on the top screen; touching one shows its result (screen 3).
+#endif

@@ -4,6 +4,9 @@
 #include <nitro/gx/g2.h>
 
 #include "global.h"
+#if defined(SDK_PORT)
+#include "port/battle_timing.h"
+#endif
 
 #define SCREEN_MASK_MAIN 1
 #define SCREEN_MASK_SUB  2
@@ -21,6 +24,9 @@ typedef struct BrightnessData {
     u16 fractionalCount;
     fx16 currentBrightness;
     BOOL transitionActive;
+#if defined(SDK_PORT)
+    BattleTimingDomain timingDomain;
+#endif
 } BrightnessData;
 
 void DoBrightnessTransitionStep(BrightnessData *brightness);

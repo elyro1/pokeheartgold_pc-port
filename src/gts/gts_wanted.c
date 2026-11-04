@@ -817,3 +817,26 @@ void GtsCursorValueTable_SetEntry(GtsCursorValueTable *arg, int index, u16 value
     arg->unk_04[index] = value1;
     arg->unk_18[index] = value2;
 }
+#if defined(SDK_PORT)
+
+/* Native tables from asm/gts_data.s; adapters give differing originals the table's signature. */
+enum GtsAppState (*const gGtsWantedStates[])(GtsApp *app) = {
+    GtsWanted_Start,
+    GtsWanted_HandleInput,
+    GtsWanted_FadeOut,
+    GtsWanted_OpenSpeciesSelector,
+    GtsWanted_InvalidState4,
+    GtsWanted_InvalidState5,
+    GtsWanted_HandleSpeciesSelector,
+    GtsWanted_AskGender,
+    GtsWanted_OpenGenderSelector,
+    GtsWanted_HandleGenderSelector,
+    GtsWanted_AskLevel,
+    GtsWanted_OpenLevelSelector,
+    GtsWanted_HandleLevelSelector,
+    GtsWanted_AskConfirm,
+    GtsWanted_ShowConfirmPrompt,
+    GtsWanted_HandleConfirmPrompt,
+    GtsWanted_WaitText,
+};
+#endif

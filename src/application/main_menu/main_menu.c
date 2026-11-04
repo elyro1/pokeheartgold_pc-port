@@ -1,6 +1,14 @@
 #include "application/main_menu/main_menu.h"
 
+#if defined(SDK_PORT)
+/* asm/main_menu_data.s stores these three callbacks as 32-bit words. */
+
+
+#endif
 #include "global.h"
+#if defined(SDK_PORT)
+#include <hg/offline_features.h>
+#endif
 
 #include "application/main_menu/agb_cartridge.h"
 #include "application/main_menu/main_menu_internal.h"
@@ -52,6 +60,20 @@ typedef enum MainMenu_AppOption {
 
     APPOPTION_COUNT = APPOPTION_WII_SETTINGS,
 } MainMenu_AppOption;
+#if defined(SDK_PORT)
+
+static PCUnavailableFeature MainMenu_GetUnavailableFeature(MainMenu_AppOption option) {
+    switch (option) {
+    case APPOPTION_WFC: return PC_FEATURE_WIFI_SETUP;
+    case APPOPTION_POKEWALKER: return PC_FEATURE_POKEWALKER;
+    case APPOPTION_MIGRATE_AGB: return PC_FEATURE_GBA_MIGRATION;
+    case APPOPTION_RANGER: return PC_FEATURE_RANGER;
+    case APPOPTION_CONNECT_TO_WII: return PC_FEATURE_WII_LINK;
+    case APPOPTION_WII_SETTINGS: return PC_FEATURE_WII_MESSAGES;
+    default: return PC_FEATURE_UNAVAILABLE_COUNT;
+    }
+}
+#endif
 
 typedef struct MainMenuAppData {
     BgConfig *bgConfig;
@@ -192,6 +214,14 @@ static u32 MainMenu_ConfirmOption(MainMenuAppData *data, int *state, BOOL cancel
     if (!cancelled) {
         PlaySE(SEQ_SE_DP_SELECT);
         data->selectedApp = (MainMenu_AppOption)data->optionIds[data->currentOption];
+#if defined(SDK_PORT)
+        /* Keep the current menu alive when an unavailable hardware feature is selected. */
+        PCUnavailableFeature feature = MainMenu_GetUnavailableFeature(data->selectedApp);
+        if (feature != PC_FEATURE_UNAVAILABLE_COUNT) {
+            PC_ShowUnavailableFeature(feature);
+            return FALSE;
+        }
+#endif
         if (data->selectedApp == APPOPTION_MIGRATE_AGB && CTRDG_IsPulledOut() == TRUE) {
             if (data->beaconWatchState != 12) {
                 CommState_StopBeaconWatch();
@@ -490,9 +520,15 @@ static BOOL MainMenu_PrintWifiInfoErasedWarning(MainMenuAppData *data) {
 }
 
 static void DetectInsertedGBACart(MainMenuAppData *data) {
+#if defined(SDK_PORT)
+#else
     u32 offsets = PmAgbCartridgeGetOffsets(0);
     u32 version = 0;
+#endif
     data->connectedAgbGame = 0;
+#if defined(SDK_PORT)
+    Sys_SetAgbCartridgeVersion(0);
+#else
 
     if (offsets != 0) {
         return;
@@ -521,6 +557,7 @@ static void DetectInsertedGBACart(MainMenuAppData *data) {
         data->connectedAgbGame = PmAgbCartridge_GetVersionInternal() + 1;
         MainMenuUtil_IgnoreCartridgeIrq();
     }
+#endif
 }
 
 static void MainMenu_UpdateBeaconWatch(MainMenuAppData *data) {
@@ -1317,6 +1354,12 @@ static void MainMenu_OnVBlank(BgConfig *bgConfig) {
     OS_SetIrqCheckFlag(OS_IE_VBLANK);
 }
 
+#if defined(SDK_PORT)
+static void MainMenu_NativeVBlank(void *bgConfig) {
+    MainMenu_OnVBlank(bgConfig);
+}
+
+#endif
 BOOL MainMenuApp_Init(OverlayManager *manager, int *state) {
     Heap_Create(HEAP_ID_3, HEAP_ID_MAIN_MENU, 0x40000);
 
@@ -1401,7 +1444,11 @@ BOOL MainMenuApp_Main(OverlayManager *manager, int *state) {
     case 4:
         MainMenu_SetupSprites(data);
         MainMenu_SetupWifiTiles(data);
+#if defined(SDK_PORT)
+        Main_SetVBlankIntrCB(MainMenu_NativeVBlank, data->bgConfig);
+#else
         Main_SetVBlankIntrCB((GFIntrCB)MainMenu_OnVBlank, data->bgConfig);
+#endif
         MainMenu_DrawOptionWindows(data);
         MainMenu_HighlightOption(data, data->currentOption);
         MainMenuUtil_StartFade(FADE_TYPE_BRIGHTNESS_IN, 5, state, 8);
@@ -1458,25 +1505,45 @@ static void MainMenu_QueueSelectedApp(MainMenuAppData *data) {
         RegisterMainOverlay(FS_OVERLAY_ID(OVY_74), &gApp_MainMenu_SelectOption_MysteryGift);
         break;
     case APPOPTION_MIGRATE_AGB:
+#if defined(SDK_PORT)
+#else
         RegisterMainOverlay(FS_OVERLAY_ID(OVY_74), &gApp_MainMenu_SelectOption_MigrateFromAgb);
         break;
+#endif
     case APPOPTION_RANGER:
+#if defined(SDK_PORT)
+#else
         RegisterMainOverlay(FS_OVERLAY_ID(OVY_74), &gApp_MainMenu_SelectOption_ConnectToRanger);
         break;
+#endif
     case APPOPTION_CONNECT_TO_WII:
+#if defined(SDK_PORT)
+#else
         SystemCard_RebootIntoFile("data/eoo.dat");
         break;
+#endif
     case APPOPTION_WFC:
+#if defined(SDK_PORT)
+#else
         Sound_Stop();
         RegisterMainOverlay(FS_OVERLAY_ID_NONE, &gApp_MainMenu_SelectOption_NintendoWFCSetup);
         break;
+#endif
     case APPOPTION_POKEWALKER:
+#if defined(SDK_PORT)
+#else
         Sound_Stop();
         RegisterMainOverlay(FS_OVERLAY_ID(OVY_112), &ov112_App_MainMenu_SelectOption_ConnectToPokewalker);
         break;
+#endif
     case APPOPTION_WII_SETTINGS:
+#if defined(SDK_PORT)
+        PC_ShowUnavailableFeature(MainMenu_GetUnavailableFeature(data->selectedApp));
+        RegisterMainOverlay(FS_OVERLAY_ID(OVY_74), &gApp_MainMenu);
+#else
         Sound_Stop();
         RegisterMainOverlay(FS_OVERLAY_ID(OVY_75), &gApp_MainMenu_SelectOption_WiiMessageSettings);
+#endif
         break;
     case APPOPTION_TITLE_SCREEN:
         RegisterMainOverlay(FS_OVERLAY_ID(intro_title), &gApplication_TitleScreen);
@@ -1496,3 +1563,7 @@ BOOL MainMenuApp_Exit(OverlayManager *manager, int *state) {
 
     return TRUE;
 }
+#if defined(SDK_PORT)
+
+const OverlayManagerTemplate gApp_MainMenu = { MainMenuApp_Init, MainMenuApp_Main, MainMenuApp_Exit, FS_OVERLAY_ID_NONE };
+#endif

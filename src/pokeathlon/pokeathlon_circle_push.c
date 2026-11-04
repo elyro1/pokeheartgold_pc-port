@@ -1,3 +1,6 @@
+#if defined(SDK_PORT)
+#include <hg/qsort.h>
+#endif
 #include "pokeathlon/pokeathlon_circle_push.h"
 
 #include <string.h>
@@ -76,7 +79,10 @@ enum PokeathlonCirclePushInitState {
     CIRCLE_PUSH_INIT_DONE,
 };
 
+#if defined(SDK_PORT)
+#else
 void MATH_QSort(void *head, u32 num, u32 width, int (*compare)(const void *, const void *), void *stackBuffer);
+#endif
 
 typedef struct CirclePushTimerTiles {
     u16 tiles[8];
@@ -2156,7 +2162,11 @@ static void PokeathlonCirclePush_SortByDepth(PokeathlonCirclePush *circlePush, P
         PokeathlonCourseObject_CenterToGround(circlePush->mons[i / POKEATHLON_TEAM_SIZE][i % POKEATHLON_TEAM_SIZE].object, packet->x[i], packet->y[i], &groundX, &groundY);
         depths[i].y = groundY;
     }
+#if defined(SDK_PORT)
+    HG_QSort(depths, NELEMS(depths), sizeof(CirclePushDepth), PokeathlonCirclePush_CompareDepth, circlePush->sortBuffer);
+#else
     MATH_QSort(depths, NELEMS(depths), sizeof(CirclePushDepth), PokeathlonCirclePush_CompareDepth, circlePush->sortBuffer);
+#endif
     for (i = 0; i < POKEATHLON_MONS; i++) {
         u8 mon = depths[i].mon;
         int team = mon / POKEATHLON_TEAM_SIZE;
@@ -2164,3 +2174,7 @@ static void PokeathlonCirclePush_SortByDepth(PokeathlonCirclePush *circlePush, P
         PokeathlonCourseMonObject_SetDrawPriority(circlePush->mons[team][member].object, i + 6);
     }
 }
+#if defined(SDK_PORT)
+
+PokeathlonCirclePushContact gPokeathlonCirclePushContacts[12][12];
+#endif

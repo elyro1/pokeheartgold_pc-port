@@ -1,3 +1,6 @@
+#if defined(SDK_PORT)
+#include "port/sim_config_prj.h"
+#endif
 #include "field_reflection.h"
 
 #include "global.h"
@@ -180,6 +183,9 @@ static BOOL ReflectionEffect_Init(FieldEffect *effect, void *state) {
     work->scale.y = FX32_ONE;
     work->scale.z = FX32_ONE;
     work->scaleStep = REFLECTION_SCALE_STEP;
+#if defined(SDK_PORT)
+    if (SIM_Config_prj_GetConfig()->enable60fps) work->scaleStep /= 2;
+#endif
     if (work->kind == REFLECTION_KIND_FLOOR) {
         work->scaleStep = 0;
     }
@@ -361,6 +367,9 @@ static BOOL BillboardReflectionEffect_Init(FieldEffect *effect, void *state) {
     work->scale.y = FX32_ONE;
     work->scale.z = FX32_ONE;
     work->scaleStep = REFLECTION_SCALE_STEP;
+#if defined(SDK_PORT)
+    if (SIM_Config_prj_GetConfig()->enable60fps) work->scaleStep /= 2;
+#endif
     if (work->kind == REFLECTION_KIND_FLOOR) {
         work->scaleStep = 0;
     }
@@ -417,6 +426,9 @@ static BOOL FollowerReflectionEffect_Init(FieldEffect *effect, void *state) {
     work->scale.y = FX32_ONE;
     work->scale.z = FX32_ONE;
     work->scaleStep = REFLECTION_SCALE_STEP;
+#if defined(SDK_PORT)
+    if (SIM_Config_prj_GetConfig()->enable60fps) work->scaleStep /= 2;
+#endif
     if (work->kind == REFLECTION_KIND_FLOOR || work->kind == REFLECTION_KIND_LARGE_FLOOR) {
         work->scaleStep = 0;
     }

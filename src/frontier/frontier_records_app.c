@@ -885,7 +885,11 @@ static u32 FrontierRecordsApp_GetFactoryStreakLabel(FrontierRecordsApp *app, u32
         FrontierSave *frontierSave = Save_Frontier_GetStatic(app->saveData);
         result = FrontierSave_GetStat(frontierSave, stat, FrontierStat_GetFriendIndex(stat));
     } else {
+#if defined(SDK_PORT)
+        void *factory = Save_Frontier_GetFactoryFlags(app->saveData);
+#else
         int factory = Save_Frontier_GetFactoryFlags(app->saveData);
+#endif
         result = FactoryFlags_GetField(factory, FACTORY_FLAGS_HAS_STREAK, mode + level * 4, 0);
     }
     return (u8)result == 1 ? msg_0019_00030 : msg_0019_00029;

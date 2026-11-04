@@ -1,3 +1,6 @@
+#if defined(SDK_PORT)
+#include "port/battle_timing.h"
+#endif
 #include "global.h"
 
 #include "constants/battle.h"
@@ -574,7 +577,11 @@ static SysTask *BattleAnimSystem_CreateTaskOfKind(enum BattleAnimTaskKind kind, 
         GF_ASSERT(FALSE);
         break;
     }
+#if defined(SDK_PORT)
+    return SysTask_CreateBattleAnimation(func, data, priority);
+#else
     return SysTask_CreateOnMainQueue(func, data, priority);
+#endif
 }
 
 static void BattleAnimSystem_DestroyTaskOfKind(enum BattleAnimTaskKind kind, BattleAnimSystem *system, SysTask *task) {
@@ -750,7 +757,15 @@ BOOL BattleAnimSystem_Execute(BattleAnimSystem *system) {
     if (!BattleAnimSystem_IsInitialized(system)) {
         return FALSE;
     }
+#if defined(SDK_PORT)
+    if (BattleTiming_ShouldTick(BATTLE_TIMING_ANIMATION)) {
+        BattleTimingDomain previous = BattleTiming_SetDomain(BATTLE_TIMING_ANIMATION);
+        system->runner(system);
+        BattleTiming_SetDomain(previous);
+    }
+#else
     system->runner(system);
+#endif
     return TRUE;
 }
 
@@ -864,7 +879,11 @@ static BattleAnimSoundTaskData *BattleAnimSystem_NewSoundTaskData(BattleAnimSyst
 
 static void BattleAnimSystem_StartSoundTask(BattleAnimSystem *system, BattleAnimSoundTaskData *data) {
     data->system = system;
+#if defined(SDK_PORT)
+    SysTask_CreateBattleAnimation((SysTaskFunc)BattleAnimTask_Sound, data, 1100);
+#else
     SysTask_CreateOnMainQueue((SysTaskFunc)BattleAnimTask_Sound, data, 1100);
+#endif
 }
 
 static void BattleAnimTask_Sound(SysTask *task, BattleAnimSoundTaskData *data) {
@@ -1360,7 +1379,11 @@ static void BattleAnimScriptCmd_Call(BattleAnimSystem *system) {
     for (i = 0; i < 3; i++) {
         if (system->returnStack[i] == NULL) {
             system->returnStack[i] = system->scriptPtr + 1;
+#if defined(SDK_PORT)
+            system->scriptPtr += (s32)*system->scriptPtr;
+#else
             system->scriptPtr += *system->scriptPtr;
+#endif
             return;
         }
     }
@@ -1386,7 +1409,13 @@ static void BattleAnimScriptCmd_JumpIfArgEqual(BattleAnimSystem *system) {
     value = *system->scriptPtr;
     system->scriptPtr++;
     if (value == system->args[index]) {
+#if defined(SDK_PORT)
+        /* These NARC operands are word displacements. For example, move 276
+         * branches from word 75 by 67 words to its background wait at 142. */
+        system->scriptPtr += (s32)*system->scriptPtr;
+#else
         system->scriptPtr = (u32 *)*system->scriptPtr;
+#endif
     } else {
         system->scriptPtr++;
     }
@@ -1395,7 +1424,11 @@ static void BattleAnimScriptCmd_JumpIfArgEqual(BattleAnimSystem *system) {
 static void BattleAnimScriptCmd_JumpIfContextField01(BattleAnimSystem *system) {
     system->scriptPtr++;
     if (BattleAnimContext_GetField01(system->context)) {
+#if defined(SDK_PORT)
+        system->scriptPtr += (s32)*system->scriptPtr;
+#else
         system->scriptPtr = (u32 *)*system->scriptPtr;
+#endif
     } else {
         system->scriptPtr++;
     }
@@ -1428,7 +1461,11 @@ static void BattleAnimScriptCmd_JumpByVariantBit0(BattleAnimSystem *system) {
     if (system->context->moveAnimVariant & 1) {
         system->scriptPtr++;
     }
+#if defined(SDK_PORT)
+    system->scriptPtr += (s32)*system->scriptPtr;
+#else
     system->scriptPtr += *system->scriptPtr;
+#endif
 }
 
 static void BattleAnimScriptCmd_JumpBySide(BattleAnimSystem *system) {
@@ -1445,7 +1482,11 @@ static void BattleAnimScriptCmd_JumpBySide(BattleAnimSystem *system) {
     if (side == BATTLE_ANIM_SIDE_ENEMY) {
         system->scriptPtr++;
     }
+#if defined(SDK_PORT)
+    system->scriptPtr += (s32)*system->scriptPtr;
+#else
     system->scriptPtr += *system->scriptPtr;
+#endif
 }
 
 static void BattleAnimScriptCmd_JumpByWeather(BattleAnimSystem *system) {
@@ -1464,7 +1505,11 @@ static void BattleAnimScriptCmd_JumpByWeather(BattleAnimSystem *system) {
             system->scriptPtr++;
         }
     }
+#if defined(SDK_PORT)
+    system->scriptPtr += (s32)*system->scriptPtr;
+#else
     system->scriptPtr += *system->scriptPtr;
+#endif
 }
 
 static void BattleAnimScriptCmd_JumpIfContest(BattleAnimSystem *system) {
@@ -1479,7 +1524,11 @@ static void BattleAnimScriptCmd_JumpIfContest(BattleAnimSystem *system) {
 static void BattleAnimScriptCmd_JumpIfAttackerActive(BattleAnimSystem *system) {
     system->scriptPtr++;
     if (system->context->attackerActive) {
+#if defined(SDK_PORT)
+        system->scriptPtr += (s32)*system->scriptPtr;
+#else
         system->scriptPtr += *system->scriptPtr;
+#endif
     } else {
         system->scriptPtr++;
     }
@@ -1491,7 +1540,11 @@ static void BattleAnimScriptCmd_JumpIfSameSide(BattleAnimSystem *system) {
     attackerSide = BattleAnimUtil_GetBattlerSide(system, system->context->attacker);
     defenderSide = BattleAnimUtil_GetBattlerSide(system, system->context->defender);
     if (attackerSide == defenderSide) {
+#if defined(SDK_PORT)
+        system->scriptPtr += (s32)*system->scriptPtr;
+#else
         system->scriptPtr += *system->scriptPtr;
+#endif
     } else {
         system->scriptPtr++;
     }
@@ -1503,7 +1556,11 @@ static void BattleAnimScriptCmd_JumpIfVariantEqual(BattleAnimSystem *system) {
     value = *system->scriptPtr;
     system->scriptPtr++;
     if (value == system->context->moveAnimVariant) {
+#if defined(SDK_PORT)
+        system->scriptPtr += (s32)*system->scriptPtr;
+#else
         system->scriptPtr += *system->scriptPtr;
+#endif
     } else {
         system->scriptPtr++;
     }
@@ -1511,7 +1568,11 @@ static void BattleAnimScriptCmd_JumpIfVariantEqual(BattleAnimSystem *system) {
 
 static void BattleAnimScriptCmd_Jump(BattleAnimSystem *system) {
     system->scriptPtr++;
+#if defined(SDK_PORT)
+    system->scriptPtr += (s32)*system->scriptPtr;
+#else
     system->scriptPtr += *system->scriptPtr;
+#endif
 }
 
 static void BattleAnimSystem_StartBrightnessFade(BattleAnimBrightnessFlashWork *work, BOOL fadeIn) {
@@ -1545,7 +1606,11 @@ static void BattleAnimScriptCmd_BrightnessFlash(BattleAnimSystem *system) {
     system->scriptPtr++;
     ScreenBrightnessData_InitAll();
     BattleAnimSystem_StartBrightnessFade(work, TRUE);
+#if defined(SDK_PORT)
+    SysTask_CreateBattleAnimation((SysTaskFunc)BattleAnimTask_BrightnessFlash, work, 0x1001);
+#else
     SysTask_CreateOnMainQueue((SysTaskFunc)BattleAnimTask_BrightnessFlash, work, 0x1001);
+#endif
 }
 
 static int BattleAnimSystem_GetBattlerByRole(BattleAnimSystem *system, u32 role) {
@@ -1702,7 +1767,11 @@ static void BattleAnimScriptCmd_CopyBattlerToBg(BattleAnimSystem *system) {
         system->followWorks[5]->pokepic = BattleAnimSystem_GetBattlerPokepic(system, battler);
         system->followWorks[5]->counter = 0;
         system->followWorks[5]->interval = 0;
+#if defined(SDK_PORT)
+        system->followWorks[5]->task = SysTask_CreateBattleAnimation(BattleAnimTask_BgFollowBattler, system->followWorks[5], 0x1001);
+#else
         system->followWorks[5]->task = SysTask_CreateOnMainQueue(BattleAnimTask_BgFollowBattler, system->followWorks[5], 0x1001);
+#endif
     }
     x = Pokepic_GetAttr(BattleAnimSystem_GetBattlerPokepic(system, battler), POKEPIC_X);
     y = Pokepic_GetAttr(BattleAnimSystem_GetBattlerPokepic(system, battler), POKEPIC_Y);
@@ -1819,7 +1888,11 @@ static void BattleAnimScriptCmd_CreateBattlerSprite(BattleAnimSystem *system) {
         system->followWorks[slot]->pokepic = BattleAnimSystem_GetBattlerPokepic(system, battler);
         system->followWorks[slot]->counter = 0;
         system->followWorks[slot]->interval = 0;
+#if defined(SDK_PORT)
+        system->followWorks[slot]->task = SysTask_CreateBattleAnimation(BattleAnimTask_SpriteFollowBattler, system->followWorks[slot], 0x1001);
+#else
         system->followWorks[slot]->task = SysTask_CreateOnMainQueue(BattleAnimTask_SpriteFollowBattler, system->followWorks[slot], 0x1001);
+#endif
     }
 }
 
@@ -1934,7 +2007,11 @@ static void BattleAnimScriptCmd_StartBattlerSpriteDraw(BattleAnimSystem *system)
             }
             break;
         }
+#if defined(SDK_PORT)
+        SysTask_CreateUnscaled(BattleAnimTask_DrawBattlerSprites, &system->battlerSpriteDraws[index], 0x1000);
+#else
         SysTask_CreateOnMainQueue(BattleAnimTask_DrawBattlerSprites, &system->battlerSpriteDraws[index], 0x1000);
+#endif
     }
 }
 
@@ -2430,7 +2507,11 @@ static BOOL BattleAnimBackground_StartScroll(BattleAnimBgSwitchWork *work) {
     scroll->stop = FALSE;
     BattleAnimSystem_RegisterBgEffect(work->system->bgEffects, scroll, 1);
     work->stopScroll = TRUE;
+#if defined(SDK_PORT)
+    SysTask_CreateBattleAnimation(BattleAnimTask_BgScroll, scroll, 0x1001);
+#else
     SysTask_CreateOnMainQueue(BattleAnimTask_BgScroll, scroll, 0x1001);
+#endif
     return FALSE;
 }
 
@@ -2455,7 +2536,11 @@ static BOOL BattleAnimBackground_StartWave(BattleAnimBgSwitchWork *work) {
             wave->bands->bands[i].step *= -1;
         }
     }
+#if defined(SDK_PORT)
+    SysTask_CreateBattleAnimation(BattleAnimTask_BgWave, wave, 0x1000);
+#else
     SysTask_CreateOnMainQueue(BattleAnimTask_BgWave, wave, 0x1000);
+#endif
     return FALSE;
 }
 
@@ -2621,7 +2706,11 @@ static BOOL BattleAnimBackground_StartPaletteCycle(BattleAnimBgSwitchWork *work)
         }
     }
     Heap_Free(file);
+#if defined(SDK_PORT)
+    SysTask_CreateBattleAnimation(BattleAnimTask_BgPaletteCycle, cycle, 0x1001);
+#else
     SysTask_CreateOnMainQueue(BattleAnimTask_BgPaletteCycle, cycle, 0x1001);
+#endif
     return FALSE;
 }
 
@@ -2694,7 +2783,11 @@ static void BattleAnimScriptCmd_SwitchBackground(BattleAnimSystem *system) {
     system->scriptPtr++;
     work->func = (u16)word;
     work->effectFlags = (word & 0xFFFF0000) >> 16;
+#if defined(SDK_PORT)
+    SysTask_CreateBattleAnimation(BattleAnimTask_BackgroundSwitch, work, 1100);
+#else
     SysTask_CreateOnMainQueue(BattleAnimTask_BackgroundSwitch, work, 1100);
+#endif
 }
 
 static void BattleAnimScriptCmd_SwitchBackgroundWithFadeWait(BattleAnimSystem *system) {
@@ -2740,7 +2833,11 @@ static void BattleAnimScriptCmd_SwitchBackgroundWithFadeWait(BattleAnimSystem *s
         GF_ASSERT(gBattleAnimInvalidExFlagMsg == NULL);
         break;
     }
+#if defined(SDK_PORT)
+    SysTask_CreateBattleAnimation(BattleAnimTask_BackgroundSwitch, work, 1100);
+#else
     SysTask_CreateOnMainQueue(BattleAnimTask_BackgroundSwitch, work, 1100);
+#endif
 }
 
 static void BattleAnimScriptCmd_SetBgScroll(BattleAnimSystem *system) {
@@ -2782,7 +2879,11 @@ static void BattleAnimScriptCmd_RestoreBackground(BattleAnimSystem *system) {
     system->scriptPtr++;
     work->func = (u16)word + 3;
     work->effectFlags = (word & 0xFFFF0000) >> 16;
+#if defined(SDK_PORT)
+    SysTask_CreateBattleAnimation(BattleAnimTask_BackgroundSwitch, work, 1100);
+#else
     SysTask_CreateOnMainQueue(BattleAnimTask_BackgroundSwitch, work, 1100);
+#endif
 }
 
 static void BattleAnimScriptCmd_WaitForBackgroundLoaded(BattleAnimSystem *system) {
@@ -2846,7 +2947,11 @@ static void BattleAnimScriptCmd_SwitchBackgroundBySide(BattleAnimSystem *system)
     } else {
         work->bgId = playerSide;
     }
+#if defined(SDK_PORT)
+    SysTask_CreateBattleAnimation(BattleAnimTask_BackgroundSwitch, work, 1100);
+#else
     SysTask_CreateOnMainQueue(BattleAnimTask_BackgroundSwitch, work, 1100);
+#endif
 }
 
 static void BattleAnimScriptCmd_Nop37(BattleAnimSystem *system) {
@@ -3545,3 +3650,32 @@ int BattleAnimSystem_GetSideSign(BattleAnimSystem *system, int battlerA, int bat
 
 void BattleAnimEmitterCb_Dummy(void) {
 }
+#if defined(SDK_PORT)
+
+static void Native_BattleAnimEmitterCb_Dummy(SPLEmitter * a0) { BattleAnimEmitterCb_Dummy(); }
+void (*const gBattleAnimEmitterCallbackTable[])(SPLEmitter *) = {
+    BattleAnimEmitterCb_None,
+    BattleAnimEmitterCb_SetPositionAtFirstOpponent,
+    BattleAnimEmitterCb_SetPositionAtBattler0,
+    BattleAnimEmitterCb_SetPositionAtAttacker,
+    BattleAnimEmitterCb_SetPositionAtDefender,
+    BattleAnimEmitterCb_AttackerToDefender,
+    BattleAnimEmitterCb_DefenderToAttacker,
+    BattleAnimEmitterCb_ConvergeBySide,
+    BattleAnimEmitterCb_ConvergeUp,
+    BattleAnimEmitterCb_ConvergeToDefender,
+    BattleAnimEmitterCb_ConvergeToAttacker,
+    BattleAnimEmitterCb_ConvergeFromScript,
+    BattleAnimEmitterCb_MagnetBySide,
+    BattleAnimEmitterCb_MagnetUp,
+    BattleAnimEmitterCb_MagnetToDefender,
+    BattleAnimEmitterCb_MagnetToAttacker,
+    BattleAnimEmitterCb_MagnetFromScript,
+    BattleAnimEmitterCb_ConfigureFromScript,
+    BattleAnimEmitterCb_SetPositionByBattlerTypes,
+    BattleAnimEmitterCb_SetPositionAtAttackerSide,
+    BattleAnimEmitterCb_SetPositionAtDefenderSide,
+    BattleAnimEmitterCb_SetPositionAtAttacker2,
+    Native_BattleAnimEmitterCb_Dummy,
+};
+#endif

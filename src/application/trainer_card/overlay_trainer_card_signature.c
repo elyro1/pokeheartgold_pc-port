@@ -406,10 +406,17 @@ static void TrainerCardSignature_InitStrings(TrainerCardSignature *signature) {
     int i;
     u32 countMask = 0xf0;
 
+#if defined(SDK_PORT)
+    for (i = 0; i < TRAINER_CARD_SIGNATURE_PEN_COUNT; i++) {
+        signature->penNames[i] = String_New(8, HEAP_ID_39);
+        signature->strokes[i].count = 0;
+        signature->penPos[i].count = 0;
+#else
     for (i = 0, pen = (u8 *)signature, styleAndCount = signature->strokes[0].y + 8; i < TRAINER_CARD_SIGNATURE_PEN_COUNT; i++, pen += 4, styleAndCount += sizeof(TrainerCardSignatureStroke)) {
         ((TrainerCardSignature *)pen)->penNames[0] = String_New(8, HEAP_ID_39);
         *styleAndCount &= ~countMask;
         ((TrainerCardSignature *)pen)->penPos[0].count = 0;
+#endif
     }
     signature->doneString = String_New(20, HEAP_ID_39);
     signature->titleString = String_New(40, HEAP_ID_39);
@@ -942,7 +949,13 @@ static void TrainerCardSignature_PackCanvas(u8 *signature, const u8 *pixels) {
         if (bit == 8) {
             signature++;
             byteCount++;
+#if defined(SDK_PORT)
+            if (i + 1 < 6144) {
+                *signature = 0;
+            }
+#else
             *signature = 0;
+#endif
             bit = 0;
         }
         GF_ASSERT(byteCount < 6144);

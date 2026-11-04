@@ -54,7 +54,11 @@ static void FrontierListMenu_AddItemInternal(FrontierMenu *menu, u32 msgId, u16 
 static u32 FrontierListMenu_GetWidth(FrontierMenu *menu);
 static void FrontierListMenu_InitTemplate(FrontierMenu *menu);
 static void FrontierListMenu_PrintItem(ListMenu *list, s32 value, u8 onInit);
+#if defined(SDK_PORT)
+static void FrontierListMenu_MoveCursorCallback(ListMenu *list, s32 value, u8 onInit);
+#else
 static u32 FrontierListMenu_MoveCursorCallback(ListMenu *list);
+#endif
 static void FrontierListMenu_Task(SysTask *task, FrontierMenu *menu);
 static void FrontierListMenu_Close(FrontierMenu *menu, BOOL playSound);
 static void FrontierMenu_PrintMessage(FrontierMenu *menu, u16 msgId, u32 speed);
@@ -472,7 +476,11 @@ static u32 FrontierListMenu_GetWidth(FrontierMenu *menu) {
 
 static void FrontierListMenu_InitTemplate(FrontierMenu *menu) {
     menu->listTemplate.items = menu->listItems;
+#if defined(SDK_PORT)
+    menu->listTemplate.moveCursorFunc = FrontierListMenu_MoveCursorCallback;
+#else
     menu->listTemplate.moveCursorFunc = (LM_MoveCursorFunc_t)FrontierListMenu_MoveCursorCallback;
+#endif
     menu->listTemplate.itemPrintFunc = FrontierListMenu_PrintItem;
     menu->listTemplate.window = &menu->window;
     menu->listTemplate.totalItems = menu->count;
@@ -500,8 +508,13 @@ static void FrontierListMenu_PrintItem(ListMenu *list, s32 value, u8 onInit) {
     }
 }
 
+#if defined(SDK_PORT)
+static void FrontierListMenu_MoveCursorCallback(ListMenu *list, s32 value, u8 onInit) {
+    (void)ListMenuGetTemplateField(list, (enum ListMenuAttr)19);
+#else
 static u32 FrontierListMenu_MoveCursorCallback(ListMenu *list) {
     return ListMenuGetTemplateField(list, (enum ListMenuAttr)19);
+#endif
 }
 
 static void FrontierListMenu_Task(SysTask *task, FrontierMenu *menu) {

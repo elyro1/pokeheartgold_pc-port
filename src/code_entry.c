@@ -192,8 +192,13 @@ BOOL CodeEntry_Init(OverlayManager *manager, int *state) {
         WirelessStatusIcon_Create();
         WirelessStatusIcon_ShowOnBothScreens(TRUE, HEAP_ID_108);
     }
+#if defined(SDK_PORT)
+    G2_SetBlendAlpha( GX_BLEND_PLANEMASK_NONE, GX_BLEND_PLANEMASK_BG1 | GX_BLEND_PLANEMASK_BG2, 0xF, 7);
+    G2S_SetBlendAlpha( GX_BLEND_PLANEMASK_NONE, GX_BLEND_PLANEMASK_BG1 | GX_BLEND_PLANEMASK_BG2 | GX_BLEND_PLANEMASK_BG3, 7, 8);
+#else
     G2x_SetBlendAlpha_(REG_BLDCNT_ADDR, GX_BLEND_PLANEMASK_NONE, GX_BLEND_PLANEMASK_BG1 | GX_BLEND_PLANEMASK_BG2, 0xF, 7);
     G2x_SetBlendAlpha_(REG_DB_BLDCNT_ADDR, GX_BLEND_PLANEMASK_NONE, GX_BLEND_PLANEMASK_BG1 | GX_BLEND_PLANEMASK_BG2 | GX_BLEND_PLANEMASK_BG3, 7, 8);
+#endif
     Main_SetVBlankIntrCB(CodeEntry_VBlank, app);
     return TRUE;
 }

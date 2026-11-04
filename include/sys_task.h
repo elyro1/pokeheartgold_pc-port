@@ -2,6 +2,9 @@
 #define POKEHEARTGOLD_SYS_TASK_H
 
 #include "global.h"
+#if defined(SDK_PORT)
+#include "port/battle_timing.h"
+#endif
 
 typedef struct SysTask SysTask;
 typedef struct SysTaskQueue SysTaskQueue;
@@ -15,6 +18,11 @@ struct SysTask {
     void *data;
     SysTaskFunc func;
     u32 runNow;
+#if defined(SDK_PORT)
+    BattleTimingDomain timingDomain;
+    u32 timingPressedKeys, timingRepeatKeys;
+    u16 timingTouchPressed, timingTouchX, timingTouchY;
+#endif
 };
 
 struct SysTaskQueue {

@@ -194,10 +194,18 @@ static void WirelessStatusIcon_LoadChar(int engine, int isWifi, enum HeapID heap
     void *buf;
 
     if (engine == 1) {
+#if defined(SDK_PORT)
+        mapping = reg_GX_DISPCNT & 0x00300010;
+#else
         mapping = *(u32 *)0x04000000 & 0x00300010;
+#endif
         offs = GX_GetBankForOBJ();
     } else {
+#if defined(SDK_PORT)
+        mapping = reg_GXS_DB_DISPCNT & 0x00300010;
+#else
         mapping = *(u32 *)0x04001000 & 0x00300010;
+#endif
         offs = GX_GetBankForSubOBJ();
     }
     if (mapping == 0x00300010) {

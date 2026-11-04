@@ -900,6 +900,13 @@ static void OpponentData_SwapToSubstituteSprite(BattleSystem *battleSystem, Oppo
 static void OpponentData_PlayMoveSE(BattleSystem *battleSystem, OpponentData *opponentData, BattleControllerPacketMoveSE *packet);
 static void OpponentData_PlaySong(BattleSystem *battleSystem, OpponentData *opponentData, BattleControllerPacketPlaySong *packet);
 static void OpponentData_ScreenFade(BattleSystem *battleSystem, OpponentData *opponentData, BattleControllerPacketScreenFade *packet);
+#if defined(SDK_PORT)
+static inline void OpponentData_EndEncounterSlide(OpponentData *opponent) {
+    opponent->encounterSliding = FALSE;
+    opponent->encounterSlideEndFrame = BattleTiming_GetFrame();
+}
+
+#endif
 static void Task_PokemonEncounter(SysTask *task, void *data);
 static void Task_GiratinaEncounter(SysTask *task, void *data);
 static void Task_PokemonSlideIn(SysTask *task, void *data);
@@ -1920,6 +1927,9 @@ static void OpponentData_PokemonEncounter(BattleSystem *battleSystem, OpponentDa
     BattleSystem_GetBattleType(battleSystem);
     work = Heap_Alloc(HEAP_ID_BATTLE, sizeof(OpponentPokemonEncounterWork));
     work->state = ENCOUNTER_STATE_INIT;
+#if defined(SDK_PORT)
+    opponentData->encounterSliding = TRUE;
+#endif
     if (opponentData->battlerType & BATTLER_TYPE_IS_ENEMY) {
         work->facing = 2;
         work->terrain = BattleSystem_GetBattleTerrain(battleSystem, 1);
@@ -1964,9 +1974,17 @@ static void OpponentData_PokemonEncounter(BattleSystem *battleSystem, OpponentDa
     work->nature = GetNatureFromPersonality(packet->personality);
     work->shiny = packet->shiny;
     if (work->facing == 2 && (BattleSystem_GetBattleSpecial(battleSystem) & BATTLE_SPECIAL_GIRATINA)) {
+#if defined(SDK_PORT)
+        SysTask_CreateBattleAnimation(Task_GiratinaEncounter, work, 0);
+#else
         SysTask_CreateOnMainQueue(Task_GiratinaEncounter, work, 0);
+#endif
     } else {
+#if defined(SDK_PORT)
+        SysTask_CreateBattleAnimation(Task_PokemonEncounter, work, 0);
+#else
         SysTask_CreateOnMainQueue(Task_PokemonEncounter, work, 0);
+#endif
     }
     Sound_SetKeepPlayingCries(1);
 }
@@ -2009,13 +2027,25 @@ static void OpponentData_PokemonSlideIn(BattleSystem *battleSystem, OpponentData
     battleType = BattleSystem_GetBattleType(battleSystem);
     if (BattleSystem_GetFollowMonSlot(battleSystem, opponentData->battlerId) != 0xFF) {
         if ((battleType & BATTLE_TYPE_DOUBLES) && !(battleType & BATTLE_TYPE_MULTI) && opponentData->battlerType > BATTLER_TYPE_ENEMY_SIDE_SLOT_1) {
+#if defined(SDK_PORT)
+            SysTask_CreateBattleAnimation(Task_PokemonSlideIn, work, 0);
+#else
             SysTask_CreateOnMainQueue(Task_PokemonSlideIn, work, 0);
+#endif
             return;
         }
+#if defined(SDK_PORT)
+        SysTask_CreateBattleAnimation(Task_FollowMonSlideIn, work, 0);
+#else
         SysTask_CreateOnMainQueue(Task_FollowMonSlideIn, work, 0);
+#endif
         return;
     }
+#if defined(SDK_PORT)
+    SysTask_CreateBattleAnimation(Task_PokemonSlideIn, work, 0);
+#else
     SysTask_CreateOnMainQueue(Task_PokemonSlideIn, work, 0);
+#endif
 }
 
 static void OpponentData_PokemonSendOut(BattleSystem *battleSystem, OpponentData *opponentData, BattleControllerPacketPokemonSendOut *packet) {
@@ -2063,9 +2093,17 @@ static void OpponentData_PokemonSendOut(BattleSystem *battleSystem, OpponentData
 
     i = BattleSystem_GetFollowMonSlot(battleSystem, opponentData->battlerId);
     if (i == 0xFF || i != work->selectedMonIndex) {
+#if defined(SDK_PORT)
+        SysTask_CreateBattleAnimation(Task_PokemonSendOut, work, 0);
+#else
         SysTask_CreateOnMainQueue(Task_PokemonSendOut, work, 0);
+#endif
     } else {
+#if defined(SDK_PORT)
+        SysTask_CreateBattleAnimation(Task_FollowMonSendOut, work, 0);
+#else
         SysTask_CreateOnMainQueue(Task_FollowMonSendOut, work, 0);
+#endif
     }
 }
 
@@ -2095,9 +2133,17 @@ static void OpponentData_RecallPokemon(BattleSystem *battleSystem, OpponentData 
 
     i = BattleSystem_GetFollowMonSlot(battleSystem, opponentData->battlerId);
     if (i == 0xFF || i != work->selectedMonIndex) {
+#if defined(SDK_PORT)
+        SysTask_CreateBattleAnimation(Task_RecallPokemon, work, 0);
+#else
         SysTask_CreateOnMainQueue(Task_RecallPokemon, work, 0);
+#endif
     } else {
+#if defined(SDK_PORT)
+        SysTask_CreateBattleAnimation(Task_RecallFollowMon, work, 0);
+#else
         SysTask_CreateOnMainQueue(Task_RecallFollowMon, work, 0);
+#endif
     }
 }
 
@@ -2112,7 +2158,11 @@ static void OpponentData_PokemonEnterBall(BattleSystem *battleSystem, OpponentDa
     work->height = packet->height;
     Pokepic_StartPaletteFade(work->pokepic, 0, 16, 0, gBallColors[packet->ball]);
     Pokepic_SetAttr(work->pokepic, POKEPIC_SHADOW_AFFINE, 1);
+#if defined(SDK_PORT)
+    SysTask_CreateBattleAnimation(Task_PokemonEnterBall, work, 0);
+#else
     SysTask_CreateOnMainQueue(Task_PokemonEnterBall, work, 0);
+#endif
 }
 
 #pragma push
@@ -2180,7 +2230,11 @@ static void OpponentData_TrainerEncounter(BattleSystem *battleSystem, OpponentDa
     if (work->battlerType == BATTLER_TYPE_SOLO_PLAYER || work->battlerType == BATTLER_TYPE_PLAYER_SIDE_SLOT_1) {
         BgSetPosTextAndCommit(BattleSystem_GetBgConfig(battleSystem), GF_BG_LYR_MAIN_3, BG_POS_OP_SUB_X, 132);
     }
+#if defined(SDK_PORT)
+    SysTask_CreateBattleAnimation(Task_TrainerEncounter, work, 0);
+#else
     SysTask_CreateOnMainQueue(Task_TrainerEncounter, work, 0);
+#endif
 }
 
 #pragma pop
@@ -2206,9 +2260,17 @@ static void OpponentData_ThrowPokeball(BattleSystem *battleSystem, OpponentData 
     work->backpic = backpic;
     BattleSystem_GetBattleType(battleSystem);
     if (BattleSystem_GetFollowMonSlot(battleSystem, opponentData->battlerId) != 0xFF) {
+#if defined(SDK_PORT)
+        SysTask_CreateBattleAnimation(Task_ThrowPokeballWithFollowMon, work, 0);
+#else
         SysTask_CreateOnMainQueue(Task_ThrowPokeballWithFollowMon, work, 0);
+#endif
     } else {
+#if defined(SDK_PORT)
+        SysTask_CreateBattleAnimation(Task_ThrowPokeball, work, 0);
+#else
         SysTask_CreateOnMainQueue(Task_ThrowPokeball, work, 0);
+#endif
     }
 }
 
@@ -2224,7 +2286,11 @@ static void OpponentData_TrainerSlideOut(BattleSystem *battleSystem, OpponentDat
     } else {
         work->facing = 0;
     }
+#if defined(SDK_PORT)
+    SysTask_CreateBattleAnimation(Task_TrainerSlideOut, work, 0);
+#else
     SysTask_CreateOnMainQueue(Task_TrainerSlideOut, work, 0);
+#endif
 }
 
 static void OpponentData_TrainerSlideIn(BattleSystem *battleSystem, OpponentData *opponentData, BattleControllerPacketTrainerSlideIn *packet) {
@@ -2244,7 +2310,11 @@ static void OpponentData_TrainerSlideIn(BattleSystem *battleSystem, OpponentData
     work->battleSystem = battleSystem;
     work->command = packet->command;
     work->battlerId = opponentData->battlerId;
+#if defined(SDK_PORT)
+    SysTask_CreateBattleAnimation(Task_TrainerSlideIn, work, 0);
+#else
     SysTask_CreateOnMainQueue(Task_TrainerSlideIn, work, 0);
+#endif
 }
 
 static void OpponentData_HealthbarSlideIn(BattleSystem *battleSystem, OpponentData *opponentData, BattleControllerPacketHealthbarSlideIn *packet) {
@@ -2319,7 +2389,11 @@ static SysTask *OpponentData_SelectCommand(BattleSystem *battleSystem, OpponentD
             work->movePP[k] = packet->movePP[k];
         }
     }
+#if defined(SDK_PORT)
+    return SysTask_CreateUnscaled((SysTaskFunc)opponentData->inputTasks[0], work, 0);
+#else
     return SysTask_CreateOnMainQueue((SysTaskFunc)opponentData->inputTasks[0], work, 0);
+#endif
 }
 
 static void OpponentData_SelectMove(BattleSystem *battleSystem, OpponentData *opponentData, BattleControllerPacketSelectMove *packet) {
@@ -2339,7 +2413,11 @@ static void OpponentData_SelectMove(BattleSystem *battleSystem, OpponentData *op
         work->movePP[i] = packet->movePP[i];
     }
     work->unusableMovesMask = packet->unusableMovesMask;
+#if defined(SDK_PORT)
+    SysTask_CreateUnscaled((SysTaskFunc)opponentData->inputTasks[1], work, 0);
+#else
     SysTask_CreateOnMainQueue((SysTaskFunc)opponentData->inputTasks[1], work, 0);
+#endif
 }
 
 static void OpponentData_SelectTarget(BattleSystem *battleSystem, OpponentData *opponentData, BattleControllerPacketSelectTarget *packet) {
@@ -2362,7 +2440,11 @@ static void OpponentData_SelectTarget(BattleSystem *battleSystem, OpponentData *
     for (i = 0; i < maxBattlers; i++) {
         work->targetMons[i] = packet->targetMons[i];
     }
+#if defined(SDK_PORT)
+    SysTask_CreateUnscaled((SysTaskFunc)opponentData->inputTasks[2], work, 0);
+#else
     SysTask_CreateOnMainQueue((SysTaskFunc)opponentData->inputTasks[2], work, 0);
+#endif
 }
 
 static SysTask *OpponentData_SelectItem(BattleSystem *battleSystem, OpponentData *opponentData, BattleControllerPacketSelectItem *packet) {
@@ -2388,7 +2470,11 @@ static SysTask *OpponentData_SelectItem(BattleSystem *battleSystem, OpponentData
         }
         work->embargoFlag[i] = packet->embargoFlag[i];
     }
+#if defined(SDK_PORT)
+    return SysTask_CreateUnscaled((SysTaskFunc)opponentData->inputTasks[3], work, 0);
+#else
     return SysTask_CreateOnMainQueue((SysTaskFunc)opponentData->inputTasks[3], work, 0);
+#endif
 }
 
 static void OpponentData_ShowMonList(BattleSystem *battleSystem, OpponentData *opponentData, BattleControllerPacketShowMonList *packet) {
@@ -2411,7 +2497,11 @@ static void OpponentData_ShowMonList(BattleSystem *battleSystem, OpponentData *o
             work->partyOrder[i][j] = packet->partyOrder[i][j];
         }
     }
+#if defined(SDK_PORT)
+    SysTask_CreateUnscaled((SysTaskFunc)opponentData->inputTasks[4], work, 0);
+#else
     SysTask_CreateOnMainQueue((SysTaskFunc)opponentData->inputTasks[4], work, 0);
+#endif
 }
 
 static void OpponentData_DrawYesNoBox(BattleSystem *battleSystem, OpponentData *opponentData, BattleControllerPacketYesNoBox *packet) {
@@ -2425,7 +2515,11 @@ static void OpponentData_DrawYesNoBox(BattleSystem *battleSystem, OpponentData *
     work->mode = packet->mode;
     work->value = packet->value;
     work->param = packet->param;
+#if defined(SDK_PORT)
+    SysTask_CreateUnscaled((SysTaskFunc)opponentData->inputTasks[5], work, 0);
+#else
     SysTask_CreateOnMainQueue((SysTaskFunc)opponentData->inputTasks[5], work, 0);
+#endif
 }
 
 static void OpponentData_PrintAttackMessage(BattleSystem *battleSystem, OpponentData *opponentData, BattleControllerPacketAttackMessage *packet) {
@@ -2474,7 +2568,11 @@ static void OpponentData_PlayMoveAnimation(BattleSystem *battleSystem, OpponentD
         opponentData->substituteShown = 0;
     }
     MoveAnim_GetDisplayFlags(&work->disableHpBar, &work->updateG3, animData->isEffectAnim, animData->effectAnimId, animData->move);
+#if defined(SDK_PORT)
+    SysTask_CreateBattleAnimation(Task_PlayMoveAnimation, work, 0);
+#else
     SysTask_CreateOnMainQueue(Task_PlayMoveAnimation, work, 0);
+#endif
 }
 
 static void OpponentData_MonFlicker(BattleSystem *battleSystem, OpponentData *opponentData) {
@@ -2484,7 +2582,11 @@ static void OpponentData_MonFlicker(BattleSystem *battleSystem, OpponentData *op
     work->pokepic = opponentData->pokepic;
     work->battlerId = opponentData->battlerId;
     work->delay = 0;
+#if defined(SDK_PORT)
+    SysTask_CreateBattleAnimation(Task_MonFlicker, work, 0);
+#else
     SysTask_CreateOnMainQueue(Task_MonFlicker, work, 0);
+#endif
 }
 
 static void OpponentData_HealthbarUpdate(BattleSystem *battleSystem, OpponentData *opponentData, BattleControllerPacketHealthbarUpdate *packet) {
@@ -2551,7 +2653,11 @@ static void OpponentData_PlayFaintAnimation(BattleSystem *battleSystem, Opponent
         work->animData.form[i] = packet->allForm[i];
         work->animData.personality[i] = packet->allPersonality[i];
     }
+#if defined(SDK_PORT)
+    SysTask_CreateBattleAnimation(Task_PlayFaintAnimation, work, 0);
+#else
     SysTask_CreateOnMainQueue(Task_PlayFaintAnimation, work, 0);
+#endif
 }
 
 static void OpponentData_PlaySE(BattleSystem *battleSystem, OpponentData *opponentData, BattleControllerPacketPlaySE *packet) {
@@ -2749,7 +2855,11 @@ static void OpponentData_PlayMosaicAnimation(BattleSystem *battleSystem, Opponen
     work->mosaic = packet->mosaic;
     work->counter = 0;
     work->delay = packet->delay;
+#if defined(SDK_PORT)
+    SysTask_CreateBattleAnimation(Task_PlayMosaicAnimation, work, 0);
+#else
     SysTask_CreateOnMainQueue(Task_PlayMosaicAnimation, work, 0);
+#endif
 }
 
 static void OpponentData_InitStartBallGauge(BattleSystem *battleSystem, OpponentData *opponentData, BattleControllerPacketBallGauge *packet) {
@@ -2940,7 +3050,11 @@ static void OpponentData_ScreenFade(BattleSystem *battleSystem, OpponentData *op
     SysTask_CreateOnMainQueue(Task_OpponentScreenFade, work, 0);
 }
 
+#if defined(SDK_PORT)
+void Task_PokemonEncounter(SysTask *task, void *data) {
+#else
 static void Task_PokemonEncounter(SysTask *task, void *data) {
+#endif
     OpponentPokemonEncounterWork *work = data;
     BattleAnimSystem *animSystem = BattleSystem_GetBattleAnimSystem(work->battleSystem);
     u8 state = work->state;
@@ -2986,6 +3100,9 @@ static void Task_PokemonEncounter(SysTask *task, void *data) {
             Pokepic_SetAttr(work->pokepic, POKEPIC_SHADOW_YADJ_REQ, 0);
             Pokepic_SetAttr(work->pokepic, POKEPIC_SHADOW_AFFINE, 0);
             Pokepic_SetAttr(work->pokepic, POKEPIC_X, work->target);
+#if defined(SDK_PORT)
+            OpponentData_EndEncounterSlide(work->opponentData);
+#endif
             BattleControllerOpponent_PlayMonAnimAndCry(work->battleSystem, work->battlerId, work->battlerType, work->pokepic, work->opponentData->pokepicAnimNarc, work->species, work->form, work->facing, work->cryParam);
             if (work->battlerType == BATTLER_TYPE_SOLO_ENEMY || work->battlerType == BATTLER_TYPE_ENEMY_SIDE_SLOT_1) {
                 ManagedSprite_SetPositionXY(work->terrain->sprite, 192, 88);
@@ -3019,6 +3136,9 @@ static void Task_PokemonEncounter(SysTask *task, void *data) {
                 break;
             }
             Pokepic_SetAttr(work->pokepic, POKEPIC_X, targetX);
+#if defined(SDK_PORT)
+            OpponentData_EndEncounterSlide(work->opponentData);
+#endif
             BattleControllerOpponent_PlayMonAnimAndCry(work->battleSystem, work->battlerId, work->battlerType, work->pokepic, work->opponentData->pokepicAnimNarc, work->species, work->form, work->facing, work->cryParam);
             if (work->battlerType == BATTLER_TYPE_SOLO_PLAYER || work->battlerType == BATTLER_TYPE_PLAYER_SIDE_SLOT_1) {
                 ManagedSprite_SetPositionXY(work->terrain->sprite, 64, 136);
@@ -3061,7 +3181,11 @@ static void Task_GiratinaEncounter(SysTask *task, void *data) {
 
     switch ((int)work->state) {
     case 0:
+#if defined(SDK_PORT)
+        work->delay = BattleTiming_AnimationTicksForFrames(28);
+#else
         work->delay = 28;
+#endif
         work->state++;
     case 1:
         if (--work->delay) {
@@ -3085,6 +3209,9 @@ static void Task_GiratinaEncounter(SysTask *task, void *data) {
         Pokepic_SetAttr(work->pokepic, POKEPIC_SHADOW_YADJ_REQ, 0);
         Pokepic_SetAttr(work->pokepic, POKEPIC_SHADOW_AFFINE, 0);
         Pokepic_SetAttr(work->pokepic, POKEPIC_Y, work->target);
+#if defined(SDK_PORT)
+        OpponentData_EndEncounterSlide(work->opponentData);
+#endif
         BattleControllerOpponent_PlayMonAnimAndCry(work->battleSystem, work->battlerId, work->battlerType, work->pokepic, work->opponentData->pokepicAnimNarc, work->species, work->form, work->facing, work->cryParam);
         ManagedSprite_SetPositionXY(work->terrain->sprite, 192, 88);
         Pokepic_StartPaletteFade(work->pokepic, 8, 0, 0, 0);
@@ -4164,10 +4291,28 @@ static void Task_TrainerSlideIn(SysTask *task, void *data) {
     }
 }
 
+#if defined(SDK_PORT)
+static BOOL Healthbar_WaitForEncounter(BattleHpBar *hpBar) {
+    BattleSystem *system = hpBar->battleSystem;
+    OpponentData *opponent = BattleSystem_GetOpponentData(system, hpBar->battlerId);
+    if ((BattleSystem_GetBattleType(system) & BATTLE_TYPE_TRAINER)
+        || !(opponent->battlerType & BATTLER_TYPE_IS_ENEMY) || opponent->pokepic == NULL) {
+        return FALSE;
+    }
+    // Wait for the entrance and its final interpolated frame before the healthbar.
+    if (opponent->encounterSliding) return TRUE;
+    return BattleTiming_ShouldSmoothAnimations()
+        && BattleTiming_GetFrame() - opponent->encounterSlideEndFrame < 2;
+}
+#endif
+
 static void Task_HealthbarSlideIn(SysTask *task, void *data) {
     BattleHpBar *hpBar = data;
     switch (hpBar->script) {
     case HP_BAR_SLIDE_IN_STATE_DELAY:
+#if defined(SDK_PORT)
+        if (Healthbar_WaitForEncounter(hpBar)) break;
+#endif
         if (hpBar->delay != 0) {
             hpBar->delay--;
             break;
@@ -5863,6 +6008,13 @@ static void Task_FadeOutBattle(SysTask *task, void *data) {
         if (PaletteData_GetSelectedBuffersBitmask(palette) != 0) {
             return;
         }
+#if defined(SDK_PORT)
+        for (int i = 0; i < 4; i++) {
+            if (pokepicManager->pics[i].active && Pokepic_ResumePaletteFade(&pokepicManager->pics[i])) {
+                return;
+            }
+        }
+#endif
         work->state++;
         return;
     case FADE_OUT_STATE_END:
@@ -6332,6 +6484,15 @@ static void Task_OpponentScreenFade(SysTask *task, void *data) {
 }
 
 // Selects the input tasks run for commands 14-19 (select command, move, target, item, party, yes/no) and the input mode.
+#if defined(SDK_PORT)
+#define SET_INPUT_TASKS(opponentData, selectCommand, selectMove, selectTarget, selectItem, showMonList, drawYesNoBox) \
+    (opponentData)->inputTasks[0] = (OpponentInputTask)(selectCommand);                                                     \
+    (opponentData)->inputTasks[1] = (OpponentInputTask)(selectMove);                                                        \
+    (opponentData)->inputTasks[2] = (OpponentInputTask)(selectTarget);                                                      \
+    (opponentData)->inputTasks[3] = (OpponentInputTask)(selectItem);                                                        \
+    (opponentData)->inputTasks[4] = (OpponentInputTask)(showMonList);                                                       \
+    (opponentData)->inputTasks[5] = (OpponentInputTask)(drawYesNoBox)
+#else
 #define SET_INPUT_TASKS(opponentData, selectCommand, selectMove, selectTarget, selectItem, showMonList, drawYesNoBox) \
     (opponentData)->inputTasks[0] = (u32)(selectCommand);                                                                   \
     (opponentData)->inputTasks[1] = (u32)(selectMove);                                                                      \
@@ -6339,6 +6500,7 @@ static void Task_OpponentScreenFade(SysTask *task, void *data) {
     (opponentData)->inputTasks[3] = (u32)(selectItem);                                                                      \
     (opponentData)->inputTasks[4] = (u32)(showMonList);                                                                     \
     (opponentData)->inputTasks[5] = (u32)(drawYesNoBox)
+#endif
 #define SET_AI_INPUT_TASKS(opponentData)       SET_INPUT_TASKS(opponentData, Task_AISelectCommand, Task_AISelectMove, Task_AISelectTarget, Task_AISelectItem, Task_AIShowMonList, Task_AIDrawYesNoBox)
 #define SET_RECORDED_INPUT_TASKS(opponentData) SET_INPUT_TASKS(opponentData, Task_RecordedSelectCommand, Task_RecordedSelectMove, Task_RecordedSelectTarget, Task_RecordedSelectItem, Task_RecordedShowMonList, Task_RecordedDrawYesNoBox)
 #define SET_PLAYER_INPUT_TASKS(opponentData)   SET_INPUT_TASKS(opponentData, Task_PlayerSelectCommand, Task_PlayerSelectMove, Task_PlayerSelectTarget, Task_PlayerSelectItem, Task_PlayerShowMonList, Task_PlayerDrawYesNoBox)
@@ -6895,7 +7057,14 @@ static ManagedSprite *BattleControllerOpponent_CreateTrainerSprite(BattleSystem 
     } else {
         battlerPosition = 0;
     }
+#if defined(SDK_PORT)
+    BattleTimingDomain previous = BattleTiming_SetDomain(BATTLE_TIMING_ANIMATION);
+    ManagedSprite *sprite = CreateTrainerPicSprite(spriteSystem, spriteManager, paletteData, x, y, trainerClass, battlerPosition, isLink, resTag, HEAP_ID_BATTLE);
+    BattleTiming_SetDomain(previous);
+    return sprite;
+#else
     return CreateTrainerPicSprite(spriteSystem, spriteManager, paletteData, x, y, trainerClass, battlerPosition, isLink, resTag, HEAP_ID_BATTLE);
+#endif
 }
 
 static void OpponentData_StartMoveAnimation(BattleSystem *battleSystem, OpponentData *opponentData, BattleAnimSystem *animSystem, MoveAnimData *animData) {

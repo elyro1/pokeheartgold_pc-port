@@ -1,3 +1,6 @@
+#if defined(SDK_PORT)
+#include <hg/qsort.h>
+#endif
 #include "global.h"
 
 #include "constants/sndseq.h"
@@ -27,7 +30,10 @@ typedef struct PokeathlonRingDropDepth {
     PokeathlonCourseMonObject *monObject;
 } PokeathlonRingDropDepth;
 
+#if defined(SDK_PORT)
+#else
 void MATH_QSort(void *base, u32 count, u32 width, int (*compare)(const void *, const void *), void *context);
+#endif
 
 #define PokeathlonRingDropUi_SetMemberSwitching(ui, participant, member, switching) (((void (*)(PokeathlonRingDropUi *, u8, int, int))PokeathlonRingDropUi_SetSwitching)((ui), (participant), (member), (switching)))
 #define PokeathlonRingDrop_GetTeamMemberParams(course, participant, member)         (((PokeathlonRingDropMemberParams * (*)(PokeathlonCourseData *, u8, int)) PokeathlonRingDrop_GetMemberParams)((course), (participant), (member)))
@@ -592,7 +598,11 @@ static void PokeathlonRingDropDisplay_ApplyFramePacket(PokeathlonRingDropDisplay
             depth->y = y;
             depth->monObject = monObject;
         }
+#if defined(SDK_PORT)
+        HG_QSort(depths, POKEATHLON_PARTICIPANTS, sizeof(PokeathlonRingDropDepth), PokeathlonRingDropDisplay_CompareDepth, NULL);
+#else
         MATH_QSort(depths, POKEATHLON_PARTICIPANTS, sizeof(PokeathlonRingDropDepth), PokeathlonRingDropDisplay_CompareDepth, NULL);
+#endif
         for (i = 0; i < POKEATHLON_PARTICIPANTS; i++) {
             PokeathlonCourseMonObject_SetDrawPriority(depths[i].monObject, i + 7);
         }
@@ -695,7 +705,11 @@ void PokeathlonRingDropDisplay_Update(PokeathlonRingDropDisplay *display, Pokeat
         sorted[i][1] = i;
         sorted[i][0] = packet->mons[i].score;
     }
+#if defined(SDK_PORT)
+    HG_QSort(sorted, POKEATHLON_PARTICIPANTS, 2, PokeathlonRingDropDisplay_CompareScores, NULL);
+#else
     MATH_QSort(sorted, POKEATHLON_PARTICIPANTS, 2, PokeathlonRingDropDisplay_CompareScores, NULL);
+#endif
     for (i = 0; i < POKEATHLON_PARTICIPANTS; i++) {
         if (packet->mons[i].score != display->scores[i]) {
             PokeathlonRingDropUi_SetRanks(display->ui, (u8)i, packet->mons[i].score, sorted[0]);

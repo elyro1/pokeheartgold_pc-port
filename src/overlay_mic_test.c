@@ -765,7 +765,11 @@ static void MicTestInput_Init(MicTestInput *input, enum HeapID heapID, MICCallba
     input->bufferAlloc = data;
 
     input->mic.type = MIC_SAMPLING_TYPE_8BIT;
+#if defined(SDK_PORT)
+    input->mic.buffer = (void *)((((uintptr_t)data) + 0x1F) & ~(uintptr_t)0x1F); // alignment to 32-bit boundary
+#else
     input->mic.buffer = (void *)((((u32)data) + 0x1F) & ~0x1F); // alignment to 32-bit boundary
+#endif
     input->mic.size = 256;
     input->mic.rate = 0x1040;
     input->mic.loop_enable = TRUE;

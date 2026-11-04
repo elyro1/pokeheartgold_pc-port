@@ -1,3 +1,6 @@
+#if defined(SDK_PORT)
+#include "port/sim_config_prj.h"
+#endif
 #include "field/area_data.h"
 
 #include <nnsys/g3d.h>
@@ -69,7 +72,11 @@ static const u16 sAreaEdgeColorTableLightKind0[8] = { 0, 0x1084, 0x1084, 0x1084,
 
 // Once a texture file's images are in VRAM, only its header and dictionaries are kept on the heap.
 void AreaDataManager_TrimTextureFile(void *file, NNSG3dResTex *tex) {
+#if defined(SDK_PORT)
+    Heap_Realloc(file, (u32)((u8 *)tex + tex->texInfo.ofsTex - (u8 *)file));
+#else
     Heap_Realloc(file, (u32)tex + tex->texInfo.ofsTex - (u32)file);
+#endif
 }
 
 AreaDataManager *AreaDataManager_Alloc(u8 areaDataBank) {
@@ -326,6 +333,9 @@ void Field3dModelAnimation_Unload(Field3DModelAnimation *anim, NNSFndAllocator *
 }
 
 void Field3dModelAnimation_FrameAdvanceAndLoop(Field3DModelAnimation *anim, fx32 delta) {
+#if defined(SDK_PORT)
+    if (SIM_Config_prj_GetConfig()->enable60fps) delta /= 2;
+#endif
     fx32 numFrames = NNS_G3dAnmObjGetNumFrame(anim->animObj);
     if (delta > 0) {
         anim->frame = (anim->frame + delta) % numFrames;
@@ -339,6 +349,9 @@ void Field3dModelAnimation_FrameAdvanceAndLoop(Field3DModelAnimation *anim, fx32
 }
 
 BOOL Field3dModelAnimation_FrameAdvanceAndCheck(Field3DModelAnimation *anim, fx32 delta) {
+#if defined(SDK_PORT)
+    if (SIM_Config_prj_GetConfig()->enable60fps) delta /= 2;
+#endif
     fx32 numFrames = NNS_G3dAnmObjGetNumFrame(anim->animObj);
     BOOL ret = FALSE;
     if (delta > 0) {

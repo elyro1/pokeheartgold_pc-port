@@ -14,7 +14,11 @@ FS_EXTERN_OVERLAY(OVY_0);
 FS_EXTERN_OVERLAY(OVY_13);
 FS_EXTERN_OVERLAY(OVY_38);
 
+#if defined(SDK_PORT)
+
+#else
 const OverlayManagerTemplate gApp_MainMenu_SelectOption_NintendoWFCSetup = { NintendoWFCSetupApp_Init, NULL, NULL, FS_OVERLAY_ID_NONE };
+#endif
 
 BOOL LoadDwcOverlay(void) {
     return HandleLoadOverlay(FS_OVERLAY_ID(OVY_0), OVY_LOAD_ASYNC);

@@ -1,3 +1,6 @@
+#if defined(SDK_PORT)
+#include "port/sim_config_prj.h"
+#endif
 #include "field/encounter_check.h"
 
 #include "global.h"
@@ -563,6 +566,11 @@ static BOOL FieldSystem_GenerateRockSmashEncounter(FieldSystem *fieldSystem, Pok
 }
 
 static BOOL FieldSystem_EncounterRateRoll(FieldSystem *fieldSystem, u8 encounterRate, u8 metatileBehavior) {
+#if defined(SDK_PORT)
+    if (SIM_Config_prj_GetConfig()->disableRandomEncounters) {
+        return FALSE;
+    }
+#endif
     if (encounterRate > 100) {
         encounterRate = 100;
     }

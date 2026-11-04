@@ -12,7 +12,11 @@ typedef struct GtsSave {
     u32 tradeDate;
 } GtsSave;
 
+#if defined(SDK_PORT)
+GtsSave *Save_Gts_Get(SaveData *saveData);
+#else
 int Save_Gts_Get(SaveData *saveData);
+#endif
 u32 Save_Gts_sizeof(void);
 void Save_Gts_Init(GtsSave *);
 u16 GtsSave_HasStoredMon(GtsSave *);

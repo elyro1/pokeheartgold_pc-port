@@ -3,6 +3,9 @@
 #include "application/pokewalker/pokewalker_event_log.h"
 
 #include "global.h"
+#if defined(SDK_PORT)
+#include <hg/qsort.h>
+#endif
 
 #include "constants/sndseq.h"
 
@@ -38,7 +41,10 @@ typedef struct FollowMonModelParam {
     u8 unk_03;
 } FollowMonModelParam;
 
+#if defined(SDK_PORT)
+#else
 void MATH_QSort(void *base, u32 count, u32 width, int (*compare)(const void *, const void *, void *), void *context);
+#endif
 
 static void PokewalkerEventLog_CreateMonSprite(PokewalkerEventLogMonSprite *monSprite, SpriteSystem *spriteSystem, SpriteManager *spriteManager, s16 x, s16 y, u8 animation, int side);
 static void PokewalkerEventLog_CreateMonSprites(PokewalkerEventLog *eventLog);
@@ -273,7 +279,11 @@ static void PokewalkerEventLog_BuildEntryList(PokewalkerEventLog *eventLog) {
             break;
         }
     }
+#if defined(SDK_PORT)
+    qsort(slots, eventLog->count, sizeof(PokewalkerEventLogSlot), (int (*)(const void *, const void *))PokewalkerEventLog_CompareEntryTimes);
+#else
     MATH_QSort(slots, eventLog->count, sizeof(PokewalkerEventLogSlot), (int (*)(const void *, const void *, void *))PokewalkerEventLog_CompareEntryTimes, NULL);
+#endif
     if (eventLog->count < 2) {
         slots[eventLog->count - 1].record->course = 0;
         slots[eventLog->count - 1].record->value = GF_RTC_DateTimeToSec();

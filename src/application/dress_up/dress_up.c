@@ -1239,8 +1239,13 @@ static void DressUp_LoadBackdropCharsAndPalettes(DressUpGfx *gfx, DressUpGfxReso
         void *data = GfGfxLoader_LoadFromOpenNarc(gfx->narc, i + 206, FALSE, HEAP_ID_14, TRUE);
         u32 offset = (i + 100) * sizeof(GraphicsImageTemplate);
         NNSG2dCharacterData *character = DressUpGfx_StoreUnpackedChar(gfx, data, i + 100);
+#if defined(SDK_PORT)
+        ((GraphicsImageTemplate *)((uintptr_t)out->images + offset))->character = character;
+        ((GraphicsImageTemplate *)((uintptr_t)out->images + offset))->manager = gfx->graphicsManager;
+#else
         ((GraphicsImageTemplate *)((u32)out->images + offset))->character = character;
         ((GraphicsImageTemplate *)((u32)out->images + offset))->manager = gfx->graphicsManager;
+#endif
         int id = i + 1;
         data = GfGfxLoader_LoadFromOpenNarc(gfx->narc, fileId, FALSE, HEAP_ID_14, TRUE);
         GF2dGfxRawResMan_AllocObj(out->plttResMan, data, id);

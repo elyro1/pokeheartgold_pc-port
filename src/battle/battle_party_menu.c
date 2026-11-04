@@ -3781,3 +3781,89 @@ static void BattlePartyMenu_RedrawSelectedMonButton(BattlePartyMenu *menu) {
         BattlePartyMenu_DrawButton(menu, menu->context->selectedMon, BATTLE_BUTTON_FRAME_NORMAL, 0);
     }
 }
+#if defined(SDK_PORT)
+
+/* Native-width pointer tables from asm/battle_menu_data.s. */
+extern const DpadMenuBox gBattlePartyPage0CursorBoxes[];
+extern const DpadMenuBox gBattlePartyPage1CursorBoxes[];
+extern const DpadMenuBox gBattlePartyPage2CursorBoxes[];
+extern const DpadMenuBox gBattlePartyPage3CursorBoxes[];
+extern const DpadMenuBox gBattlePartyPage4CursorBoxes[];
+extern const DpadMenuBox gBattlePartyPage5CursorBoxes[];
+extern const DpadMenuBox gBattlePartyPage6CursorBoxes[];
+extern const DpadMenuBox gBattlePartyPage7CursorBoxes[];
+extern const u8 gBattlePartyButton0Windows[];
+extern const u8 gBattlePartyButton1Windows[];
+extern const u8 gBattlePartyButton2Windows[];
+extern const u8 gBattlePartyButton3Windows[];
+extern const u8 gBattlePartyButton4Windows[];
+extern const u8 gBattlePartyButton5Windows[];
+extern const u8 gBattlePartyButton7Windows[];
+extern const u8 gBattlePartyButton8Windows[];
+extern const u8 gBattlePartyButton9Windows[];
+extern const u8 gBattlePartyButton10Windows[];
+extern const u8 gBattlePartyButton11Windows[];
+extern const u8 gBattlePartyButton14Windows[];
+extern const u8 gBattlePartyButton15Windows[];
+extern const u8 gBattlePartyButton16Windows[];
+extern const u8 gBattlePartyButton17Windows[];
+extern const u8 gBattlePartyButton19Windows[];
+extern const u8 gBattlePartyButton20Windows[];
+extern const u8 gBattlePartyButton21Windows[];
+extern const u8 gBattlePartyButton22Windows[];
+extern const u8 gBattlePartyButton23Windows[];
+extern const u8 gBattlePartyButton24Windows[];
+extern const u8 gBattlePartyButton25Windows[];
+extern const u8 gBattlePartyButton26Windows[];
+extern const u8 gBattlePartyButton27Windows[];
+extern const u8 gBattlePartyButton28Windows[];
+extern const u8 gBattlePartyButton29Windows[];
+const DpadMenuBox *const gBattlePartyPageCursorBoxes[] = {
+    gBattlePartyPage0CursorBoxes,
+    gBattlePartyPage1CursorBoxes,
+    gBattlePartyPage2CursorBoxes,
+    gBattlePartyPage3CursorBoxes,
+    gBattlePartyPage4CursorBoxes,
+    gBattlePartyPage5CursorBoxes,
+    gBattlePartyPage6CursorBoxes,
+    gBattlePartyPage7CursorBoxes,
+    gBattlePartyPage6CursorBoxes,
+    gBattlePartyPage7CursorBoxes,
+};
+const u8 *const gBattlePartyButtonWindowLists[34] = {
+    gBattlePartyButton0Windows,
+    gBattlePartyButton1Windows,
+    gBattlePartyButton2Windows,
+    gBattlePartyButton3Windows,
+    gBattlePartyButton4Windows,
+    gBattlePartyButton5Windows,
+    0,
+    gBattlePartyButton7Windows,
+    gBattlePartyButton8Windows,
+    gBattlePartyButton9Windows,
+    gBattlePartyButton10Windows,
+    gBattlePartyButton11Windows,
+    0,
+    0,
+    gBattlePartyButton14Windows,
+    gBattlePartyButton15Windows,
+    gBattlePartyButton16Windows,
+    gBattlePartyButton17Windows,
+    0,
+    gBattlePartyButton19Windows,
+    gBattlePartyButton20Windows,
+    gBattlePartyButton21Windows,
+    gBattlePartyButton22Windows,
+    gBattlePartyButton23Windows,
+    gBattlePartyButton24Windows,
+    gBattlePartyButton25Windows,
+    gBattlePartyButton26Windows,
+    gBattlePartyButton27Windows,
+    gBattlePartyButton28Windows,
+    gBattlePartyButton29Windows,
+    0,
+    0,
+    0,
+    0,
+};
+#endif

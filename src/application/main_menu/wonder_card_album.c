@@ -24,6 +24,9 @@
 #include "gf_gfx_loader.h"
 #include "gf_gfx_planes.h"
 #include "heap.h"
+#if defined(SDK_PORT)
+#include "font.h"
+#endif
 #include "link_synchronization_internal.h"
 #include "list_menu.h"
 #include "list_menu_items.h"
@@ -50,6 +53,56 @@
 // Main menu > Mystery Gift > "Check card": browses the three saved Wonder Cards, flips a card between its
 // front and back, deletes it, or shares it with other players over DS wireless.
 struct WonderCardAlbum {
+#if defined(SDK_PORT)
+    enum HeapID heapId;                        // 0x0000
+    u8 commOwner[0x8C];                        // 0x0004, start of the MysteryGiftComm owner work (MysteryGiftComm_StartParent)
+    WonderCardInfo shareHeader;    // 0x0090, sent with shareCard
+    WonderCard shareCard;                      // 0x00E0, copy of the card being shared
+    u8 unk_0438[0x25C4];                       // 0x0438
+    BgConfig *bgConfig;                        // 0x29FC
+    MessageFormat *msgFormat;                  // 0x2A00
+    MsgData *msgData;                          // 0x2A04
+    Window windows[19];                        // 0x2A08, card text boxes (sWonderCardAlbumTextBoxes)
+    u8 unk_2B38[0x10];                         // 0x2B38
+    u32 baseTiles[19];                         // 0x2B48
+    u32 unk_2B94;                              // 0x2B94
+    u32 boxBaseTile;                           // 0x2B98, of the text box WonderCardAlbum_PrintTextBox is printing
+    const WonderCardTextBox *box;              // 0x2B9C, the text box WonderCardAlbum_PrintTextBox is printing
+    MysteryGiftSave *mysteryGift;              // 0x2BA0
+    SaveData *saveData;                        // 0x2BA4
+    Options *options;                          // 0x2BA8
+    int frame;                                 // 0x2BAC
+    u32 unk_2BB0;                              // 0x2BB0
+    WonderCard *cards[NUM_SAVED_WONDER_CARDS]; // 0x2BB4
+    int cardIndex;                             // 0x2BC0
+    int page;                                  // 0x2BC4
+    struct ListMenu *listMenu;                 // 0x2BC8
+    ListMenuItem *listMenuItems;               // 0x2BCC
+    Window messageWindow;                      // 0x2BD0
+    Window menuWindow;                         // 0x2BE0
+    int menuBaseTile;                          // 0x2BF0
+    int numReceivers;                          // 0x2BF4
+    u8 unk_2BF8[0x10];                         // 0x2BF8
+    PlayerProfile *receivers[5];               // 0x2C08, by net id (0 unused)
+    u32 receiverOrder[5];                      // 0x2C1C, order the receivers connected in
+    int receiversShown;                        // 0x2C30
+    int timer;                                 // 0x2C34
+    u32 unk_2C38;                              // 0x2C38
+    u32 receiverSeq;                           // 0x2C3C
+    int nextState;                             // 0x2C40
+    SpriteList *spriteList;                    // 0x2C44
+    u8 unk_2C48[0x17C];                        // 0x2C48
+    Sprite *buttonSprites[2];                  // 0x2DC4, share / cancel
+    Sprite *monIconSprites[3];                 // 0x2DCC
+    u8 encryptedCard[sizeof(WonderCard)];      // 0x2DD8
+    WonderCardFlipEffect flipEffect;           // 0x3130
+    void (*callback)(WonderCardAlbum *album);  // 0x3D48, run every frame while set
+    int selection;                             // 0x3D4C, 0: share, 1: cancel
+    WaitingIcon *waitingIcon;                  // 0x3D50
+    MysteryGiftMenuFunc nativeMenuCallbacks[4];
+    int nativeMenuCount;
+}; // size: 0x3D54
+#else
     enum HeapID heapId;
     u8 commOwner[0x8C];         // start of the MysteryGiftComm owner work (MysteryGiftComm_StartParent)
     WonderCardInfo shareHeader; // sent with shareCard
@@ -96,11 +149,19 @@ struct WonderCardAlbum {
     int selection;                            // 0: share, 1: cancel
     WaitingIcon *waitingIcon;
 };
+#endif
 
+#if defined(SDK_PORT)
+// Declared here rather than through font.h / text.h: the card screens pass the u32 font ids of their text box
+// tables unconverted (those headers type them as the u8 FontID; matching).
+#endif
 extern void ResetAllTextPrinters(void);
 extern void LoadFontPal0(enum GFPalLoadLocation location, enum GFPalSlotOffset palSlotOffset, enum HeapID heapID);
 extern u8 GetFontAttribute(u8 fontId, int attr);
+#if defined(SDK_PORT)
+#else
 extern u32 FontID_String_GetCenterAlignmentX(u32 fontId, String *string, u32 letterSpacing, u32 windowWidth);
+#endif
 extern u8 AddTextPrinterParameterizedWithColor(Window *window, u32 fontId, String *string, u32 x, u32 y, u32 textSpeed, u32 color, void *callback);
 
 extern void RTC_ConvertDayToDate(RTCDate *date, s32 day);
@@ -565,10 +626,19 @@ static void WonderCardAlbum_CreateListMenu(WonderCardAlbum *album, const Mystery
     if (album->listMenu != NULL) {
         DestroyListMenu(album->listMenu, NULL, NULL);
     }
+#if defined(SDK_PORT)
+    GF_ASSERT(count >= 0 && count <= NELEMS(album->nativeMenuCallbacks));
+    album->nativeMenuCount = count;
+#endif
     album->listMenuItems = ListMenuItems_New(count, HEAP_ID_85);
     album->msgData = NewMsgDataFromNarc(MSGDATA_LOAD_DIRECT, NARC_msgdata_msg, NARC_msg_msg_0247_bin, HEAP_ID_85);
     for (i = 0; i < count; i++) {
+#if defined(SDK_PORT)
+        ListMenuItems_AppendFromMsgData(album->listMenuItems, album->msgData, items[i].msgId, i + 1);
+        album->nativeMenuCallbacks[i] = items[i].func;
+#else
         ListMenuItems_AppendFromMsgData(album->listMenuItems, album->msgData, items[i].msgId, (int)items[i].func);
+#endif
     }
     DestroyMsgData(album->msgData);
     template = sWonderCardAlbumListMenuTemplate;
@@ -934,13 +1004,22 @@ static void WonderCardAlbum_HandleListMenuInput(OverlayManager *manager, int *st
     default:
         PlaySE(SEQ_SE_DP_SELECT);
         if (input != 0) {
+#if defined(SDK_PORT)
+            WonderCardAlbum *album = OverlayManager_GetData(manager);
+            if (input > album->nativeMenuCount || album->nativeMenuCallbacks[input - 1] == NULL) break;
+#else
             // small values are states, the others menu functions
             if (input < 31) {
                 *state = input;
                 return;
             }
+#endif
             sWonderCardAlbumMenuInput = input;
+#if defined(SDK_PORT)
+            nextState = album->nativeMenuCallbacks[input - 1](manager);
+#else
             nextState = ((MysteryGiftMenuFunc)input)(manager);
+#endif
             if (nextState != -1) {
                 *state = nextState;
             }

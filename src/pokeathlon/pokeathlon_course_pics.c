@@ -444,7 +444,11 @@ void PokeathlonCourse_LoadSpritePalette(ManagedSprite *sprite, NarcId narcId, in
         } else {
             palette = (void *)HW_DB_OBJ_PLTT;
         }
+#if defined(SDK_PORT)
+        TintPalette_GrayScale((u16 *)((u8 *)palette + offset), 0x20);
+#else
         TintPalette_GrayScale((u16 *)(offset + (u32)palette), 0x20);
+#endif
     }
 }
 

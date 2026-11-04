@@ -1,3 +1,6 @@
+#if defined(SDK_PORT)
+#include "port/battle_timing.h"
+#endif
 #include "sprite_system.h"
 
 #include "global.h"
@@ -1040,3 +1043,13 @@ void SpriteSystem_ReplacePlttResObjFromOpenNarc(SpriteSystem *spriteSystem, Spri
     ReplacePlttResObjFromOpenNarc(spriteManager->_2dGfxResMan[GF_GFX_RES_TYPE_PLTT], obj, narc, fileId, compressed, spriteSystem->heapID);
     SpriteTransfer_ReplacePlttData(obj);
 }
+#if defined(SDK_PORT)
+
+ManagedSprite *SpriteSystem_NewBattleUISprite(SpriteSystem *spriteSystem, SpriteManager *spriteManager, const ManagedSpriteTemplate *template) {
+    BattleTimingDomain previous = BattleTiming_SetDomain(BATTLE_TIMING_UI);
+    ManagedSprite *sprite = SpriteSystem_NewSprite(spriteSystem, spriteManager, template);
+    BattleTiming_SetDomain(previous);
+    return sprite;
+}
+
+#endif

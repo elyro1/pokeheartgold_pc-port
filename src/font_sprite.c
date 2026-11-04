@@ -120,7 +120,11 @@ TextOBJ *FontOAM_Create(TextOBJTemplate *template) {
     list.next = &list;
     count = FontOAM_BuildLayout(template->window->width, template->window->height, template->heapID, &list);
     sprites = Heap_AllocAtEnd(template->heapID, sizeof(FontSpriteData) * count);
+#if defined(SDK_PORT)
+    object->sprites = Heap_Alloc(template->heapID, sizeof(*object->sprites) * count);
+#else
     object->sprites = Heap_Alloc(template->heapID, 12 * count);
+#endif
     object->spriteCount = count;
     FontOAM_LoadChars(template->window, &list, sprites, template->offset, template->vram, template->heapID);
     TextOBJ_CreateSprites(template, &list, sprites, object);

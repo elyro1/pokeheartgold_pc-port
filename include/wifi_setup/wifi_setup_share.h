@@ -1,7 +1,11 @@
 #ifndef POKEHEARTGOLD_WIFI_SETUP_SHARE_H
 #define POKEHEARTGOLD_WIFI_SETUP_SHARE_H
 
+#if defined(SDK_PORT)
+#include <nitro/wm.h>
+#else
 #include <nitro/wm/wm_internal.h>
+#endif
 
 #include "global.h"
 

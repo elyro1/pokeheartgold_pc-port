@@ -194,7 +194,11 @@ static BOOL Task_GetRockSmashItem(TaskManager *taskman) {
         break;
     case 1:
         if (EmoteMark_IsDone(env->emoteMark)) {
+#if defined(SDK_PORT)
+            FieldEffect_Destroy((FieldEffectHandle)env->emoteMark);
+#else
             FieldEffect_Destroy(env->emoteMark);
+#endif
             ++(*state_p);
         }
         break;

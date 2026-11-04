@@ -380,3 +380,8 @@ int BattleFactory_GetRound(BattleFactoryData *data) {
     }
     return round;
 }
+#if defined(SDK_PORT)
+
+/* Native writable pointer from asm/battle_factory_setup_data.s (assigned when a factory run starts). */
+const BattleFactorySetRange *gBattleFactoryTrainerSetRanges;
+#endif

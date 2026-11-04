@@ -5,7 +5,11 @@
 #pragma dollar_identifiers on
 
 // asm/nitrocrypto_data.s: bit length of each value 0-15
+#if defined(SDK_PORT)
+const s8 bits$7808[16] = {0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4};
+#else
 extern const s8 bits$7808[];
+#endif
 
 // MWCC 1.2 emits a file's functions in reverse order: the functions are defined last-to-first here
 // (link order is bottom-up).

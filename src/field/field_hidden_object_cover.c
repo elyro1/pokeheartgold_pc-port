@@ -40,6 +40,21 @@ static BOOL HiddenObjectCoverEffect_Init(FieldEffect *effect, void *state);
 static void HiddenObjectCoverEffect_Destroy(FieldEffect *effect, void *state);
 static void HiddenObjectCoverEffect_Update(FieldEffect *effect, void *state);
 static void HiddenObjectCoverEffect_Draw(FieldEffect *effect, void *state);
+#if defined(SDK_PORT)
+
+static BOOL HiddenObjectCoverEffect_InitNative(FieldEffect *effect, void *state) {
+    return HiddenObjectCoverEffect_Init(effect, state);
+}
+static void HiddenObjectCoverEffect_DestroyNative(FieldEffect *effect, void *state) {
+    HiddenObjectCoverEffect_Destroy(effect, state);
+}
+static void HiddenObjectCoverEffect_UpdateNative(FieldEffect *effect, void *state) {
+    HiddenObjectCoverEffect_Update(effect, state);
+}
+static void HiddenObjectCoverEffect_DrawNative(FieldEffect *effect, void *state) {
+    HiddenObjectCoverEffect_Draw(effect, state);
+}
+#endif
 
 static const int sHiddenObjectCoverModelFiles[4] = { 0x64, 0x65, 0x66, 0x67 };
 static const FieldEffectBasicTemplate sHiddenObjectCoverEffectTemplate = {

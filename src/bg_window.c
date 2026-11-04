@@ -3,6 +3,10 @@
 #include "global.h"
 
 #include "math_util.h"
+#if defined(SDK_PORT)
+#include <stdint.h>
+#define BG_ADDRESS_INTEGER uintptr_t
+#endif
 
 static u8 TranslateGFBgModePairToGXScreenSize(enum GFBgScreenSize size, enum GFBgType type);
 static void GetBgScreenDimensions(u32 screenSize, u8 *widthPtr, u8 *heightPtr);
@@ -776,7 +780,11 @@ static void CopyOrUncompressTilemapData(const void *src, void *dest, u32 size) {
         return;
     }
 
+#if defined(SDK_PORT)
+    if ((((BG_ADDRESS_INTEGER)src) % 4) == 0 && (((BG_ADDRESS_INTEGER)dest) % 4) == 0 && (((u16)size) % 4) == 0) {
+#else
     if ((((u32)src) % 4) == 0 && (((u32)dest) % 4) == 0 && (((u16)size) % 4) == 0) {
+#endif
         MI_CpuCopy32(src, dest, size);
         return;
     }

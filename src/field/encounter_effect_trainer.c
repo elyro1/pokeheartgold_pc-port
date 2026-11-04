@@ -381,7 +381,11 @@ void EncounterEffect_TrainerFadeSpin(SysTask *task, EncounterEffectTask *effect)
         break;
     case FADE_SPIN_STATE_START_SPIN:
         EncounterEffectInterp_Init(&work->blend, 0, 16, 8);
+#if defined(SDK_PORT)
+        G2_SetBlendAlpha(GX_BLEND_PLANEMASK_NONE, GX_BLEND_PLANEMASK_BG0 | GX_BLEND_PLANEMASK_BG1 | GX_BLEND_PLANEMASK_BG2 | GX_BLEND_PLANEMASK_BG3, work->blend.value, 16 - work->blend.value);
+#else
         G2x_SetBlendAlpha_((u32)&reg_G2_BLDCNT, GX_BLEND_PLANEMASK_NONE, GX_BLEND_PLANEMASK_BG0 | GX_BLEND_PLANEMASK_BG1 | GX_BLEND_PLANEMASK_BG2 | GX_BLEND_PLANEMASK_BG3, work->blend.value, 16 - work->blend.value);
+#endif
         for (i = 0; i < 2; i++) {
             Sprite_SetDrawFlag(work->sprites[i], TRUE);
             Sprite_SetAffineOverwriteMode(work->sprites[i], NNS_G2D_RND_AFFINE_OVERWRITE_DOUBLE);

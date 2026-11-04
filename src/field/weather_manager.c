@@ -1937,14 +1937,24 @@ static void WeatherTask_Snow(SysTask *task, void *data) {
     }
 }
 
+#if defined(SDK_PORT)
+static const int sSnowFallSpeeds[] = { 2, 2, 2, 2 };
+static const int sSnowSlowdownIntervals[] = { 16, 32, 16, 10 };
+#else
 static const sSnowFallSpeeds[] = { 2, 2, 2, 2 };
 static const sSnowSlowdownIntervals[] = { 16, 32, 16, 10 };
+#endif
 
 static void Snow_AddFlakes(WeatherWork *work, int count) {
+#if defined(SDK_PORT)
+    const int *table0 = sSnowSlowdownIntervals;
+    const int *table1 = sSnowFallSpeeds;
+#else
     int table0[4];
     table0 = sSnowSlowdownIntervals;
     int table1[4];
     table1 = sSnowFallSpeeds;
+#endif
     WeatherParticleTaskData *taskData = work->taskData;
 
     for (int i = 0; i < count; i++) {

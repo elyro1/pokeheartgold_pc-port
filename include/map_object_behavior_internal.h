@@ -4,6 +4,9 @@
 #include "field/map_object_render.h"
 
 #include "field_system.h"
+#if defined(SDK_PORT)
+#include "field_emote_mark.h"
+#endif
 #include "map_object.h"
 #include "player_avatar.h"
 

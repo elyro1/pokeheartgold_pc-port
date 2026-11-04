@@ -23,8 +23,13 @@ SPLEmitter *BattleParticleSystem_New(enum HeapID heapID) {
     SPLEmitter *pPVar1;
     Camera *pGVar2;
 
+#if defined(SDK_PORT)
+    particleHeap = Heap_Alloc(heapID, PARTICLE_WORK_SIZE(0x4800));
+    pPVar1 = ParticleSystem_New(BattleParticleSystem_AllocTexVram, BattleParticleSystem_AllocPlttVram, particleHeap, PARTICLE_WORK_SIZE(0x4800), TRUE, heapID);
+#else
     particleHeap = Heap_Alloc(heapID, 0x4800);
     pPVar1 = ParticleSystem_New(BattleParticleSystem_AllocTexVram, BattleParticleSystem_AllocPlttVram, particleHeap, 0x4800, TRUE, heapID);
+#endif
     pGVar2 = ParticleSystem_GetCamera(pPVar1);
     if (pGVar2 != NULL) {
         Camera_SetPerspectiveClippingPlane(1 * FX32_ONE, 900 * FX32_ONE, pGVar2);
@@ -37,11 +42,19 @@ SPLEmitter *BattleParticleSystem_NewSmallHeap(enum HeapID heapID) {
     SPLEmitter *pPVar1;
     Camera *pGVar2;
 
+#if defined(SDK_PORT)
+    particleHeap = Heap_Alloc(heapID, PARTICLE_WORK_SIZE(0x4200));
+#else
     particleHeap = Heap_Alloc(heapID, 0x4200);
+#endif
     if (particleHeap == NULL) {
         return NULL;
     }
+#if defined(SDK_PORT)
+    pPVar1 = ParticleSystem_New(BattleParticleSystem_AllocTexVram, BattleParticleSystem_AllocPlttVram, particleHeap, PARTICLE_WORK_SIZE(0x4200), TRUE, heapID);
+#else
     pPVar1 = ParticleSystem_New(BattleParticleSystem_AllocTexVram, BattleParticleSystem_AllocPlttVram, particleHeap, 0x4200, TRUE, heapID);
+#endif
     pGVar2 = ParticleSystem_GetCamera(pPVar1);
     if (pGVar2 != NULL) {
         Camera_SetPerspectiveClippingPlane(1 * FX32_ONE, 900 * FX32_ONE, pGVar2);

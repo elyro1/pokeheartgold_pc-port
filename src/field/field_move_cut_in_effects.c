@@ -153,7 +153,11 @@ typedef struct FlyLanding {
 typedef BOOL (*FlyLandingStep)(FlyLanding *landing);
 
 extern const CutInScrollSpriteTemplate gCutInScrollSpriteTemplates[];
+#if defined(SDK_PORT)
+extern const CutInFlyerStep *const gCutInFlyerModeSteps[3];
+#else
 extern CutInFlyerStep *const gCutInFlyerModeSteps[3];
+#endif
 extern FlyLandingStep const gFlyLandingTaskSteps[6];
 
 static void Task_FlyLanding(SysTask *task, void *data);
@@ -424,7 +428,11 @@ void CutInFlyer_Destroy(FieldEffect *effect, CutInFlyer *flyer) {
 }
 
 void CutInFlyer_Update(FieldEffect *effect, CutInFlyer *flyer) {
+#if defined(SDK_PORT)
+    const CutInFlyerStep *steps = gCutInFlyerModeSteps[flyer->mode];
+#else
     CutInFlyerStep *steps = gCutInFlyerModeSteps[flyer->mode];
+#endif
     while (steps[flyer->step](flyer) == TRUE) {
     }
 }
@@ -1107,3 +1115,108 @@ void PokecenterAnimCreate(FieldSystem *fieldSystem, u8 kind) {
         GF_ASSERT(FALSE);
     }
 }
+#if defined(SDK_PORT)
+
+const FlyLandingStep gFlyLandingTaskSteps[] = {
+    FlyLanding_SetPlayerVisible,
+    FlyLanding_LoadGraphics,
+    FlyLanding_CreateSprites,
+    FlyLanding_WaitLanding,
+    FlyLanding_FreeGraphics,
+    FlyLanding_Idle,
+};
+const CutInFlyerStep sCutInFlyerHideSteps[] = {
+    CutInFlyer_Hide,
+};
+const CutInFlyerStep sCutInFlyerTakeOffSteps[] = {
+    CutInFlyer_TakeOff,
+    CutInFlyer_Idle,
+};
+const CutInFlyerStep sCutInFlyerPickUpSteps[] = {
+    CutInFlyer_SwoopDown,
+    CutInFlyer_PickUpTrainer,
+    CutInFlyer_FlyAway,
+    CutInFlyer_Done,
+};
+
+
+
+
+const CutInFlyerStep *const gCutInFlyerModeSteps[3] = {
+    sCutInFlyerHideSteps,
+    sCutInFlyerTakeOffSteps,
+    sCutInFlyerPickUpSteps,
+};
+
+const VecFx32 gCutInFlyerTakeOffOrigin = { 557056, 360448, 0 };
+
+const VecFx32 gCutInFlyerTakeOffScale = { 1024, 1024, 0 };
+
+const VecFx32 gCutInFlyerPickUpPos = { 524288, 425984, 0 };
+
+const VecFx32 gCutInFlyerPickUpScale = { 5120, 5120, 0 };
+
+const VecFx32 gCutInFlyerTrainerScale = { 4096, 4096, 0 };
+
+const fx32 gTrainerJumpOffsets[] = { -49152, -65536, -81920, -98304, -106496, -114688, -114688, -114688, -106496, -98304, -90112, -81920 };
+
+const fx32 gTrainerHopOffsets[] = { -16384, -24576, -28672, -32768 };
+
+const CutInScrollSpriteTemplate gCutInScrollSpriteTemplates[] = {
+    { 61440, 258048, 65536, 133, 0 },
+    { 311296, 274432, 65536, 133, 0 },
+    { 524288, 249856, 98304, 128, 1 },
+    { 983040, 282624, 65536, 133, 0 },
+    { 163840, 319488, 98304, 128, 1 },
+    { 294912, 372736, 65536, 133, 0 },
+    { 851968, 352256, 98304, 128, 1 },
+    { 229376, 475136, 65536, 133, 0 },
+    { 389120, 446464, 98304, 128, 1 },
+    { 651264, 409600, 65536, 133, 0 },
+    { 98304, 516096, 98304, 128, 1 },
+    { 573440, 512000, 98304, 128, 1 },
+    { 905216, 507904, 98304, 128, 1 },
+};
+static BOOL CutInScrollSprite_Init_Native(FieldEffect *effect, void *state) { return CutInScrollSprite_Init(effect, state); }
+static void CutInScrollSprite_Destroy_Native(FieldEffect *effect, void *state) { CutInScrollSprite_Destroy(effect, state); }
+static void CutInScrollSprite_Update_Native(FieldEffect *effect, void *state) { CutInScrollSprite_Update(effect, state); }
+static void CutInScrollSprite_Draw_Native(FieldEffect *effect, void *state) { CutInScrollSprite_Draw(effect, state); }
+
+
+
+
+
+const FieldEffectBasicTemplate gCutInScrollSpriteEffectTemplate = {sizeof(CutInScrollSprite), CutInScrollSprite_Init_Native, CutInScrollSprite_Destroy_Native, CutInScrollSprite_Update_Native, CutInScrollSprite_Draw_Native};
+static BOOL CutInFlyer_Init_Native(FieldEffect *effect, void *state) { return CutInFlyer_Init(effect, state); }
+static void CutInFlyer_Destroy_Native(FieldEffect *effect, void *state) { CutInFlyer_Destroy(effect, state); }
+static void CutInFlyer_Update_Native(FieldEffect *effect, void *state) { CutInFlyer_Update(effect, state); }
+static void CutInFlyer_Draw_Native(FieldEffect *effect, void *state) { CutInFlyer_Draw(effect, state); }
+
+
+
+
+
+const FieldEffectBasicTemplate gCutInFlyerEffectTemplate = {sizeof(CutInFlyer), CutInFlyer_Init_Native, CutInFlyer_Destroy_Native, CutInFlyer_Update_Native, CutInFlyer_Draw_Native};
+static BOOL TrainerJumpEffect_Init_Native(FieldEffect *effect, void *state) { return TrainerJumpEffect_Init(effect, state); }
+static void TrainerJumpEffect_Update_Native(FieldEffect *effect, void *state) { TrainerJumpEffect_Update(effect, state); }
+
+
+
+const FieldEffectBasicTemplate gTrainerJumpEffectTemplate = {sizeof(TrainerJump), TrainerJumpEffect_Init_Native, FieldEffect_DefaultDestroy, TrainerJumpEffect_Update_Native, FieldEffect_DefaultDraw};
+static BOOL TrainerClipEffect_Init_Native(FieldEffect *effect, void *state) { return TrainerClipEffect_Init(effect, state); }
+static void TrainerClipEffect_Update_Native(FieldEffect *effect, void *state) { TrainerClipEffect_Update(effect, state); }
+
+
+
+const FieldEffectBasicTemplate gTrainerClipEffectTemplate = {sizeof(TrainerClip), TrainerClipEffect_Init_Native, FieldEffect_DefaultDestroy, TrainerClipEffect_Update_Native, FieldEffect_DefaultDraw};
+static BOOL CutInModelEffect_Init_Native(FieldEffect *effect, void *state) { return CutInModelEffect_Init(effect, state); }
+static void CutInModelEffect_Destroy_Native(FieldEffect *effect, void *state) { CutInModelEffect_Destroy(effect, state); }
+static void CutInModelEffect_Update_Native(FieldEffect *effect, void *state) { CutInModelEffect_Update(effect, state); }
+static void CutInModelEffect_Draw_Native(FieldEffect *effect, void *state) { CutInModelEffect_Draw(effect, state); }
+
+
+
+
+
+const FieldEffectBasicTemplate gCutInModelEffectTemplate = {sizeof(CutInModelEffect), CutInModelEffect_Init_Native, CutInModelEffect_Destroy_Native, CutInModelEffect_Update_Native, CutInModelEffect_Draw_Native};
+#endif

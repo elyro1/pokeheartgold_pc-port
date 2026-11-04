@@ -1732,3 +1732,16 @@ u32 EasyChatApp_GetFrame(EasyChatApp *app) {
 u8 EasyChatApp_GetYesNoCursor(EasyChatApp *app) {
     return EasyChatYesNo_GetCursor(app->yesNo);
 }
+#if defined(SDK_PORT)
+
+/* Native tables from asm/easy_chat_app_data.s; adapters give differing originals the table's signature. */
+BOOL (*const gEasyChatCategoryCursorFuncs[2])(EasyChatApp *app) = {
+    EasyChatApp_MoveCategoryGridCursor,
+    EasyChatApp_MoveInitialGridCursor,
+};
+const EasyChatAppHandler gEasyChatAppHandlers[3] = {
+    EasyChatApp_Handler_WordMenu,
+    EasyChatApp_Handler_WordMenu,
+    EasyChatApp_Handler_MessageMenu,
+};
+#endif

@@ -199,7 +199,11 @@ typedef struct BerryPotsGrowthAnimArgs {
 
 static void Task_BerryPotsApp_GrowthAnim(SysTask *task, BerryPotsGrowthAnimArgs *args);
 
+#if defined(SDK_PORT)
+void BerryPotsApp_StartGrowthAnims(BerryPotsAppData *data) {
+#else
 static void BerryPotsApp_StartGrowthAnims(BerryPotsAppData *data) {
+#endif
     for (int i = 0; i < MAX_BERRY_POT; i++) {
         BerryPotsAppPot *sub = &data->pots[i];
 
@@ -270,7 +274,11 @@ BOOL BerryPotsApp_HandleWateringInput(BerryPotsAppData *data) {
     return ret;
 }
 
+#if defined(SDK_PORT)
+u32 BerryPotsApp_SelectPotAction(BerryPotsAppData *data, u32 selection) {
+#else
 static u32 BerryPotsApp_SelectPotAction(BerryPotsAppData *data, u32 selection) {
+#endif
     switch (selection) {
     case 0:
     case 1:
@@ -297,7 +305,11 @@ static u32 BerryPotsApp_SelectPotAction(BerryPotsAppData *data, u32 selection) {
     return 2;
 }
 
+#if defined(SDK_PORT)
+u32 BerryPotsApp_HandleSelectPotKeys(BerryPotsAppData *data) {
+#else
 static u32 BerryPotsApp_HandleSelectPotKeys(BerryPotsAppData *data) {
+#endif
     BOOL flag = FALSE;
 
     if (gSystem.newKeys & (PAD_BUTTON_Y | PAD_BUTTON_X | PAD_KEY_DOWN | PAD_KEY_UP | PAD_KEY_LEFT | PAD_KEY_RIGHT | PAD_BUTTON_B | PAD_BUTTON_A)) {
@@ -329,7 +341,11 @@ static u32 BerryPotsApp_HandleSelectPotKeys(BerryPotsAppData *data) {
     }
 }
 
+#if defined(SDK_PORT)
+u32 BerryPotsApp_HandleSelectPotTouch(BerryPotsAppData *data, BOOL *touched) {
+#else
 static u32 BerryPotsApp_HandleSelectPotTouch(BerryPotsAppData *data, BOOL *touched) {
+#endif
     int potIndex = BerryPotsApp_GetSelectPotTouch(data);
     if (potIndex < 0) {
         return 2;
@@ -340,7 +356,11 @@ static u32 BerryPotsApp_HandleSelectPotTouch(BerryPotsAppData *data, BOOL *touch
     return BerryPotsApp_SelectPotAction(data, potIndex);
 }
 
+#if defined(SDK_PORT)
+BOOL BerryPotsApp_HandleWateringKeys(BerryPotsAppData *data) {
+#else
 static BOOL BerryPotsApp_HandleWateringKeys(BerryPotsAppData *data) {
+#endif
     BOOL moved = FALSE;
 
     if (data->nextWateringPot != 0xFF) {
@@ -369,7 +389,11 @@ static BOOL BerryPotsApp_HandleWateringKeys(BerryPotsAppData *data) {
     return FALSE;
 }
 
+#if defined(SDK_PORT)
+BOOL BerryPotsApp_HandleWateringTouch(BerryPotsAppData *data, BOOL *touched) {
+#else
 static BOOL BerryPotsApp_HandleWateringTouch(BerryPotsAppData *data, BOOL *touched) {
+#endif
     if (data->nextWateringPot != 0xFF) {
         return FALSE;
     }
@@ -389,7 +413,11 @@ static BOOL BerryPotsApp_HandleWateringTouch(BerryPotsAppData *data, BOOL *touch
     return TRUE;
 }
 
+#if defined(SDK_PORT)
+int BerryPotsApp_GetTouchedPot(BerryPotsAppData *data) {
+#else
 static int BerryPotsApp_GetTouchedPot(BerryPotsAppData *data) {
+#endif
     TouchscreenHitbox touchHitbox;
 
     for (int i = 0, xOffsetMaybe = 16; i < MAX_BERRY_POT; xOffsetMaybe += 28, i++) {
@@ -410,7 +438,11 @@ static int BerryPotsApp_GetTouchedPot(BerryPotsAppData *data) {
     return -1;
 }
 
+#if defined(SDK_PORT)
+int BerryPotsApp_GetSelectPotTouch(BerryPotsAppData *data) {
+#else
 static int BerryPotsApp_GetSelectPotTouch(BerryPotsAppData *data) {
+#endif
     if (TouchscreenHitbox_TouchNewIsIn(&sBerryPotsCancelHitbox)) {
         return 5;
     }
@@ -425,7 +457,11 @@ static int BerryPotsApp_GetSelectPotTouch(BerryPotsAppData *data) {
     return -1;
 }
 
+#if defined(SDK_PORT)
+u32 BerryPotsApp_GetPotMenuState(BerryPotsAppData *data) {
+#else
 static u32 BerryPotsApp_GetPotMenuState(BerryPotsAppData *data) {
+#endif
     BerryPotsAppPot *pot = &data->pots[data->selectedPot];
     switch (pot->growthStage) {
     case BERRY_POT_GROWTH_STAGE_NONE:

@@ -82,7 +82,11 @@ typedef struct MartData {
     u32 touchButton;
     u32 touchMartAction;
     MartButtonPressAnim buttonPressAnim;
+#if defined(SDK_PORT)
+    u16 *sellResult; // Optional script results; index 1 receives the number sold.
+#else
     u32 unk2A0;
+#endif
 } MartData;
 
 void CommClub_StartJoin(FieldSystem *fieldSystem, u32 commType, u16 course, u16 arg3);

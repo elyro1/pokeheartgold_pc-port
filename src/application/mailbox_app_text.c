@@ -185,8 +185,13 @@ static void MailboxApp_PrintMessageBox(MailboxApp *app) {
     MailboxAppData *data = app->data;
     u32 offset = MailboxAppData_GetMessageWindowOffset();
 
+#if defined(SDK_PORT)
+    FillWindowPixelBuffer((Window *)((uintptr_t)data + offset), 15);
+    *(u8 *)((uintptr_t)app->data + offset + (offsetof(MailboxAppData, printerId) - offsetof(MailboxAppData, windows[MAILBOX_WIN_MESSAGE]))) = AddTextPrinterParameterizedWithColor((Window *)((uintptr_t)data + offset), 1, *(String **)((uintptr_t)app->data + offset + (offsetof(MailboxAppData, string) - offsetof(MailboxAppData, windows[MAILBOX_WIN_MESSAGE]))), 0, 0, Options_GetTextFrameDelay(app->options), 0x1020F, NULL);
+#else
     FillWindowPixelBuffer((Window *)((u32)data + offset), 15);
     *(u8 *)((u32)app->data + offset + (offsetof(MailboxAppData, printerId) - offsetof(MailboxAppData, windows[MAILBOX_WIN_MESSAGE]))) = AddTextPrinterParameterizedWithColor((Window *)((u32)data + offset), 1, *(String **)((u32)app->data + offset + (offsetof(MailboxAppData, string) - offsetof(MailboxAppData, windows[MAILBOX_WIN_MESSAGE]))), 0, 0, Options_GetTextFrameDelay(app->options), 0x1020F, NULL);
+#endif
 }
 
 void MailboxApp_PrintMailPrompt(MailboxApp *app) {

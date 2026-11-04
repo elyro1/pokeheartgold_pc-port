@@ -1,5 +1,16 @@
 #ifndef POKEHEARTGOLD_APPLICATION_PC_BOX_PC_BOX_INTERNAL_H
 #define POKEHEARTGOLD_APPLICATION_PC_BOX_PC_BOX_INTERNAL_H
+#if defined(SDK_PORT)
+
+/* Many states are declared void in the decompilation but end in a tail call that returns the
+ * next state; natively they return it. On the DS the macros leave the original code unchanged. */
+#define PCBOX_STATE_RET u32
+#define PCBOX_RETURN return
+#define PCBOX_BARE_RETURN (void)0
+#else
+#define PCBOX_RETURN
+
+#endif
 
 #include "bag_types_def.h"
 #include "bg_cell_manager.h"
@@ -670,16 +681,32 @@ enum PCBoxState PCBox_State_HandleYesNo(PCBoxWork *work);
 enum PCBoxState PCBox_State_WaitPaletteFlash(PCBoxWork *work);
 enum PCBoxState PCBox_State_StartSubApp(PCBoxWork *work);
 enum PCBoxState PCBox_State_RunSubApp(PCBoxWork *work);
+#if defined(SDK_PORT)
+enum PCBoxState PCBox_State_Start(PCBoxWork *work);
+#else
 void PCBox_State_Start(PCBoxWork *work);
+#endif
 enum PCBoxState PCBox_State_MoveModeInput(PCBoxWork *work);
 enum PCBoxState PCBox_State_ApplyMonMove(PCBoxWork *work);
+#if defined(SDK_PORT)
+enum PCBoxState PCBox_State_ReturnToActionMenu(PCBoxWork *work);
+enum PCBoxState PCBox_State_ReturnFromSummary(PCBoxWork *work);
+enum PCBoxState PCBox_State_ReturnFromNamingScreen(PCBoxWork *work);
+enum PCBoxState PCBox_State_GiveItemFromBag(PCBoxWork *work);
+#else
 void PCBox_State_ReturnToActionMenu(PCBoxWork *work);
 void PCBox_State_ReturnFromSummary(PCBoxWork *work);
 void PCBox_State_ReturnFromNamingScreen(PCBoxWork *work);
 void PCBox_State_GiveItemFromBag(PCBoxWork *work);
+#endif
 enum PCBoxState PCBox_State_PrintItemHeld(PCBoxWork *work);
+#if defined(SDK_PORT)
+enum PCBoxState PCBox_State_MarkingChosen(PCBoxWork *work);
+enum PCBoxState PCBox_State_OpenMarkingMenu(PCBoxWork *work);
+#else
 void PCBox_State_MarkingChosen(PCBoxWork *work);
 void PCBox_State_OpenMarkingMenu(PCBoxWork *work);
+#endif
 enum PCBoxState PCBox_State_SetupMarkingMenuInput(PCBoxWork *work);
 enum PCBoxState PCBox_State_MarkingMenuInput(PCBoxWork *work);
 enum PCBoxState PCBox_State_FinishCloseMarkingMenu(PCBoxWork *work);
@@ -707,18 +734,36 @@ enum PCBoxState PCBox_State_ResumeBoxTrayInput(PCBoxWork *work);
 enum PCBoxState PCBox_State_OpenTrayBesideParty(PCBoxWork *work);
 enum PCBoxState PCBox_State_SetupPartyInputAfterTray(PCBoxWork *work);
 enum PCBoxState PCBox_State_OpenTrayFromBox(PCBoxWork *work);
+#if defined(SDK_PORT)
+enum PCBoxState PCBox_State_SlideInTrayPartyPanel(PCBoxWork *work);
+#else
 void PCBox_State_SlideInTrayPartyPanel(PCBoxWork *work);
+#endif
 enum PCBoxState PCBox_State_SlideOutTray(PCBoxWork *work);
+#if defined(SDK_PORT)
+enum PCBoxState PCBox_State_TrayClosed(PCBoxWork *work);
+enum PCBoxState PCBox_State_ReturnToBoxFromTray(PCBoxWork *work);
+#else
 void PCBox_State_TrayClosed(PCBoxWork *work);
 void PCBox_State_ReturnToBoxFromTray(PCBoxWork *work);
+#endif
 enum PCBoxState PCBox_State_BoxMenuInput(PCBoxWork *work);
 enum PCBoxState PCBox_State_HideButtonsForBoxMenu(PCBoxWork *work);
 enum PCBoxState PCBox_State_OpenBoxMenuTray(PCBoxWork *work);
 enum PCBoxState PCBox_State_ShowBoxMenuExitButton(PCBoxWork *work);
+#if defined(SDK_PORT)
+enum PCBoxState PCBox_State_OpenBoxMenu(PCBoxWork *work);
+#else
 void PCBox_State_OpenBoxMenu(PCBoxWork *work);
+#endif
 enum PCBoxState PCBox_State_SetupBoxMenuInput(PCBoxWork *work);
+#if defined(SDK_PORT)
+enum PCBoxState PCBox_State_CloseBoxMenu(PCBoxWork *work);
+enum PCBoxState PCBox_State_SlideOutBoxMenu(PCBoxWork *work);
+#else
 void PCBox_State_CloseBoxMenu(PCBoxWork *work);
 void PCBox_State_SlideOutBoxMenu(PCBoxWork *work);
+#endif
 enum PCBoxState PCBox_State_CloseBoxMenuTray(PCBoxWork *work);
 enum PCBoxState PCBox_State_BoxMenuClosed(PCBoxWork *work);
 enum PCBoxState PCBox_State_OpenWallpaperMenu(PCBoxWork *work);
@@ -734,11 +779,19 @@ enum PCBoxState PCBox_State_WallpaperFadeIn(PCBoxWork *work);
 enum PCBoxState PCBox_State_ResumeBoxInput(PCBoxWork *work);
 enum PCBoxState PCBox_State_ResumeMoveModePartyInput(PCBoxWork *work);
 enum PCBoxState PCBox_State_WithdrawInput(PCBoxWork *work);
+#if defined(SDK_PORT)
+enum PCBoxState PCBox_State_ReturnToWithdrawInput(PCBoxWork *work);
+enum PCBoxState PCBox_State_SlideInWithdrawParty(PCBoxWork *work);
+enum PCBoxState PCBox_State_StartWithdrawMove(PCBoxWork *work);
+enum PCBoxState PCBox_State_EndWithdrawMove(PCBoxWork *work);
+enum PCBoxState PCBox_State_WithdrawPartyClosed(PCBoxWork *work);
+#else
 void PCBox_State_ReturnToWithdrawInput(PCBoxWork *work);
 void PCBox_State_SlideInWithdrawParty(PCBoxWork *work);
 void PCBox_State_StartWithdrawMove(PCBoxWork *work);
 void PCBox_State_EndWithdrawMove(PCBoxWork *work);
 void PCBox_State_WithdrawPartyClosed(PCBoxWork *work);
+#endif
 enum PCBoxState PCBox_State_EndWithdrawDrag(PCBoxWork *work);
 enum PCBoxState PCBox_State_ResumeWithdrawInput(PCBoxWork *work);
 enum PCBoxState PCBox_State_DepositInput(PCBoxWork *work);
@@ -813,10 +866,27 @@ enum PCBoxState PCBox_ConfirmExit(PCBoxWork *work);
 enum PCBoxState PCBox_CancelExit(PCBoxWork *work);
 enum PCBoxState PCBox_State_AskExit(PCBoxWork *work);
 enum PCBoxState PCBox_State_AskContinue(PCBoxWork *work);
+#if defined(SDK_PORT)
+enum PCBoxState PCBox_State_ChooseParty(PCBoxWork *work);
+enum PCBoxState PCBox_State_ChooseTrayTab(PCBoxWork *work);
+#else
 void PCBox_State_ChooseParty(PCBoxWork *work);
 void PCBox_State_ChooseTrayTab(PCBoxWork *work);
+#endif
 enum PCBoxState PCBox_State_ChooseMoveFromBox(PCBoxWork *work);
 enum PCBoxState PCBox_State_ChooseSummary(PCBoxWork *work);
+#if defined(SDK_PORT)
+enum PCBoxState PCBox_State_ChooseItem(PCBoxWork *work);
+enum PCBoxState PCBox_State_ChooseMarking(PCBoxWork *work);
+enum PCBoxState PCBox_State_ChooseMarkingDone(PCBoxWork *work);
+enum PCBoxState PCBox_State_ChooseRelease(PCBoxWork *work);
+enum PCBoxState PCBox_State_CloseMoveModeActionMenu(PCBoxWork *work);
+enum PCBoxState PCBox_State_PartyChooseTray(PCBoxWork *work);
+enum PCBoxState PCBox_State_CloseMoveModePartyActionMenu(PCBoxWork *work);
+enum PCBoxState PCBox_State_ChoosePartyPanelExit(PCBoxWork *work);
+enum PCBoxState PCBox_State_ChooseTrayBox(PCBoxWork *work);
+enum PCBoxState PCBox_State_ChooseTrayExit(PCBoxWork *work);
+#else
 void PCBox_State_ChooseItem(PCBoxWork *work);
 void PCBox_State_ChooseMarking(PCBoxWork *work);
 void PCBox_State_ChooseMarkingDone(PCBoxWork *work);
@@ -827,11 +897,29 @@ void PCBox_State_CloseMoveModePartyActionMenu(PCBoxWork *work);
 void PCBox_State_ChoosePartyPanelExit(PCBoxWork *work);
 void PCBox_State_ChooseTrayBox(PCBoxWork *work);
 void PCBox_State_ChooseTrayExit(PCBoxWork *work);
+#endif
 enum PCBoxState PCBox_State_BoxMenuSwitchBox(PCBoxWork *work);
+#if defined(SDK_PORT)
+enum PCBoxState PCBox_State_ChooseWallpaper(PCBoxWork *work);
+#else
 void PCBox_State_ChooseWallpaper(PCBoxWork *work);
+#endif
 enum PCBoxState PCBox_State_ChooseRename(PCBoxWork *work);
 enum PCBoxState PCBox_State_SwitchBoxForWallpaper(PCBoxWork *work);
 enum PCBoxState PCBox_State_ChooseWallpaperMenuExit(PCBoxWork *work);
+#if defined(SDK_PORT)
+enum PCBoxState PCBox_State_ChooseWithdraw(PCBoxWork *work);
+enum PCBoxState PCBox_State_CloseWithdrawActionMenu(PCBoxWork *work);
+enum PCBoxState PCBox_State_ChooseDeposit(PCBoxWork *work);
+enum PCBoxState PCBox_State_CloseDepositActionMenu(PCBoxWork *work);
+enum PCBoxState PCBox_State_ItemModeChooseParty(PCBoxWork *work);
+enum PCBoxState PCBox_State_ItemModeChooseTrayTab(PCBoxWork *work);
+enum PCBoxState PCBox_State_ChooseBagGive(PCBoxWork *work);
+enum PCBoxState PCBox_State_CloseItemModeActionMenu(PCBoxWork *work);
+enum PCBoxState PCBox_State_ItemModeChooseTrayBox(PCBoxWork *work);
+enum PCBoxState PCBox_State_ItemModePartyChooseTray(PCBoxWork *work);
+enum PCBoxState PCBox_State_CloseItemModePartyActionMenu(PCBoxWork *work);
+#else
 void PCBox_State_ChooseWithdraw(PCBoxWork *work);
 void PCBox_State_CloseWithdrawActionMenu(PCBoxWork *work);
 void PCBox_State_ChooseDeposit(PCBoxWork *work);
@@ -843,6 +931,7 @@ void PCBox_State_CloseItemModeActionMenu(PCBoxWork *work);
 void PCBox_State_ItemModeChooseTrayBox(PCBoxWork *work);
 void PCBox_State_ItemModePartyChooseTray(PCBoxWork *work);
 void PCBox_State_CloseItemModePartyActionMenu(PCBoxWork *work);
+#endif
 
 void PCBox_FreeSprites(PCBoxView *view);
 void PCBox_TickSprites(PCBoxView *view);

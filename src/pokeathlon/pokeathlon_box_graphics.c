@@ -289,7 +289,11 @@ static void PokeathlonBox_PrintMonTexts(PokeathlonBox_Graphics *graphics, Pokeat
 static void PokeathlonBox_ShowMonSprites(PokeathlonBox_Graphics *graphics, PokeathlonBox_MonInfo *mon) {
     u8 i;
     PokeathlonBox_SubGraphics *sub = &graphics->sub;
+#if defined(SDK_PORT)
+    const u8 *medalSlots;
+#else
     u8 medalSlots[5];
+#endif
 
     PokeathlonBox_LoadMonPic(&graphics->sub, mon);
     PokeathlonBox_TransferMonPic(&graphics->sub);

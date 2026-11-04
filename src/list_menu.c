@@ -132,48 +132,124 @@ s32 ListMenuGetValueByArrayId(struct ListMenu *list, s32 index) {
     return list->template.items[index].value;
 }
 
+#if defined(SDK_PORT)
+ListMenuFieldValue ListMenuGetTemplateField(struct ListMenu *list, enum ListMenuAttr attr) {
+#else
 s32 ListMenuGetTemplateField(struct ListMenu *list, enum ListMenuAttr attr) {
+#endif
     switch (attr) {
     case LISTMENUATTR_MOVECURSORFUNC:
+#if defined(SDK_PORT)
+        return (ListMenuFieldValue)list->template.moveCursorFunc;
+#else
         return (s32)list->template.moveCursorFunc;
+#endif
     case LISTMENUATTR_ITEMPRINTFUNC:
+#if defined(SDK_PORT)
+        return (ListMenuFieldValue)list->template.itemPrintFunc;
+#else
         return (s32)list->template.itemPrintFunc;
+#endif
     case LISTMENUATTR_TOTALITEMS:
+#if defined(SDK_PORT)
+        return (ListMenuFieldValue)list->template.totalItems;
+#else
         return (s32)list->template.totalItems;
+#endif
     case LISTMENUATTR_MAXSHOWED:
+#if defined(SDK_PORT)
+        return (ListMenuFieldValue)list->template.maxShowed;
+#else
         return (s32)list->template.maxShowed;
+#endif
     case LISTMENUATTR_UNUSED_4:
         break;
     case LISTMENUATTR_HEADERX:
+#if defined(SDK_PORT)
+        return (ListMenuFieldValue)list->template.header_X;
+#else
         return (s32)list->template.header_X;
+#endif
     case LISTMENUATTR_ITEMX:
+#if defined(SDK_PORT)
+        return (ListMenuFieldValue)list->template.item_X;
+#else
         return (s32)list->template.item_X;
+#endif
     case LISTMENUATTR_CURSORX:
+#if defined(SDK_PORT)
+        return (ListMenuFieldValue)list->template.cursor_X;
+#else
         return (s32)list->template.cursor_X;
+#endif
     case LISTMENUATTR_UPTEXTY:
+#if defined(SDK_PORT)
+        return (ListMenuFieldValue)list->template.upText_Y;
+#else
         return (s32)list->template.upText_Y;
+#endif
     case LISTMENUATTR_TEXTHEIGHT:
         return GetFontAttribute(list->template.fontId, 1) + list->template.itemVerticalPadding;
     case LISTMENUATTR_CURSORPAL:
+#if defined(SDK_PORT)
+        return (ListMenuFieldValue)list->template.cursorPal;
+#else
         return (s32)list->template.cursorPal;
+#endif
     case LISTMENUATTR_FILLVALUE:
+#if defined(SDK_PORT)
+        return (ListMenuFieldValue)list->template.fillValue;
+#else
         return (s32)list->template.fillValue;
+#endif
     case LISTMENUATTR_CURSORSHADOWPAL:
+#if defined(SDK_PORT)
+        return (ListMenuFieldValue)list->template.cursorShadowPal;
+#else
         return (s32)list->template.cursorShadowPal;
+#endif
     case LISTMENUATTR_LETTERSSPACING:
+#if defined(SDK_PORT)
+        return (ListMenuFieldValue)list->template.lettersSpacing;
+#else
         return (s32)list->template.lettersSpacing;
+#endif
     case LISTMENUATTR_ITEMVERTICALPADDING:
+#if defined(SDK_PORT)
+        return (ListMenuFieldValue)list->template.itemVerticalPadding;
+#else
         return (s32)list->template.itemVerticalPadding;
+#endif
     case LISTMENUATTR_SCROLLMULTIPLE:
+#if defined(SDK_PORT)
+        return (ListMenuFieldValue)list->template.scrollMultiple;
+#else
         return (s32)list->template.scrollMultiple;
+#endif
     case LISTMENUATTR_FONTID:
+#if defined(SDK_PORT)
+        return (ListMenuFieldValue)list->template.fontId;
+#else
         return (s32)list->template.fontId;
+#endif
     case LISTMENUATTR_CURSORKIND:
+#if defined(SDK_PORT)
+        return (ListMenuFieldValue)list->template.cursorKind;
+#else
         return (s32)list->template.cursorKind;
+#endif
     case LISTMENUATTR_WINDOW:
+#if defined(SDK_PORT)
+        return (ListMenuFieldValue)list->template.window;
+#else
         return (s32)list->template.window;
+#endif
     case LISTMENUATTR_DATA:
+#if defined(SDK_PORT)
+        return (ListMenuFieldValue)list->template.data;
+#else
         return (s32)list->template.data;
+#endif
     }
 
     return -1;

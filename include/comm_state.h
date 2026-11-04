@@ -23,7 +23,11 @@ BOOL CommState_StopForReset(void);
 BOOL Comm_HasWifiProfile(SaveData *saveData);
 void Comm_RecordPlayerLocations(SaveWiFiHistory *);
 BOOL CommState_SetError(int);
+#if defined(SDK_PORT)
+int Comm_GetOwnGsProfileId(FriendRoster *wifiList);
+#else
 void *Comm_GetOwnGsProfileId(FriendRoster *wifiList);
+#endif
 void CommState_SetErrorWatch(BOOL watchMembers, BOOL reportErrors);
 void CommState_SetWifiClubLinkMode(void);
 void CommState_LeaveWifiMatch(void);
@@ -46,4 +50,8 @@ int Comm_InitDwc(enum HeapID heapID);
 void CommState_SetFrontierWifiLinkMode(void);
 void Comm_MarkLocationSeen(SaveWiFiHistory *history, s32 country, s32 region, u8 language);
 
+#if defined(SDK_PORT)
+void CommState_StartWifiPlaza(SaveData *saveData, void *profileId);
+
+#endif
 #endif // POKEHEARTGOLD_COMM_STATE_H

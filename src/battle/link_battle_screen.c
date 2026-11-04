@@ -1330,15 +1330,23 @@ static void LinkBattleScreen_UpdateSpriteAnims(LinkBattleScreen *screen) {
 
 static void LinkBattleScreen_VBlankCallback(void *data) {
     LinkBattleScreen *screen = data;
+#if defined(SDK_PORT)
+#else
     vu32 *dtcm;
+#endif
 
     DoScheduledBgGpuUpdates(screen->bgConfig);
     PaletteData_PushTransparentBuffers(screen->paletteData);
     GF_RunVramTransferTasks();
     SpriteSystem_TransferOam();
+#if defined(SDK_PORT)
+    // OS_SetIrqCheckFlag(OS_IE_V_BLANK) with the DTCM address as a literal
+    OS_SetIrqCheckFlag(OS_IE_V_BLANK);
+#else
     // OS_SetIrqCheckFlag(OS_IE_V_BLANK)
     dtcm = (vu32 *)0x027E0000;
     dtcm[0x3FF8 / sizeof(u32)] |= OS_IE_V_BLANK;
+#endif
 }
 
 static void LinkBattleScreen_InitVsBgLayers(LinkBattleScreen *screen, BOOL use3D, BOOL shiftBg1) {
@@ -1677,8 +1685,13 @@ static void LinkBattleScreen_InitParticles(LinkBattleScreen *screen) {
     screen->gfx3DVramMan = GF_3DVramMan_Create(screen->args->heapId, 0, 4, 0, 2, NULL);
     G3X_AlphaBlend(TRUE);
     ParticleSystem_ZeroAll();
+#if defined(SDK_PORT)
+    screen->particleHeap = Heap_Alloc(screen->args->heapId, PARTICLE_WORK_SIZE(0x4800));
+    screen->particleSystem = ParticleSystem_New(LinkBattleScreen_AllocParticleTexVram, LinkBattleScreen_AllocParticlePlttVram, screen->particleHeap, PARTICLE_WORK_SIZE(0x4800), TRUE, screen->args->heapId);
+#else
     screen->particleHeap = Heap_Alloc(screen->args->heapId, 0x4800);
     screen->particleSystem = ParticleSystem_New(LinkBattleScreen_AllocParticleTexVram, LinkBattleScreen_AllocParticlePlttVram, screen->particleHeap, 0x4800, TRUE, screen->args->heapId);
+#endif
     Camera_SetPerspectiveClippingPlane(FX32_ONE, 900 * FX32_ONE, ParticleSystem_GetCamera(screen->particleSystem));
     ParticleSystem_SetResource(screen->particleSystem, ParticleSystem_LoadResourceFile(NARC_a_0_5_9, 2, screen->args->heapId), 10, TRUE);
     ParticleSystem_CreateEmitterWithParam(screen->particleSystem, 0, NULL, NULL);

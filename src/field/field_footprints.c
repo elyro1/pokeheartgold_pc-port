@@ -55,6 +55,21 @@ static BOOL FootprintEffect_Init(FieldEffect *effect, void *state);
 static void FootprintEffect_Destroy(FieldEffect *effect, void *state);
 static void FootprintEffect_Update(FieldEffect *effect, void *state);
 static void FootprintEffect_Draw(FieldEffect *effect, void *state);
+#if defined(SDK_PORT)
+
+static BOOL FootprintEffect_InitNative(FieldEffect *effect, void *state) {
+    return FootprintEffect_Init(effect, state);
+}
+static void FootprintEffect_DestroyNative(FieldEffect *effect, void *state) {
+    FootprintEffect_Destroy(effect, state);
+}
+static void FootprintEffect_UpdateNative(FieldEffect *effect, void *state) {
+    FootprintEffect_Update(effect, state);
+}
+static void FootprintEffect_DrawNative(FieldEffect *effect, void *state) {
+    FootprintEffect_Draw(effect, state);
+}
+#endif
 
 static const FieldEffectBasicTemplate sFootprintEffectTemplate = {
     sizeof(FootprintEffect),
@@ -251,7 +266,11 @@ static BOOL Footprints_Spawn(LocalMapObject *mapObject, u32 kind) {
         break;
     }
 
+#if defined(SDK_PORT)
+    return FieldEffectManager_CreateEffect(manager, &sFootprintEffectTemplate, &position, 0, &args, priority) != NULL;
+#else
     return (BOOL)FieldEffectManager_CreateEffect(manager, &sFootprintEffectTemplate, &position, 0, &args, priority);
+#endif
 }
 
 static BOOL FootprintEffect_Init(FieldEffect *effect, void *state) {

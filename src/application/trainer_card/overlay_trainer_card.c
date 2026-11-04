@@ -93,7 +93,11 @@ static int TCardAppRunStep_Init(TrainerCardAppState *work) {
 static int TCardAppRunStep_Exec(TrainerCardAppState *work) {
     if (!isSubprocFinished(&work->ov_mgr)) {
         return TRAINERCARD_RUN_EXEC;
+#if defined(SDK_PORT)
+    } else if (work->parentData->settings.showBack != 0) {
+#else
     } else if (work->parentData->reqUpdateSignature != 0) {
+#endif
         return TRAINERCARD_RUN_SIGNATURE_INIT;
     } else {
         return TRAINERCARD_RUN_EXIT;
@@ -107,7 +111,11 @@ static int TCardAppRunStep_SignatureInit(TrainerCardAppState *work) {
         TrainerCardSignature_Exit,
         FS_OVERLAY_ID(trainer_card_signature)
     };
+#if defined(SDK_PORT)
+    work->ov_mgr = OverlayManager_New(&template, work->parentData->settings.saveData, work->heapID);
+#else
     work->ov_mgr = OverlayManager_New(&template, work->parentData->saveData, work->heapID);
+#endif
     return TRAINERCARD_RUN_SIGNATURE_EXEC;
 }
 
@@ -117,8 +125,15 @@ static int TCardAppRunStep_SignatureExec(TrainerCardAppState *work) {
         return TRAINERCARD_RUN_SIGNATURE_EXEC;
     }
 
+#if defined(SDK_PORT)
+    TrainerCardData *card = &work->parentData->nativeCard;
+    ptr = Save_TrainerCard_Get(work->parentData->settings.saveData);
+    card->signatureExists = TrainerCard_SignatureExists(ptr);
+    MI_CpuCopy8(TrainerCard_GetSignature(ptr), card->signature, sizeof(card->signature));
+#else
     ptr = Save_TrainerCard_Get(work->parentData->saveData);
     work->parentData->signatureExists = TrainerCard_SignatureExists(ptr);
     MI_CpuCopy8(TrainerCard_GetSignature(ptr), work->parentData->signature, sizeof(work->parentData->signature));
+#endif
     return TRAINERCARD_RUN_INIT;
 }

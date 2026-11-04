@@ -1,0 +1,62 @@
+{
+  "asm/scratch_off_cards_data.s": [
+    "gScratchOffCardsMatchPaletteFiles"
+  ],
+  "asm/bag_app_data.s": [
+    "gDebugSubScreenLayoutCount",
+    "gBagEdgeColorTable",
+    "gItemSlotRects",
+    "gUnusedSlotRects",
+    "gSubScreenTilemapCommands",
+    "gItemMenuCursorButtons"
+  ],
+  "asm/pokeathlon_record_data.s": [
+    "sStr_SeqError_3",
+    "sStr_SeqError_4"
+  ],
+  "asm/apricorn_box_screens_data.s": [],
+  "asm/plaza_game_mime_jr_top_data.s": [
+    "gMimeJrTopPlayerPalettes"
+  ],
+  "asm/global_terminal_socket_data.s": [
+    "sGlobalTerminalSocketSvl",
+    "sGlobalTerminalServerHostName",
+    "ov39_0222AA78",
+    "sGlobalTerminalSocketCipher"
+  ],
+  "asm/field_move_effects_data.s": [
+    "gHealingMachineBallOffsets",
+    "gHallOfFameBallOffsets"
+  ],
+  "asm/vs_recorder_data.s": [],
+  "asm/nintendo_wfc_connect_data.s": [
+    "gNintendoWfcRoomNumUrl",
+    "gNintendoWfcDownloadUrl",
+    "gNintendoWfcUploadUrl",
+    "gNintendoWfcInfoUrl",
+    "gNintendoWfcSetProfileUrl",
+    "gNintendoWfcPadHitboxes_Max100",
+    "gNintendoWfcPadHitboxes"
+  ],
+  "asm/battle_anim_data.s": [
+    "gStr_HaikeiSubSystemLaunchLimit",
+    "gBattleAnimNoBgPaletteAnimMsg",
+    "gBattleAnimInvalidExFlagMsg",
+    "gBattleAnimSpriteDrawPriorities",
+    "_022378C0"
+  ],
+  "asm/spin_trade_data.s": [
+    "gSpinTradeHoverOffsets"
+  ],
+  "asm/frontier_script_commands_data.s": [],
+  "asm/wifi_plaza_lobby_data.s": [],
+  "asm/gts_data.s": [
+    "gGtsGenderColors"
+  ],
+  "asm/pokeathlon_course_data.s": [],
+  "asm/pokeathlon_event_data.s": [
+    "gPokeathlonLampJumpSoundPlayers",
+    "gPokeathlonHurdleDashLanePans",
+    "gPokeathlonHurdleDashLaneSoundPlayers"
+  ]
+}

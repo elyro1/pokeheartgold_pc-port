@@ -340,7 +340,11 @@ void Script_ReopenStartMenuOnEnd(FieldSystem *fieldSystem) {
 
 void ScriptRunByIndex(ScriptContext *ctx, int idx) {
     ctx->script_ptr += 4 * idx;
+#if defined(SDK_PORT)
+    ctx->script_ptr += (s32)ScriptReadWord(ctx);
+#else
     ctx->script_ptr += ScriptReadWord(ctx);
+#endif
 }
 
 u8 *LoadScriptsForCurrentMap(u32 mapno) {

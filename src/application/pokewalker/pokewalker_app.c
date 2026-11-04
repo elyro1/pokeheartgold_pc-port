@@ -146,7 +146,12 @@ static void PokewalkerApp_GetSaveData(PokewalkerApp *app) {
 }
 
 static inline void SetIrqCheckFlag(u32 *dtcm) {
+#if defined(SDK_PORT)
+    (void)dtcm;
+    OS_SetIrqCheckFlag(OS_IE_V_BLANK);
+#else
     dtcm[0xFFE] |= OS_IE_V_BLANK;
+#endif
 }
 
 static void PokewalkerApp_VBlankCB(void *arg) {

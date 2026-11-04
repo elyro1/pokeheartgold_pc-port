@@ -24,6 +24,11 @@ typedef struct MemoryBlock {
     u32 filler_0D : 24;
 } MemoryBlock;
 
+#if defined(SDK_PORT)
+/* Runtime objects contain native pointers and may require max_align_t alignment. */
+#define HEAP_ALIGNMENT ((s32)_Alignof(max_align_t))
+
+#endif
 static HeapInfo sHeapInfo;
 
 static BOOL CreateHeapInternal(enum HeapID parent, enum HeapID child, u32 size, s32 alignment);
@@ -43,7 +48,11 @@ void Heap_InitSystem(const HeapParam *templates, u32 nTemplates, u32 totalNumHea
             preSize++;
         }
 
+#if defined(SDK_PORT)
+        OS_AllocFromArenaLo(OS_ARENA_MAIN, preSize, HEAP_ALIGNMENT);
+#else
         OS_AllocFromArenaLo(OS_ARENA_MAIN, preSize, 4);
+#endif
     }
 
     sHeapInfo.heapHandles = (NNSFndHeapHandle *)OS_AllocFromArenaLo(
@@ -53,7 +62,11 @@ void Heap_InitSystem(const HeapParam *templates, u32 nTemplates, u32 totalNumHea
             + usableHeaps * sizeof(void *)
             + totalNumHeaps * sizeof(u16)
             + totalNumHeaps,
+#if defined(SDK_PORT)
+        HEAP_ALIGNMENT);
+#else
         4);
+#endif
     sHeapInfo.parentHeapHandles = sHeapInfo.heapHandles + (usableHeaps + 1);
     sHeapInfo.subHeapRawPtrs = (void **)(sHeapInfo.parentHeapHandles + usableHeaps);
     sHeapInfo.numMemBlocks = (u16 *)(sHeapInfo.subHeapRawPtrs + usableHeaps);
@@ -67,10 +80,18 @@ void Heap_InitSystem(const HeapParam *templates, u32 nTemplates, u32 totalNumHea
         switch (templates[i].arena) {
         case OS_ARENA_MAIN:
         default:
+#if defined(SDK_PORT)
+            ptr = OS_AllocFromArenaLo(OS_ARENA_MAIN, templates[i].size, HEAP_ALIGNMENT);
+#else
             ptr = OS_AllocFromArenaLo(OS_ARENA_MAIN, templates[i].size, 4);
+#endif
             break;
         case OS_ARENA_MAINEX:
+#if defined(SDK_PORT)
+            ptr = OS_AllocFromArenaHi(OS_ARENA_MAINEX, templates[i].size, HEAP_ALIGNMENT);
+#else
             ptr = OS_AllocFromArenaHi(OS_ARENA_MAINEX, templates[i].size, 4);
+#endif
             break;
         }
 
@@ -109,11 +130,19 @@ static s32 FindFirstAvailableHeapHandle(void) {
 }
 
 BOOL Heap_Create(enum HeapID parent, enum HeapID child, u32 size) {
+#if defined(SDK_PORT)
+    return CreateHeapInternal(parent, child, size, HEAP_ALIGNMENT);
+#else
     return CreateHeapInternal(parent, child, size, 4);
+#endif
 }
 
 BOOL Heap_CreateAtEnd(enum HeapID parent, enum HeapID child, u32 size) {
+#if defined(SDK_PORT)
+    return CreateHeapInternal(parent, child, size, -HEAP_ALIGNMENT);
+#else
     return CreateHeapInternal(parent, child, size, -4);
+#endif
 }
 
 static BOOL CreateHeapInternal(enum HeapID parent, enum HeapID child, u32 size, s32 alignment) {
@@ -206,7 +235,11 @@ void *Heap_Alloc(enum HeapID heapID, u32 size) {
 
     if ((u32)heapID < sHeapInfo.totalNumHeaps) {
         u8 index = sHeapInfo.heapIdxs[heapID];
+#if defined(SDK_PORT)
+        ptr = AllocFromHeapInternal(sHeapInfo.heapHandles[index], size, HEAP_ALIGNMENT, heapID);
+#else
         ptr = AllocFromHeapInternal(sHeapInfo.heapHandles[index], size, 4, heapID);
+#endif
     }
 
     if (ptr != NULL) {
@@ -223,7 +256,11 @@ void *Heap_AllocAtEnd(enum HeapID heapID, u32 size) {
 
     if ((u32)heapID < sHeapInfo.totalNumHeaps) {
         u8 index = sHeapInfo.heapIdxs[heapID];
+#if defined(SDK_PORT)
+        ptr = AllocFromHeapInternal(sHeapInfo.heapHandles[index], size, -HEAP_ALIGNMENT, heapID);
+#else
         ptr = AllocFromHeapInternal(sHeapInfo.heapHandles[index], size, -4, heapID);
+#endif
     }
 
     if (ptr != NULL) {
@@ -294,6 +331,13 @@ u32 HeapExp_FndGetTotalFreeSize(enum HeapID heapID) {
 }
 
 void HeapExp_FndInitAllocator(NNSFndAllocator *pAllocator, enum HeapID heapID, int alignment) {
+#if defined(SDK_PORT)
+    if (alignment >= 0 && alignment < HEAP_ALIGNMENT) {
+        alignment = HEAP_ALIGNMENT;
+    } else if (alignment < 0 && alignment > -HEAP_ALIGNMENT) {
+        alignment = -HEAP_ALIGNMENT;
+    }
+#endif
     if ((u32)heapID < sHeapInfo.totalNumHeaps) {
         u8 index = sHeapInfo.heapIdxs[heapID];
         NNS_FndInitAllocatorForExpHeap(pAllocator, sHeapInfo.heapHandles[index], alignment);

@@ -1,3 +1,6 @@
+#if defined(SDK_PORT)
+#include <hg/qsort.h>
+#endif
 #include "pokeathlon/pokeathlon_snow_throw.h"
 
 #include "global.h"
@@ -57,13 +60,22 @@ void MTX_MultVec43(const VecFx32 *vec, const MtxFx43 *mtx, VecFx32 *result);
 typedef struct PokeathlonSnowThrowViewAnims {
     u32 animStates[POKEATHLON_PARTICIPANTS - 1];
 } PokeathlonSnowThrowViewAnims;
+#if defined(SDK_PORT)
+_Static_assert(sizeof(PokeathlonSnowThrowViewAnims) == 12, "literal data: PokeathlonSnowThrowViewAnims");
+#endif
 
 // Where the marks of the other teams' colours are on the field screen.
 typedef struct PokeathlonSnowThrowTeamMarkPositions {
     VecFx32 positions[POKEATHLON_PARTICIPANTS - 1];
 } PokeathlonSnowThrowTeamMarkPositions;
+#if defined(SDK_PORT)
+_Static_assert(sizeof(PokeathlonSnowThrowTeamMarkPositions) == 36, "literal data: PokeathlonSnowThrowTeamMarkPositions");
+#endif
 
+#if defined(SDK_PORT)
+#else
 void MATH_QSort(void *base, u32 count, u32 width, int (*compare)(const void *, const void *), void *context);
+#endif
 
 // A snowball as sorted for drawing.
 typedef struct PokeathlonSnowThrowDrawOrder {
@@ -1547,7 +1559,11 @@ static void PokeathlonSnowThrow_SortSprites(PokeathlonSnowThrow *work, u16 own) 
         orders[i].y = position->y;
         orders[i].own = own;
     }
+#if defined(SDK_PORT)
+    HG_QSort(orders, POKEATHLON_MONS, sizeof(PokeathlonSnowThrowDrawOrder), PokeathlonSnowThrow_CompareDrawOrder, work->sortBuffer);
+#else
     MATH_QSort(orders, POKEATHLON_MONS, sizeof(PokeathlonSnowThrowDrawOrder), PokeathlonSnowThrow_CompareDrawOrder, work->sortBuffer);
+#endif
     for (i = 0; i < POKEATHLON_MONS; i++) {
         ball = orders[i].index;
         PokeathlonCourseSpritePoolSprite_SetDrawPriority(work->balls[ball].sprite, i + 20);

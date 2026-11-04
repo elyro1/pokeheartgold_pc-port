@@ -1176,3 +1176,7 @@ static void WiFiPlazaSurvey_CountPlazaAnswers(WiFiPlazaSurveyTally *tally, struc
         }
     }
 }
+#if defined(SDK_PORT)
+
+const OverlayManagerTemplate sWiFiPlazaSurveyOverlayTemplate = { WiFiPlazaSurvey_Init, WiFiPlazaSurvey_Main, WiFiPlazaSurvey_Exit, FS_OVERLAY_ID(OVY_47) };
+#endif

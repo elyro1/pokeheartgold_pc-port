@@ -1,0 +1,46 @@
+name: Windows PC build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: >-
+            git make flex bison
+            mingw-w64-ucrt-x86_64-gcc
+            mingw-w64-ucrt-x86_64-python
+            mingw-w64-ucrt-x86_64-meson
+            mingw-w64-ucrt-x86_64-ninja
+            mingw-w64-ucrt-x86_64-nasm
+            mingw-w64-ucrt-x86_64-pkgconf
+            mingw-w64-ucrt-x86_64-SDL2
+            mingw-w64-ucrt-x86_64-enet
+            mingw-w64-ucrt-x86_64-soundtouch
+      - name: Check generators and runtime packaging
+        run: python3 -m unittest discover -s pc/tools/tests
+      - name: Build executable and stage runtime DLLs
+        run: make -f Makefile.pc win64 GAME_VERSION=HEARTGOLD JOBS=4
+      - name: Stage runtime files and libraries
+        run: >-
+          python3 pc/tools/package_runtime.py --platform win64 --game heartgold
+          --build build/pc/win64/heartgold --output build/pc/win64/heartgold/package
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-HEARTGOLD
+          path: build/pc/win64/heartgold/package/
+          if-no-files-found: error

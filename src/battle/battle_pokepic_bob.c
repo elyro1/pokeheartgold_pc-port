@@ -10,7 +10,11 @@ static void Task_OpponentPokepicBob(SysTask *task, void *_data);
 void OpponentData_StartPokepicBobTask(OpponentData *data, BattleSystem *battleSystem) {
     if (data->pokepicBobTask == NULL && !(BattleSystem_GetBattleType(battleSystem) & (BATTLE_TYPE_SAFARI | BATTLE_TYPE_PAL_PARK))) {
         data->pokepicBobAngle = 180;
+#if defined(SDK_PORT)
+        data->pokepicBobTask = SysTask_CreateBattleAnimation(Task_OpponentPokepicBob, data, 0x3F2);
+#else
         data->pokepicBobTask = SysTask_CreateOnMainQueue(Task_OpponentPokepicBob, data, 0x3F2);
+#endif
     }
 }
 

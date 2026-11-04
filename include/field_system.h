@@ -99,7 +99,11 @@ typedef struct FieldMapSystems {
     FieldDrawMapNameInfo *drawMapNameInfo;
     WeatherManager *weatherManager;
     FieldTextureManager *textureManager;
+#if defined(SDK_PORT)
+    void *unk14;
+#else
     u32 unk14;
+#endif
     UnusedFieldModel *unusedFieldModel;
     HBlankSystem *hBlankSystem;
     struct PoisonEffect *poisonEffect;

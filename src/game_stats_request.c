@@ -4,7 +4,11 @@
 
 #include "global.h"
 
+#if defined(SDK_PORT)
+#include <string.h>
+#else
 extern int strncmp(const char *a, const char *b, u32 n);
+#endif
 extern int sprintf(char *dest, const char *format, ...);
 
 static void GameStats_SeedRandom(u32 seed);

@@ -177,7 +177,14 @@ static void BattleTerrain_CreateSprite(BattleTerrain *terrain) {
     ManagedSprite *managed;
 
     spriteSystem = BattleSystem_GetSpriteSystem(terrain->battleSystem);
+#if defined(SDK_PORT)
+    // Platforms move with the battlers, independently of battle UI timing.
+    BattleTimingDomain previous = BattleTiming_SetDomain(BATTLE_TIMING_ANIMATION);
+#endif
     managed = SpriteSystem_NewSprite(spriteSystem, BattleSystem_GetSpriteManager(terrain->battleSystem), &sTerrainSpriteTemplates[terrain->side]);
+#if defined(SDK_PORT)
+    BattleTiming_SetDomain(previous);
+#endif
     terrain->sprite = managed;
     Sprite_TickFrame(managed->sprite);
 }

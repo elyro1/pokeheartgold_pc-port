@@ -33,7 +33,11 @@ struct FieldEffect {
     FieldEffectPool *pool;
     u8 padding[12];
     VecFx32 position;
+#if defined(SDK_PORT)
+    void *state; // native work structs can exceed the DS slot's 128 bytes
+#else
     u8 state[128]; // per-effect work area handed to the callbacks
+#endif
     FieldEffectInitFunc init;
     FieldEffectFunc update;
     FieldEffectFunc draw;
@@ -129,6 +133,13 @@ static FieldEffect *FieldEffectPool_AddEffect(FieldEffectPool *pool, const Field
         VecFx32 zero = { 0, 0, 0 };
         FieldEffect_SetPosition(effect, &zero);
     }
+#ifdef SDK_PORT
+    effect->state = Heap_Alloc(pool->heapID, template->basic.stateSize ? template->basic.stateSize : 1);
+    if (effect->state == NULL) {
+        FieldEffect_Reset(effect);
+        return NULL;
+    }
+#endif
     FieldEffect_ClearState(effect, template->basic.stateSize);
     FieldEffect_SetInitFunc(effect, template->basic.init);
     FieldEffect_SetDestroyFunc(effect, template->basic.destroy);
@@ -238,6 +249,11 @@ static void FieldEffectPool_FreeEffects(FieldEffectPool *pool) {
 
 // Clears the slot and installs the no-op callbacks.
 static void FieldEffect_Reset(FieldEffect *effect) {
+#ifdef SDK_PORT
+    if (effect->state != NULL) {
+        Heap_Free(effect->state);
+    }
+#endif
     memset(effect, 0, sizeof(*effect));
     FieldEffect_SetInitFunc(effect, FieldEffect_DefaultInit);
     FieldEffect_SetDestroyFunc(effect, FieldEffect_DefaultDestroy);

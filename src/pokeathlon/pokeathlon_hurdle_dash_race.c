@@ -717,7 +717,11 @@ static void PokeathlonHurdleDash_CalcRanks(PokeathlonCourseData *course) {
             node->finished = packet->finished[0];
             node->tied = FALSE;
             j = 0;
+#if defined(SDK_PORT)
+            node->next = NULL;
+#else
             node->next = (void *)j;
+#endif
             if (index > 0) {
                 do {
                     BOOL inserted;

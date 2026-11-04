@@ -1864,9 +1864,14 @@ static void BattleFactoryApp_VBlankCallback(BattleFactoryApp *app) {
         GF_RunVramTransferTasks();
         OamManager_ApplyAndResetBuffers();
         {
+#if defined(SDK_PORT)
+            // OS_SetIrqCheckFlag(OS_IE_V_BLANK) with the DTCM address written out
+            OS_SetIrqCheckFlag(OS_IE_V_BLANK);
+#else
             // OS_SetIrqCheckFlag(OS_IE_V_BLANK)
             vu32 *dtcm = (vu32 *)0x027E0000;
             dtcm[0x3FF8 / 4] |= OS_IE_V_BLANK;
+#endif
         }
     }
 }

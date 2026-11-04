@@ -1,4 +1,7 @@
 #include "field/map_prop_render.h"
+#if defined(SDK_PORT)
+#include "port/sim_config_prj.h"
+#endif
 
 #include "global.h"
 
@@ -24,10 +27,18 @@ Field3dRenderObjManager *Field3dObjectList_New(enum HeapID heapID, int indexMax,
     for (i = 0; i < indexMax; i++) {
         renderObjManager->modelNumToLoadedSlot[i] = 0xFF;
     }
+#if defined(SDK_PORT)
+    int size = objectMax * sizeof(*renderObjManager->objectHeap);
+#else
     int size = objectMax * 0x5C;
+#endif
     renderObjManager->objectHeap = Heap_Alloc(heapID, size);
     MIi_CpuClearFast(0, (u32 *)renderObjManager->objectHeap, size);
+#if defined(SDK_PORT)
+    renderObjManager->objects = Heap_Alloc(heapID, objectMax * sizeof(*renderObjManager->objects));
+#else
     renderObjManager->objects = Heap_Alloc(heapID, objectMax * 4);
+#endif
     for (i = 0; i < objectMax; i++) {
         renderObjManager->objects[i] = &renderObjManager->objectHeap[i];
     }
@@ -116,9 +127,15 @@ MapPropAnimationPool *MapPropAnimationPoolList_AddPool(MapPropAnimationPoolList 
     ret->capacity = count;
     ret->loadFunc = NULL;
     HeapExp_FndInitAllocator(&ret->allocator, heapID, 4);
+#if defined(SDK_PORT)
+    ret->animations = Heap_Alloc(heapID, count * sizeof(*ret->animations));
+    MIi_CpuClearFast(0, (u32 *)(ret->animations), count * sizeof(*ret->animations));
+    ret->freeList = Heap_Alloc(heapID, count * sizeof(*ret->freeList));
+#else
     ret->animations = Heap_Alloc(heapID, count << 5);
     MIi_CpuClearFast(0, (u32 *)(ret->animations), count << 5);
     ret->freeList = Heap_Alloc(heapID, count << 2);
+#endif
 
     for (int i = 0; i < count; i++) {
         ret->animations[i].inUse = 0;
@@ -341,23 +358,45 @@ void MapPropAnimation_SetLoopCount(MapPropAnimation *animation, const int loopCo
 }
 
 static void MapPropAnimation_AdvanceFrame(MapPropAnimation *animation) {
+#if defined(SDK_PORT)
+    fx32 step = FX32_ONE;
+    if (SIM_Config_prj_GetConfig()->enable60fps) step /= 2;
+#endif
     if (!animation->reversed) {
+#if defined(SDK_PORT)
+        animation->animObj->frame += step;
+        if (animation->animObj->frame >= NNS_G3dAnmObjGetNumFrame(animation->animObj)) {
+#else
         animation->animObj->frame += FX32_ONE;
         if (animation->animObj->frame == NNS_G3dAnmObjGetNumFrame(animation->animObj)) {
+#endif
             animation->animObj->frame = 0;
         }
     } else {
         if (animation->animObj->frame <= 0) {
+#if defined(SDK_PORT)
+            // A reverse wrap spans one update, just like a forward wrap.
+            animation->animObj->frame = NNS_G3dAnmObjGetNumFrame(animation->animObj) - step;
+#else
             animation->animObj->frame = NNS_G3dAnmObjGetNumFrame(animation->animObj) - FX32_ONE;
+#endif
         } else {
+#if defined(SDK_PORT)
+            animation->animObj->frame -= step;
+#else
             animation->animObj->frame -= FX32_ONE;
+#endif
         }
     }
 }
 
 static BOOL MapPropAnimation_IsOnLastFrame(MapPropAnimation *animation) {
     if (!animation->reversed) {
+#if defined(SDK_PORT)
+        return animation->animObj->frame == NNS_G3dAnmObjGetNumFrame(animation->animObj) - FX32_ONE;
+#else
         return animation->animObj->frame >= NNS_G3dAnmObjGetNumFrame(animation->animObj) - FX32_ONE;
+#endif
     }
     return animation->animObj->frame == 0;
 }
@@ -401,8 +440,13 @@ static void AreaMapAnimation_AllocAnimObj(MapPropAnimationPool *pool, MapPropAni
     AreaMapAnimation_InitAnimObj(alloc, anim);
 }
 
+#if defined(SDK_PORT)
+static int AreaMapAnimation_GetAnimObjSize(ResAnim_4004 *anim) { // Returns some sort of size
+    return (anim->numMapData * sizeof(u16) + sizeof(NNSG3dAnmObj)) & ~3;
+#else
 static int AreaMapAnimation_GetAnimObjSize(ResAnim_4004 *anim) {
     return ((anim->numMapData * 2) + 0x1C) & ~3;
+#endif
 }
 
 static void *AreaMapAnimation_AllocAnimObjMem(NNSFndAllocator *pAllocator, ResAnim_4004 *anim) {

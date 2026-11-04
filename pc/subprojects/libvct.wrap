@@ -1,0 +1,8 @@
+[wrap-git]
+url = https://github.com/elyro1/libvct.git
+revision = lib_libvct
+depth = 1
+directory = libvct
+
+[provide]
+dependency_names = libvct

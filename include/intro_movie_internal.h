@@ -17,6 +17,10 @@ enum IntroMovieSceneState {
 typedef struct IntroMovieScene1Data {
     u8 state;
     u8 needFreeGfx;
+#if defined(SDK_PORT)
+    BOOL smoothPan;
+    BOOL halfFrame;
+#endif
     u8 *skipAllowedPtr;
     SpriteResource *charResObj;
     SpriteResource *plttResObj;
@@ -46,6 +50,10 @@ typedef struct IntroMovieScene2Data {
     u8 needFreeGfx;
     u8 unk_002;
     u8 flowerIndex;
+#if defined(SDK_PORT)
+    BOOL smoothPan;
+    BOOL halfFrame;
+#endif
     SpriteResource *spriteGfxRes[2][4];
     Sprite *ethanSprite0;
     Sprite *lyraSprite0;

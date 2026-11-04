@@ -72,6 +72,10 @@
 #include "wireless_status_icon.h"
 #include "wireless_trade_select_mon_internal.h"
 #include "yes_no_prompt.h"
+#if defined(SDK_PORT)
+#define TRADE_DETAIL_Y(index) sWirelessTradeSelectMonDetailSpritePos[index].y
+#define TRADE_SLOT_Y(index) sWirelessTradeSelectMonSlotPos[index].y
+#endif
 
 // Communication commands
 #define WIRELESS_TRADE_CMD_PARTY_CHUNK 0x16
@@ -847,7 +851,11 @@ static void WirelessTradeSelectMon_VBlankCB(WirelessTradeSelectMon *work) {
     }
     GF_RunVramTransferTasks();
     OamManager_ApplyAndResetBuffers();
+#if defined(SDK_PORT)
+    OS_SetIrqCheckFlag(OS_IE_V_BLANK);
+#else
     dtcm[(HW_INTR_CHECK_BUF - HW_DTCM) / 4] |= OS_IE_V_BLANK; // OS_SetIrqCheckFlag, through the DTCM base address
+#endif
 }
 
 static void WirelessTradeSelectMon_SetGfxBanks(void) {
@@ -1097,7 +1105,12 @@ static void WirelessTradeSelectMon_ShowMonDetails(Window *windows, int side, Par
     sprites = work->detailSprites;
     f.sideOffset = side * sizeof(Sprite *);
     Sprite_SetDrawFlag(*(Sprite **)((u8 *)sprites + f.sideOffset), TRUE);
+#if defined(SDK_PORT)
+    // sWirelessTradeSelectMonDetailSpritePosY is sWirelessTradeSelectMonDetailSpritePos[0].y.
+    WirelessTradeSelectMon_SetSpritePos(*(Sprite **)((u8 *)sprites + f.sideOffset), sWirelessTradeSelectMonDetailSpritePos[side].x, f.yOffset + TRADE_DETAIL_Y(side) + 192);
+#else
     WirelessTradeSelectMon_SetSpritePos(*(Sprite **)((u8 *)sprites + f.sideOffset), sWirelessTradeSelectMonDetailSpritePos[side].x, f.yOffset + sWirelessTradeSelectMonDetailSpritePosY[side].x + 192);
+#endif
     if (side == 0) {
         ((void (*)(Sprite *, int))Sprite_SetFlipMode)(*(Sprite **)((u8 *)sprites + f.sideOffset), work->mons[f.slot].flip);
     }
@@ -1329,17 +1342,29 @@ static void WirelessTradeSelectMon_SetCursorSprite(int cursor, Sprite *sprite, i
 
     GF_ASSERT(cursor < WIRELESS_TRADE_NUM_SLOTS + 1);
     pos.x = sWirelessTradeSelectMonSlotPos[cursor].x * FX32_ONE;
+#if defined(SDK_PORT)
+    pos.y = TRADE_SLOT_Y(cursor) * FX32_ONE;
+#else
     pos.y = sWirelessTradeSelectMonSlotPosY[cursor].x * FX32_ONE;
+#endif
     if (cursor == WIRELESS_TRADE_SLOT_CANCEL) {
         Sprite_SetMatrix(sprite, &pos);
+#if defined(SDK_PORT)
+        Sprite_SetAnimCtrlSeq(sprite, sWirelessTradeSelectMonCursorAnims[side][2]);
+#else
         Sprite_SetAnimCtrlSeq(sprite, sWirelessTradeSelectMonQuitCursorAnims[side][0]);
+#endif
         return;
     }
     Sprite_SetMatrix(sprite, &pos);
     if (cursor < 6) {
         Sprite_SetAnimCtrlSeq(sprite, sWirelessTradeSelectMonCursorAnims[side][0]);
     } else {
+#if defined(SDK_PORT)
+        Sprite_SetAnimCtrlSeq(sprite, sWirelessTradeSelectMonCursorAnims[side][1]);
+#else
         Sprite_SetAnimCtrlSeq(sprite, sWirelessTradeSelectMonPartnerCursorAnims[side][0]);
+#endif
     }
 }
 
@@ -1480,7 +1505,11 @@ static void WirelessTradeSelectMon_OpenSummary(WirelessTradeSelectMon *work, u32
         work->summaryArgs.party = work->partnerParty;
         work->summaryArgs.partyCount = Party_GetCount(work->partnerParty);
         // The partner's Chatot cry.
+#if defined(SDK_PORT)
+        work->summaryArgs.chatot = (struct SOUND_CHATOT *)&work->chatot[Comm_GetLocalNetId() ^ 1];
+#else
         work->summaryArgs.chatot = (int)&work->chatot[Comm_GetLocalNetId() ^ 1];
+#endif
         PokemonSummaryArgs_SetPlayer(&work->summaryArgs, CommPlayerInfo_GetProfile(Comm_GetLocalNetId() ^ 1));
     }
 
@@ -1855,8 +1884,13 @@ static int WirelessTradeSelectMon_StartTradeSlide(WirelessTradeSelectMon *work) 
     }
     Sprite_SetDrawFlag(work->cursorSprites[0], FALSE);
     Sprite_SetDrawFlag(work->cursorSprites[1], FALSE);
+#if defined(SDK_PORT)
+    WirelessTradeSelectMon_InitSlide(&work->slides[0], sWirelessTradeSelectMonSlotPos[work->cursor].x + 16, TRADE_SLOT_Y(work->cursor) - 6, 48, 32);
+    WirelessTradeSelectMon_InitSlide(&work->slides[1], sWirelessTradeSelectMonSlotPos[work->partnerCursor].x + 16, TRADE_SLOT_Y(work->partnerCursor) - 6, 176, 32);
+#else
     WirelessTradeSelectMon_InitSlide(&work->slides[0], sWirelessTradeSelectMonSlotPos[work->cursor].x + 16, sWirelessTradeSelectMonSlotPosY[work->cursor].x - 6, 48, 32);
     WirelessTradeSelectMon_InitSlide(&work->slides[1], sWirelessTradeSelectMonSlotPos[work->partnerCursor].x + 16, sWirelessTradeSelectMonSlotPosY[work->partnerCursor].x - 6, 176, 32);
+#endif
     work->slideStep = 0;
     work->callback = WirelessTradeSelectMon_UpdateTradeSlide;
     return 0;
@@ -2378,3 +2412,116 @@ static void WirelessTradeSelectMon_RosterListCursorCB(ListMenu *list, s32 index,
         PlaySE(SEQ_SE_DP_SELECT);
     }
 }
+#if defined(SDK_PORT)
+
+const u32 sWirelessTradeSelectMonCursorAnims[][3] = {
+    {0, 1, 2},
+    {17, 18, 19},
+};
+
+const BgTemplate sWirelessTradeSelectMonBgTemplate_Sub0 = {0, 0, 2048, 0, 1, 0, 31, 4, 0, 0, 0, 0, 0};
+
+const BgTemplate sWirelessTradeSelectMonBgTemplate_Sub1 = {0, 0, 2048, 0, 1, 0, 30, 0, 0, 1, 0, 0, 0};
+
+const BgTemplate sWirelessTradeSelectMonBgTemplate_Main1 = {0, 0, 2048, 0, 1, 0, 31, 2, 0, 1, 0, 0, 0};
+
+const BgTemplate sWirelessTradeSelectMonBgTemplate_Sub2 = {0, 0, 2048, 0, 1, 0, 27, 0, 0, 1, 0, 0, 0};
+
+const BgTemplate sWirelessTradeSelectMonBgTemplate_Main0 = {0, 0, 2048, 0, 1, 0, 30, 0, 0, 0, 0, 0, 0};
+
+const BgTemplate sWirelessTradeSelectMonBgTemplate_Main2 = {0, 0, 2048, 0, 1, 0, 28, 4, 0, 2, 0, 0, 0};
+
+const BgTemplate sWirelessTradeSelectMonBgTemplate_Main3 = {0, 0, 2048, 0, 1, 0, 29, 4, 0, 3, 0, 0, 0};
+
+const GraphicsBanks sWirelessTradeSelectMonGraphicsBanks = {1, 0, 4, 0, 2, 0, 256, 0, 0, 0};
+
+const TouchscreenHitbox sWirelessTradeSelectMonSlotHitboxes[] = {
+    {.rect = {32, 71, 0, 63}},
+    {.rect = {32, 71, 64, 127}},
+    {.rect = {72, 111, 0, 63}},
+    {.rect = {72, 111, 64, 127}},
+    {.rect = {112, 151, 0, 63}},
+    {.rect = {112, 151, 64, 127}},
+    {.rect = {32, 71, 128, 191}},
+    {.rect = {32, 71, 192, 255}},
+    {.rect = {72, 111, 128, 191}},
+    {.rect = {72, 111, 192, 255}},
+    {.rect = {112, 151, 128, 191}},
+    {.rect = {112, 151, 192, 255}},
+    {.rect = {160, 192, 200, 0}},
+    {.rect = {255, 0, 0, 0}},
+};
+
+const WirelessTradeDetailSpritePos sWirelessTradeSelectMonDetailSpritePos[] = {
+    {63, 88, 0},
+    {192, 88, 1},
+    {16, 8, 8},
+    {144, 8, 8},
+    {99, 8, 6},
+    {227, 8, 6},
+};
+
+const u32 sWirelessTradeSelectMonBallPalettes[] = {49, 51, 51, 49, 50, 50, 50, 50, 51, 51, 51, 51, 52, 52, 51, 49, 53, 54, 55, 56, 57, 58, 59, 60};
+
+const WirelessTradeSlotPos sWirelessTradeSelectMonSlotPos[] = {
+    {0, 32},
+    {64, 32},
+    {0, 72},
+    {64, 72},
+    {0, 112},
+    {64, 112},
+    {128, 32},
+    {192, 32},
+    {128, 72},
+    {192, 72},
+    {128, 112},
+    {192, 112},
+    {192, 160},
+};
+
+const u8 sWirelessTradeSelectMonCursorMoves[][4][6] = {
+    {{4, 2, 12, 12, 0, 0}, {2, 4, 12, 12, 0, 0}, {7, 6, 1, 0, 0, 0}, {1, 6, 7, 0, 0, 0}},
+    {{5, 3, 12, 12, 0, 0}, {3, 5, 12, 12, 0, 0}, {0, 7, 6, 1, 0, 0}, {6, 7, 0, 1, 0, 0}},
+    {{0, 0, 0, 0, 0, 0}, {4, 0, 0, 0, 0, 0}, {9, 8, 7, 6, 0, 0}, {3, 1, 0, 0, 0, 0}},
+    {{1, 1, 1, 1, 0, 0}, {5, 1, 1, 1, 0, 0}, {2, 9, 8, 7, 0, 0}, {8, 9, 6, 6, 0, 0}},
+    {{2, 2, 2, 2, 0, 0}, {0, 0, 0, 0, 0, 0}, {11, 10, 9, 8, 7, 6}, {5, 3, 1, 0, 0, 0}},
+    {{3, 3, 3, 3, 0, 0}, {1, 1, 1, 1, 0, 0}, {4, 4, 4, 4, 0, 0}, {10, 8, 6, 0, 0, 0}},
+    {{10, 8, 12, 0, 0, 0}, {8, 10, 12, 0, 0, 0}, {1, 0, 0, 0, 0, 0}, {7, 0, 1, 0, 0, 0}},
+    {{12, 0, 0, 0, 0, 0}, {9, 12, 0, 0, 0, 0}, {6, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0}},
+    {{6, 0, 0, 0, 0, 0}, {10, 6, 0, 0, 0, 0}, {3, 2, 1, 0, 0, 0}, {9, 7, 0, 0, 0, 0}},
+    {{7, 0, 0, 0, 0, 0}, {11, 12, 0, 0, 0, 0}, {8, 0, 0, 0, 0, 0}, {2, 0, 1, 0, 0, 0}},
+    {{8, 0, 0, 0, 0, 0}, {6, 0, 0, 0, 0, 0}, {5, 4, 3, 2, 1, 0}, {11, 9, 7, 0, 0, 0}},
+    {{9, 0, 0, 0, 0, 0}, {12, 0, 0, 0, 0, 0}, {10, 0, 0, 0, 0, 0}, {4, 2, 0, 0, 0, 0}},
+    {{11, 9, 7, 6, 0, 0}, {7, 6, 0, 0, 0, 0}, {12, 0, 0, 0, 0, 0}, {12, 0, 0, 0, 0, 0}},
+};
+
+const ListMenuTemplate sWirelessTradeSelectMonRosterListTemplate = {.totalItems = 32, .maxShowed = 32, .item_X = 8, .cursorPal = 1, .fillValue = 15, .cursorShadowPal = 2, .scrollMultiple = 1};
+
+const WirelessTradeWindowPos sWirelessTradeSelectMonNameWindowPos[] = {
+    {0, 7},
+    {8, 7},
+    {0, 12},
+    {8, 12},
+    {0, 17},
+    {8, 17},
+    {16, 7},
+    {24, 7},
+    {16, 12},
+    {24, 12},
+    {16, 17},
+    {24, 17},
+    {4, 8},
+    {20, 8},
+};
+
+const WirelessTradeWindowTemplate sWirelessTradeSelectMonDetailWindows[] = {
+    {4, 1, 9, 2, 1},
+    {20, 1, 9, 2, 19},
+    {4, 3, 8, 2, 37},
+    {20, 3, 8, 2, 53},
+    {2, 19, 7, 2, 69},
+    {18, 19, 7, 2, 83},
+    {2, 21, 12, 2, 97},
+    {18, 21, 12, 2, 121},
+};
+#endif

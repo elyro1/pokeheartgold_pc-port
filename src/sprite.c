@@ -38,6 +38,26 @@ static void (*const sAnimFuncs[2])(Sprite *sprite) = {
     Sprite_AnimFunc_Active,
 };
 
+#if defined(SDK_PORT)
+static SpriteList *sBattleDrawLists;
+
+void SpriteList_ResetBattleDrawLists(void) {
+    sBattleDrawLists = NULL;
+}
+
+void SpriteList_DrawSkippedBattleLists(void) {
+    if (!BattleTiming_IsActive()) return;
+    for (SpriteList *list = sBattleDrawLists; list; list = list->battleDrawNext) {
+        if (!list->flag || list->battleDrawFrame != BattleTiming_GetFrame() - 1
+            || BattleTiming_ShouldTick(list->battleDrawDomain)) continue;
+        for (Sprite *sprite = list->dummy.next; sprite != &list->dummy; sprite = sprite->next) {
+            if (sprite->drawFlag) SpriteList_DrawSprite_Active(list, sprite);
+        }
+        list->battleDrawFrame = BattleTiming_GetFrame();
+    }
+}
+
+#endif
 SpriteList *SpriteList_Create(SpriteListParam *param) {
     GF_ASSERT(param != NULL);
     GF_ASSERT(param->rendererInstance != NULL);
@@ -57,6 +77,17 @@ SpriteList *SpriteList_Create(SpriteListParam *param) {
     ret->animBuff = Sys_AllocAndReadFile(param->heapID, "data/clact_default.NANR");
     NNS_G2dGetUnpackedAnimBank(ret->animBuff, &ret->animBank);
     ret->flag = TRUE;
+#if defined(SDK_PORT)
+    ret->battleDrawFrame = 0;
+    ret->battleDrawNext = NULL;
+    ret->battleDrawDomain = BATTLE_TIMING_NONE;
+    // Battle-owned overlays such as the naming screen use their own heaps,
+    // but still inherit the battle task's skipped UI ticks.
+    if (BattleTiming_IsActive()) {
+        ret->battleDrawNext = sBattleDrawLists;
+        sBattleDrawLists = ret;
+    }
+#endif
     return ret;
 }
 
@@ -69,6 +100,11 @@ BOOL SpriteList_Delete(SpriteList *spriteList) {
         return TRUE;
     }
 
+#if defined(SDK_PORT)
+    SpriteList **link = &sBattleDrawLists;
+    while (*link && *link != spriteList) link = &(*link)->battleDrawNext;
+    if (*link) *link = spriteList->battleDrawNext;
+#endif
     SpriteList_DeleteAllSprites(spriteList);
     Heap_Free(spriteList->animBuff);
     Heap_Free(spriteList->stack);
@@ -103,9 +139,19 @@ void SpriteList_RenderAndAnimateSprites(SpriteList *spriteList) {
         return;
     }
 
+#if defined(SDK_PORT)
+    spriteList->battleDrawFrame = BattleTiming_GetFrame();
+    spriteList->battleDrawDomain = BattleTiming_GetDomain();
+#endif
     Sprite *sprite = spriteList->dummy.next;
     while (sprite != &spriteList->dummy) {
+#if defined(SDK_PORT)
+        if (!sprite->drawFlag) sprite->battleVisualHistory.valid = FALSE;
+#endif
         sRenderFuncs[sprite->drawFlag](spriteList, sprite);
+#if defined(SDK_PORT)
+        if (BattleTiming_ShouldTick(sprite->battleTimingDomain))
+#endif
         sAnimFuncs[sprite->animActive](sprite);
         sprite = sprite->next;
     }
@@ -136,6 +182,11 @@ Sprite *Sprite_CreateAffine(const SpriteTemplate *template) {
     }
 
     sprite->spriteList = template->spriteList;
+#if defined(SDK_PORT)
+    sprite->battleTimingDomain = BattleTiming_GetDomain();
+    if (sprite->battleTimingDomain == BATTLE_TIMING_NONE && template->heapID == HEAP_ID_BATTLE && BattleTiming_IsActive())
+        sprite->battleTimingDomain = BATTLE_TIMING_UI;
+#endif
     sprite->animationNo = 0;
     sprite->matrix = template->position;
     sprite->scale = template->scale;
@@ -237,6 +288,9 @@ void Sprite_SetDrawFlag(Sprite *sprite, BOOL flag) {
     GF_ASSERT(sprite != NULL);
     GF_ASSERT(flag < 2);
     sprite->drawFlag = flag;
+#if defined(SDK_PORT)
+    if (!flag) sprite->battleVisualHistory.valid = FALSE;
+#endif
 }
 
 void Sprite_SetAnimActiveFlag(Sprite *sprite, BOOL flag) {
@@ -608,8 +662,29 @@ static u32 Sprite_GetPaletteVramOffset(NNSG2dImagePaletteProxy *proxy, NNS_G2D_V
 }
 
 static void SpriteList_DrawSprite_Active(SpriteList *spriteList, Sprite *sprite) {
+#if defined(SDK_PORT)
+    Sprite *assetSprite = sprite;
+    Sprite rendered = *sprite;
+    BattleVisualPose pose = {0}, renderPose;
+    pose.position[0] = sprite->matrix.x; pose.position[1] = sprite->matrix.y; pose.position[2] = sprite->matrix.z;
+    pose.offset[0] = sprite->affineMatrix.x; pose.offset[1] = sprite->affineMatrix.y; pose.offset[2] = sprite->affineMatrix.z;
+    pose.scale[0] = sprite->scale.x; pose.scale[1] = sprite->scale.y; pose.scale[2] = sprite->scale.z;
+    pose.rotation[2] = sprite->rotation;
+    u64 identity = sprite->animationNo | ((u64)sprite->flag << 16) | ((u64)sprite->flip << 24) | ((u64)sprite->affine << 32) | ((u64)sprite->type << 40);
+    BattleSmoothing_Sample(&sprite->battleVisualHistory, &pose, identity, sprite->drawFlag,
+        sprite->battleTimingDomain == BATTLE_TIMING_ANIMATION, &renderPose);
+    rendered.matrix = (VecFx32){renderPose.position[0], renderPose.position[1], renderPose.position[2]};
+    rendered.affineMatrix = (VecFx32){renderPose.offset[0], renderPose.offset[1], renderPose.offset[2]};
+    rendered.scale = (VecFx32){renderPose.scale[0], renderPose.scale[1], renderPose.scale[2]};
+    rendered.rotation = renderPose.rotation[2];
+    sprite = &rendered;
+#endif
     VecFx32 matrix = sprite->matrix;
+#if defined(SDK_PORT)
+    NNS_G2dSetRendererImageProxy(spriteList->renderer, &assetSprite->imageProxy, &assetSprite->paletteProxy);
+#else
     NNS_G2dSetRendererImageProxy(spriteList->renderer, &sprite->imageProxy, &sprite->paletteProxy);
+#endif
     NNS_G2dBeginRendering(spriteList->renderer);
     NNS_G2dPushMtx();
     NNS_G2dSetRndCoreAffineOverwriteMode(&spriteList->renderer->rendererCore, (NNSG2dRendererAffineTypeOverwiteMode)sprite->affine);
@@ -633,10 +708,18 @@ static void SpriteList_DrawSprite_Active(SpriteList *spriteList, Sprite *sprite)
     NNS_G2dSetRendererOverwriteOBJMode(spriteList->renderer, sprite->mode);
     NNS_G2dSetRendererOverwritePriority(spriteList->renderer, sprite->priority);
     if (sprite->flag == SPRITE_ANIM_TYPE_CELL || sprite->flag == SPRITE_ANIM_TYPE_CELL_TRANSFER) {
+#if defined(SDK_PORT)
+        SpriteAnimationData *animData = (SpriteAnimationData *)assetSprite->animationData;
+#else
         SpriteAnimationData *animData = (SpriteAnimationData *)sprite->animationData;
+#endif
         NNS_G2dDrawCellAnimation(&animData->animation);
     } else {
+#if defined(SDK_PORT)
+        SpriteMultiAnimationData *animData = (SpriteMultiAnimationData *)assetSprite->animationData;
+#else
         SpriteMultiAnimationData *animData = (SpriteMultiAnimationData *)sprite->animationData;
+#endif
         NNS_G2dDrawMultiCellAnimation(&animData->animation);
     }
     NNS_G2dPopMtx();

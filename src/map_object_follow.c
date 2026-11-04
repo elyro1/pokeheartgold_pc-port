@@ -635,10 +635,18 @@ static BOOL HiddenObjectState_Wait(LocalMapObject *object, HiddenObjectMovementS
     return FALSE;
 }
 
+#if defined(SDK_PORT)
+struct FieldEffect *HiddenObjectMovement_SetCoverEffect(LocalMapObject *object, FieldEffect *effect) {
+#else
 int HiddenObjectMovement_SetCoverEffect(LocalMapObject *object, FieldEffect *effect) {
+#endif
     HiddenObjectMovementState *state = MapObject_GetMovementData(object);
     state->coverEffect = effect;
+#if defined(SDK_PORT)
+    return (FieldEffectHandle)state;
+#else
     return (int)state;
+#endif
 }
 
 FieldEffect *HiddenObjectMovement_GetCoverEffect(LocalMapObject *object) {

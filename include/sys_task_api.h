@@ -7,6 +7,11 @@ SysTask *SysTask_CreateOnMainQueue(SysTaskFunc func, void *data, u32 priority);
 SysTask *SysTask_CreateOnVBlankQueue(SysTaskFunc func, void *data, u32 priority);
 SysTask *SysTask_CreateOnPrintQueue(SysTaskFunc func, void *data, u32 priority);
 SysTask *SysTask_CreateOnVWaitQueue(SysTaskFunc func, void *data, u32 priority);
+#if defined(SDK_PORT)
+SysTask *SysTask_CreateBattleAnimation(SysTaskFunc func, void *data, u32 priority);
+SysTask *SysTask_CreateBattleUI(SysTaskFunc func, void *data, u32 priority);
+SysTask *SysTask_CreateUnscaled(SysTaskFunc func, void *data, u32 priority);
+#endif
 void SysTask_Destroy(SysTask *task);
 
 #endif // POKEHEARTGOLD_SYS_TASK_API_H

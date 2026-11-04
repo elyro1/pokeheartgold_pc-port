@@ -89,26 +89,58 @@ void PokeathlonRelayRunCpu_SetTeam(PokeathlonRelayRunCpu *cpu, u8 index, Pokeath
 void PokeathlonRelayRunCpu_SetObstacles(PokeathlonRelayRunCpu *cpu, s32 *layout) {
     int i;
 
+#if defined(SDK_PORT)
+    // Index the native array directly; advancing a CPU pointer by the DS
+    // obstacle stride would misalign the pointer fields elsewhere in the CPU.
+    for (i = 0; i < RELAY_RUN_OBSTACLES; i++, layout++) {
+        PokeathlonRelayRunCpuObstacle *obstacle = &cpu->obstacles[i];
+#else
     for (i = 0; i < RELAY_RUN_OBSTACLES; i++, layout++, cpu = (PokeathlonRelayRunCpu *)((u8 *)cpu + sizeof(PokeathlonRelayRunCpuObstacle))) {
+#endif
         int kind, y, x;
 
         kind = (u8)*layout;
+#if defined(SDK_PORT)
+        obstacle->kind = kind;
+#else
         cpu->obstacles[0].kind = kind;
+#endif
         y = (u8)(*layout >> 8);
         x = (u16)(*layout >> 16);
         if (kind != 0) {
+#if defined(SDK_PORT)
+            obstacle->active = TRUE;
+            if (obstacle->kind == RELAY_RUN_OBSTACLE_WALL) {
+                obstacle->size = 32;
+            } else if (obstacle->kind == RELAY_RUN_OBSTACLE_BIG_WALL) {
+                obstacle->size = 48;
+#else
             cpu->obstacles[0].active = TRUE;
             if (cpu->obstacles[0].kind == RELAY_RUN_OBSTACLE_WALL) {
                 cpu->obstacles[0].size = 32;
             } else if (cpu->obstacles[0].kind == RELAY_RUN_OBSTACLE_BIG_WALL) {
                 cpu->obstacles[0].size = 48;
+#endif
             } else {
+#if defined(SDK_PORT)
+                obstacle->size = 64;
+#else
                 cpu->obstacles[0].size = 64;
+#endif
             }
+#if defined(SDK_PORT)
+            obstacle->x = x - obstacle->size / 2;
+            obstacle->y = y + 32 - obstacle->size / 2;
+#else
             cpu->obstacles[0].x = x - cpu->obstacles[0].size / 2;
             cpu->obstacles[0].y = y + 32 - cpu->obstacles[0].size / 2;
+#endif
         } else {
+#if defined(SDK_PORT)
+            obstacle->active = FALSE;
+#else
             cpu->obstacles[0].active = FALSE;
+#endif
         }
     }
 }

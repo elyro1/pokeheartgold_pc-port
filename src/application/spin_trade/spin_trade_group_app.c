@@ -437,8 +437,13 @@ BOOL SpinTradeGroupApp_Init(OverlayManager *manager, int *state) {
         HBlankInterruptDisable();
         GfGfx_DisableEngineAPlanes();
         GfGfx_DisableEngineBPlanes();
+#if defined(SDK_PORT)
+        reg_GX_DISPCNT &= 0xffffe0ff;
+        reg_GXS_DB_DISPCNT &= 0xffffe0ff;
+#else
         *(vu32 *)0x04000000 &= 0xffffe0ff;
         *(vu32 *)0x04001000 &= 0xffffe0ff;
+#endif
         Heap_Create(HEAP_ID_3, HEAP_ID_102, 0x80000);
         narc = NARC_New(NARC_a_2_1_5, HEAP_ID_102);
         GF_ASSERT(narc != NULL);
@@ -1592,3 +1597,47 @@ static void SpinTradeGroup_SaveDummy(SaveData *saveData, u8 *buffer) {
 #pragma unused(saveData)
 #pragma unused(buffer)
 }
+#if defined(SDK_PORT)
+
+/* Native tables from asm/spin_trade_flow_data.s; adapters give differing originals the field signatures. */
+BOOL SpinTradeGroupApp_Init(OverlayManager *manager, int *state);
+BOOL SpinTradeGroupApp_Main(OverlayManager *man, int *state);
+BOOL SpinTradeGroupApp_Exit(OverlayManager *man, int *state);
+const OverlayManagerTemplate gOverlayTemplate_SpinTradeGroup = { SpinTradeGroupApp_Init, SpinTradeGroupApp_Main, SpinTradeGroupApp_Exit, FS_OVERLAY_ID(OVY_85) };
+
+/* Native tables from asm/spin_trade_data.s; adapters give differing originals the table's signature. */
+int (*const gSpinTradeGroupStateFuncs[32])(SpinTradeGroupApp *app, int state) = {
+    SpinTradeGroup_State_ShowPrompt,
+    SpinTradeGroup_State_WaitTextThenResetMenu,
+    SpinTradeGroup_State_ResetLeaderMenuState,
+    SpinTradeGroup_State_HandleInput,
+    SpinTradeGroup_State_ShowCancelYesNo,
+    SpinTradeGroup_State_HandleCancelYesNo,
+    SpinTradeGroup_State_ResetLeaveWait,
+    SpinTradeGroup_State_SendLeave,
+    SpinTradeGroup_State_AbortLeave,
+    SpinTradeGroup_State_ShowCanceled,
+    SpinTradeGroup_State_FadeOutCanceled,
+    SpinTradeGroup_State_ShowDisbandYesNo,
+    SpinTradeGroup_State_HandleDisbandYesNo,
+    SpinTradeGroup_State_ShowDisbanded,
+    SpinTradeGroup_State_WaitBeforeExit,
+    SpinTradeGroup_State_StartExitSync,
+    SpinTradeGroup_State_WaitExitSync,
+    SpinTradeGroup_State_ShowMemberDropped,
+    SpinTradeGroup_State_WaitMemberDropped,
+    SpinTradeGroup_State_ShowMemberLeft,
+    SpinTradeGroup_State_StartMemberLeftWait,
+    SpinTradeGroup_State_WaitMemberLeft,
+    SpinTradeGroup_State_ShowConfirmYesNo,
+    SpinTradeGroup_State_HandleConfirmYesNo,
+    SpinTradeGroup_State_SendStartSync,
+    SpinTradeGroup_State_WaitSyncCount,
+    SpinTradeGroup_State_BeforeSave,
+    SpinTradeGroup_State_StartSave,
+    SpinTradeGroup_State_Save,
+    SpinTradeGroup_State_WaitAfterSave,
+    SpinTradeGroup_State_WaitPrinter,
+    SpinTradeGroup_State_Proceed,
+};
+#endif

@@ -211,9 +211,21 @@ BOOL ScrCmd_LoadWord(ScriptContext *ctx) {
     return FALSE;
 }
 
+#if defined(SDK_PORT)
+// These legacy operands are serialized DS absolute addresses, always four bytes.
+// Widening the word on PC does not relocate a DS symbol to a native game object.
+static u8 *ScriptReadAbsoluteAddress(ScriptContext *ctx) {
+    return (u8 *)(uintptr_t)ScriptReadWord(ctx);
+}
+
+#endif
 BOOL ScrCmd_LoadByteFromAddr(ScriptContext *ctx) {
     u8 reg = ScriptReadByte(ctx);
+#if defined(SDK_PORT)
+    u8 *address = ScriptReadAbsoluteAddress(ctx);
+#else
     u8 *address = (u8 *)ScriptReadWord(ctx);
+#endif
 
     ctx->data[reg] = *address;
 
@@ -221,14 +233,22 @@ BOOL ScrCmd_LoadByteFromAddr(ScriptContext *ctx) {
 }
 
 BOOL ScrCmd_WriteByteToAddr(ScriptContext *ctx) {
+#if defined(SDK_PORT)
+    u8 *address = ScriptReadAbsoluteAddress(ctx);
+#else
     u8 *address = (u8 *)ScriptReadWord(ctx);
+#endif
     *address = ScriptReadByte(ctx);
 
     return FALSE;
 }
 
 BOOL ScrCmd_SetPtrByte(ScriptContext *ctx) {
+#if defined(SDK_PORT)
+    u8 *address = ScriptReadAbsoluteAddress(ctx);
+#else
     u8 *address = (u8 *)ScriptReadWord(ctx);
+#endif
     u8 reg = ScriptReadByte(ctx);
 
     *address = ctx->data[reg];
@@ -246,8 +266,13 @@ BOOL ScrCmd_CopyLocal(ScriptContext *ctx) {
 }
 
 BOOL ScrCmd_CopyByte(ScriptContext *ctx) {
+#if defined(SDK_PORT)
+    u8 *dest_address = ScriptReadAbsoluteAddress(ctx);
+    u8 *src_address = ScriptReadAbsoluteAddress(ctx);
+#else
     u8 *dest_address = (u8 *)ScriptReadWord(ctx);
     u8 *src_address = (u8 *)ScriptReadWord(ctx);
+#endif
 
     *dest_address = *src_address;
 
@@ -284,7 +309,11 @@ BOOL ScrCmd_CompareLocalToValue(ScriptContext *ctx) {
 
 BOOL ScrCmd_CompareLocalToAddr(ScriptContext *ctx) {
     u8 a = ctx->data[ScriptReadByte(ctx)];
+#if defined(SDK_PORT)
+    u8 b = *ScriptReadAbsoluteAddress(ctx);
+#else
     u8 b = *(u8 *)ScriptReadWord(ctx);
+#endif
 
     ctx->comparisonResult = Compare(a, b);
 
@@ -292,7 +321,11 @@ BOOL ScrCmd_CompareLocalToAddr(ScriptContext *ctx) {
 }
 
 BOOL ScrCmd_CompareAddrToLocal(ScriptContext *ctx) {
+#if defined(SDK_PORT)
+    u8 a = *ScriptReadAbsoluteAddress(ctx);
+#else
     u8 a = *(u8 *)ScriptReadWord(ctx);
+#endif
     u8 b = ctx->data[ScriptReadByte(ctx)];
 
     ctx->comparisonResult = Compare(a, b);
@@ -301,7 +334,11 @@ BOOL ScrCmd_CompareAddrToLocal(ScriptContext *ctx) {
 }
 
 BOOL ScrCmd_CompareAddrToValue(ScriptContext *ctx) {
+#if defined(SDK_PORT)
+    u8 a = *ScriptReadAbsoluteAddress(ctx);
+#else
     u8 a = *(u8 *)ScriptReadWord(ctx);
+#endif
     u8 b = ScriptReadByte(ctx);
 
     ctx->comparisonResult = Compare(a, b);
@@ -310,8 +347,13 @@ BOOL ScrCmd_CompareAddrToValue(ScriptContext *ctx) {
 }
 
 BOOL ScrCmd_CompareAddrToAddr(ScriptContext *ctx) {
+#if defined(SDK_PORT)
+    u8 a = *ScriptReadAbsoluteAddress(ctx);
+    u8 b = *ScriptReadAbsoluteAddress(ctx);
+#else
     u8 a = *(u8 *)ScriptReadWord(ctx);
     u8 b = *(u8 *)ScriptReadWord(ctx);
+#endif
 
     ctx->comparisonResult = Compare(a, b);
 
@@ -387,7 +429,11 @@ BOOL ScrCmd_RestartCurrentScript(ScriptContext *ctx) {
 }
 
 BOOL ScrCmd_GoTo(ScriptContext *ctx) {
+#if defined(SDK_PORT)
+    s32 offset_in_script = (s32)ScriptReadWord(ctx);
+#else
     u32 offset_in_script = ScriptReadWord(ctx);
+#endif
     ScriptJump(ctx, ctx->script_ptr + offset_in_script);
 
     return FALSE;
@@ -397,7 +443,11 @@ BOOL ScrCmd_ObjectGoTo(ScriptContext *ctx) {
     LocalMapObject **lmo = FieldSysGetAttrAddr(ctx->fieldSystem, SCRIPTENV_LAST_INTERACTED);
     u8 id = ScriptReadByte(ctx);
 
+#if defined(SDK_PORT)
+    s32 offset_in_script = (s32)ScriptReadWord(ctx);
+#else
     u32 offset_in_script = ScriptReadWord(ctx);
+#endif
     if (id == MapObject_GetID(*lmo)) {
         ScriptJump(ctx, ctx->script_ptr + offset_in_script);
     }
@@ -409,7 +459,11 @@ BOOL ScrCmd_BGGoTo(ScriptContext *ctx) {
     u32 bg = TaskManager_GetBgGoToId(ctx->taskman);
     u8 required_bg = ScriptReadByte(ctx);
 
+#if defined(SDK_PORT)
+    s32 offset_in_script = (s32)ScriptReadWord(ctx);
+#else
     u32 offset_in_script = ScriptReadWord(ctx);
+#endif
     if (bg == required_bg) {
         ScriptJump(ctx, ctx->script_ptr + offset_in_script);
     }
@@ -421,7 +475,11 @@ BOOL ScrCmd_DirectionGoTo(ScriptContext *ctx) {
     u32 *direction = FieldSysGetAttrAddr(ctx->fieldSystem, SCRIPTENV_FACING_DIRECTION);
     u8 required_direction = ScriptReadByte(ctx);
 
+#if defined(SDK_PORT)
+    s32 offset_in_script = (s32)ScriptReadWord(ctx);
+#else
     u32 offset_in_script = ScriptReadWord(ctx);
+#endif
     if (*direction == required_direction) {
         ScriptJump(ctx, ctx->script_ptr + offset_in_script);
     }
@@ -430,7 +488,11 @@ BOOL ScrCmd_DirectionGoTo(ScriptContext *ctx) {
 }
 
 BOOL ScrCmd_Call(ScriptContext *ctx) {
+#if defined(SDK_PORT)
+    s32 offset_in_script = (s32)ScriptReadWord(ctx);
+#else
     u32 offset_in_script = ScriptReadWord(ctx);
+#endif
     ScriptCall(ctx, ctx->script_ptr + offset_in_script);
 
     return FALSE;
@@ -443,7 +505,11 @@ BOOL ScrCmd_Return(ScriptContext *ctx) {
 
 BOOL ScrCmd_GoToIf(ScriptContext *ctx) {
     u8 condition = ScriptReadByte(ctx);
+#if defined(SDK_PORT)
+    s32 offset_in_script = (s32)ScriptReadWord(ctx);
+#else
     u32 offset_in_script = ScriptReadWord(ctx);
+#endif
 
     if (sConditionTable[condition][ctx->comparisonResult] == 1) {
         ScriptJump(ctx, ctx->script_ptr + offset_in_script);
@@ -454,7 +520,11 @@ BOOL ScrCmd_GoToIf(ScriptContext *ctx) {
 
 BOOL ScrCmd_CallIf(ScriptContext *ctx) {
     u8 condition = ScriptReadByte(ctx);
+#if defined(SDK_PORT)
+    s32 offset_in_script = (s32)ScriptReadWord(ctx);
+#else
     u32 offset_in_script = ScriptReadWord(ctx);
+#endif
 
     if (sConditionTable[condition][ctx->comparisonResult] == 1) {
         ScriptCall(ctx, ctx->script_ptr + offset_in_script);
@@ -1134,7 +1204,11 @@ BOOL ScrCmd_MultichoiceSetAnchorBottom(ScriptContext *ctx) {
 
 BOOL ScrCmd_ApplyMovement(ScriptContext *ctx) {
     u16 person = ScriptGetVar(ctx);
+#if defined(SDK_PORT)
+    s32 offset = (s32)ScriptReadWord(ctx);
+#else
     u32 offset = ScriptReadWord(ctx);
+#endif
     LocalMapObject *object = Script_GetMapObjectByPerson(ctx->fieldSystem, person);
     EventObjectMovementMan *movementMan;
     u8 *movementCounter;

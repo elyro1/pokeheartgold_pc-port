@@ -255,11 +255,18 @@ BOOL TradeSequence_Main(OverlayManager *man, int *state) {
 
 static void TradeSequence_DrawSpritesTask(SysTask *task, void *data) {
     TradeSequence *ts = data;
+#if defined(SDK_PORT)
+#else
     vu32 *dtcm = (vu32 *)0x027E0000; // OS_SetIrqCheckFlag(OS_IE_V_BLANK)
+#endif
 
     SpriteList_RenderAndAnimateSprites(ts->spriteList);
     OamManager_ApplyAndResetBuffers();
+#if defined(SDK_PORT)
+    OS_SetIrqCheckFlag(OS_IE_V_BLANK);
+#else
     dtcm[0x3FF8 / sizeof(u32)] |= 1;
+#endif
 }
 
 TradeSequencePulses *TradeSequence_CreatePulses(int *running, int direction) {

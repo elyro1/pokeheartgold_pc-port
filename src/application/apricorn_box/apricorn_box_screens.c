@@ -1292,9 +1292,14 @@ static void ApricornBoxScreen_RemoveWindows(ApricornBoxScreen *screen) {
 static void ApricornBoxScreen_CreateListMenuItems(ApricornBoxScreen *screen) {
     int i;
     if (screen->mode != APRICORN_BOX_MODE_VIEW) {
+#if defined(SDK_PORT)
+        const ApricornBoxListDesc *desc = &gApricornBoxListMenus[screen->mode - 1];
+        screen->listMenuItems = ListMenuItems_New(desc->count, screen->heapId);
+#else
         int offset = (screen->mode - 1) * 8;
         const ApricornBoxListDesc *desc = (const ApricornBoxListDesc *)((const u8 *)gApricornBoxListMenus + offset);
         screen->listMenuItems = ListMenuItems_New(*(const u16 *)((const u8 *)gApricornBoxListMenus + offset), screen->heapId);
+#endif
         for (i = 0; i < desc->count; i++) {
             ListMenuItems_AppendFromMsgData(screen->listMenuItems, screen->msgData, desc->messages[i], i);
         }
@@ -1503,3 +1508,10 @@ static u16 ApricornBoxScreen_GetJuiceTasteMsg(ApricornBoxScreen *screen, Apricor
         return low * 6 + high + 56;
     }
 }
+#if defined(SDK_PORT)
+
+const ApricornBoxListDesc gApricornBoxListMenus[2] = {
+    { 3, 0x16, 0x0E, gApricornBoxListMenu0Messages },
+    { 2, 0x11, 0x0C, gApricornBoxListMenu1Messages },
+};
+#endif

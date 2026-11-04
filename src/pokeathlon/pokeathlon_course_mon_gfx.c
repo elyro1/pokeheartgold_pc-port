@@ -293,7 +293,11 @@ static BOOL PokeathlonCourseMonGfx_LoadStep(PokeathlonCourseMonGfxLoad *load) {
         // BUG: the infos were copied to infos[0..count) but are read at baseIndex + current; every caller passes
         // a baseIndex of 0.
         index = load->baseIndex + load->current;
+#if defined(SDK_PORT)
+        PokeathlonCourseMonGfx_Load(load->manager, &load->manager->mons[index], &load->infos[index], load->template.vram, index, load->template.vramTransfer);
+#else
         PokeathlonCourseMonGfx_Load(load->manager, &load->manager->mons[index], (PokeathlonCourseMonInfo *)((u32)load->infos + (u32)index * sizeof(PokeathlonCourseMonInfo)), load->template.vram, index, load->template.vramTransfer);
+#endif
         load->manager->mons[index].info = load->infos[index];
         load->manager->mons[index].topRow = PokeathlonCourseMonGfx_FindTopRow(&load->manager->mons[index]);
         load->manager->mons[index].shiftedUp = load->manager->shiftLargeUp && load->infos[index].isLarge != 0;

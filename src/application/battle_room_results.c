@@ -89,7 +89,11 @@ typedef struct BattleRoomResults {
     Options *options;
     FrontierSave *frontierSave;
     FrontierData *frontierData;
+#if defined(SDK_PORT)
+    void *downloadData; // BattleRoomDownload
+#else
     u32 downloadData; // BattleRoomDownload
+#endif
     MsgData *msgData;
     MessageFormat *msgFormat;
     String *string;
@@ -535,7 +539,11 @@ static void BattleRoomResults_SetGfxBanks(void) {
 static void BattleRoomResults_VBlankCB(BattleRoomResults *results) {
     BattleRoomResults_TransferOam();
     DoScheduledBgGpuUpdates(results->bgConfig);
+#if defined(SDK_PORT)
+    OS_SetIrqCheckFlag(OS_IE_V_BLANK);
+#else
     ((u32 *)0x027E0000)[(HW_INTR_CHECK_BUF - HW_DTCM) / 4] |= OS_IE_V_BLANK; // OS_SetIrqCheckFlag
+#endif
 }
 
 static int BattleRoomResults_HandleResultsInput(BattleRoomResults *results) {
@@ -1127,3 +1135,6 @@ static void BattleRoomResults_GridOnTouch(void *data, int input, int prevInput) 
     BattleRoomResults_PrintLeaderInfo(results, leader);
     BattleRoomResults_MoveCursor(results, input);
 }
+#if defined(SDK_PORT)
+
+#endif

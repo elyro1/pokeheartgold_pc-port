@@ -946,7 +946,11 @@ static void BattleBagMenu_PrintItemList(BattleBagMenu *menu) {
     menu->itemListWindowBank ^= 1;
 }
 
+#if defined(SDK_PORT)
+#define PAGE_NUMBER_WINDOW(windows) (&(windows)[25])
+#else
 #define PAGE_NUMBER_WINDOW(windows) ((Window *)((u32)(windows) + 25 * sizeof(Window)))
+#endif
 
 static void BattleBagMenu_PrintPageNumber(BattleBagMenu *menu) {
     Window *windows;
@@ -1613,3 +1617,58 @@ static void BattleBagMenu_DrawPageButtons(BattleBagMenu *menu, u8 page) {
         break;
     }
 }
+#if defined(SDK_PORT)
+
+/* Native-width pointer tables from asm/battle_menu_data.s. */
+extern const DpadMenuBox gBattleBagPage0CursorBoxes[];
+extern const DpadMenuBox gBattleBagPage1CursorBoxes[];
+extern const DpadMenuBox gBattleBagPage2CursorBoxes[];
+extern const u8 gBattleBagButton0Windows[];
+extern const u8 gBattleBagButton1Windows[];
+extern const u8 gBattleBagButton2Windows[];
+extern const u8 gBattleBagButton3Windows[];
+extern const u8 gBattleBagButton4Windows[];
+extern const u8 gBattleBagButton6Windows[];
+extern const u8 gBattleBagButton7Windows[];
+extern const u8 gBattleBagButton8Windows[];
+extern const u8 gBattleBagButton9Windows[];
+extern const u8 gBattleBagButton10Windows[];
+extern const u8 gBattleBagButton11Windows[];
+extern const u8 gBattleBagButton15Windows[];
+extern const u8 gBattleBagButton17Windows[];
+extern const u8 gBattleBagButton18Windows[];
+extern const u8 gBattleBagButton19Windows[];
+extern const u8 gBattleBagButton20Windows[];
+extern const u8 gBattleBagButton21Windows[];
+extern const u8 gBattleBagButton22Windows[];
+const DpadMenuBox *const gBattleBagPageCursorBoxes[] = {
+    gBattleBagPage0CursorBoxes,
+    gBattleBagPage1CursorBoxes,
+    gBattleBagPage2CursorBoxes,
+};
+const u8 *const gBattleBagButtonWindowLists[23] = {
+    gBattleBagButton0Windows,
+    gBattleBagButton1Windows,
+    gBattleBagButton2Windows,
+    gBattleBagButton3Windows,
+    gBattleBagButton4Windows,
+    0,
+    gBattleBagButton6Windows,
+    gBattleBagButton7Windows,
+    gBattleBagButton8Windows,
+    gBattleBagButton9Windows,
+    gBattleBagButton10Windows,
+    gBattleBagButton11Windows,
+    0,
+    0,
+    0,
+    gBattleBagButton15Windows,
+    0,
+    gBattleBagButton17Windows,
+    gBattleBagButton18Windows,
+    gBattleBagButton19Windows,
+    gBattleBagButton20Windows,
+    gBattleBagButton21Windows,
+    gBattleBagButton22Windows,
+};
+#endif

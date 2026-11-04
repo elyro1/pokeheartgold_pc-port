@@ -598,6 +598,11 @@ static void BagApp_LoadSpriteResources(BagApp *app) {
     SpriteSystem_LoadAnimResObj(app->spriteSystem, app->spriteManager, NARC_a_0_6_0, 6, FALSE, 0xC0FE);
     TypeIcon_LoadCellAnim(app->spriteSystem, app->spriteManager, 0xC0FE, 0xC0FF);
     app->objPaletteBuffer = GfGfxLoader_GetPlttData(NARC_a_0_1_5, 48, &app->objPalette, HEAP_ID_6);
+#if defined(SDK_PORT)
+    GF_ASSERT(app->objPalette->szByte <= sizeof(app->pocketObjColors));
+    memcpy(app->pocketObjColors, app->objPalette->pRawData, app->objPalette->szByte);
+    app->objPalette->pRawData = app->pocketObjColors;
+#endif
 }
 
 static void BagApp_CreateSprites(BagApp *app) {

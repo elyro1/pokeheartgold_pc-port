@@ -10,6 +10,9 @@
 #include "save.h"
 
 typedef struct PokeathlonCourseData PokeathlonCourseData;
+#if defined(SDK_PORT)
+typedef struct PokeathlonCourseLink PokeathlonCourseLink;
+#endif
 
 struct PokeathlonCourseLink;
 struct PokeathlonCourseScoreList;
@@ -77,13 +80,26 @@ typedef struct PokeathlonParticipantStats {
     u8 data[0x74]; // Opaque data for now
 } PokeathlonParticipantStats;
 
+#if defined(SDK_PORT)
+typedef struct PokeathlonCourseEventTransfer {
+    void *source;
+    void *destination;
+    u32 size;
+    BOOL enabled;
+} PokeathlonCourseEventTransfer;
+
+#endif
 // Pokeathlon course data structure (0xD70 = 3440 bytes)
 struct PokeathlonCourseData {
     u32 field_0[4];                            // 0x000
     u8 filler_10[0x14C];                       // 0x010
     u8 field_15C;                              // 0x15C
     u8 filler_15D[0x83];                       // 0x15D
+#if defined(SDK_PORT)
+    void *state;                                 // 0x1E0
+#else
     u32 state;                                 // 0x1E0
+#endif
     void *work;                                // 0x1E4 - Heap allocated pointer
     u8 filler_1E8[0x5];                        // 0x1E8
     u8 eventInitState;                              // 0x1ED
@@ -103,7 +119,11 @@ struct PokeathlonCourseData {
     u8 dataCopyBuffer1[0x28];                  // 0x2B4 - Destination buffer 1
     u8 dataCopyBuffer2[0x28];                  // 0x2DC - Destination buffer 2
     u8 filler_304[0xA0];                       // 0x304
+#if defined(SDK_PORT)
+    PokeathlonCourseEventTransfer eventDataTransfer;                          // 0x3A4
+#else
     u32 eventDataTransfer[4];                          // 0x3A4
+#endif
     PokeathlonCourseState courseState;         // 0x3B4 - State machine structure (16 bytes: 4 fields x 4 bytes)
     PokeathlonStateInfo stateInfo;             // 0x3C4 - State information (8 bytes)
     u8 filler_3CC[0xC];                        // 0x3CC
@@ -172,9 +192,17 @@ PlayerProfile *PokeathlonCourse_GetPlayerProfileFromData(PokeathlonCourseData *d
 PokeathlonStatistics *PokeathlonCourse_GetRecord(PokeathlonCourseData *data, int index);
 u8 *PokeathlonCourse_GetDataCopyArea(PokeathlonCourseData *data);
 void PokeathlonCourse_ResetDataCopyArea(PokeathlonCourseData *data);
+#if defined(SDK_PORT)
+void PokeathlonCourse_SetEventDataTransfer(PokeathlonCourseData *data, void *a0, void *a1, u32 a2);
+#else
 void PokeathlonCourse_SetEventDataTransfer(PokeathlonCourseData *data, u32 a0, u32 a1, u32 a2);
+#endif
 void PokeathlonCourse_ClearEventDataTransfer(PokeathlonCourseData *data);
+#if defined(SDK_PORT)
+void *PokeathlonCourse_GetEventRecvBuffer(PokeathlonCourseData *data);
+#else
 u32 PokeathlonCourse_GetEventRecvBuffer(PokeathlonCourseData *data);
+#endif
 u32 PokeathlonCourse_GetEventResultSize();
 void PokeathlonCourse_SetEventScore(PokeathlonCourseData *data, int index, u16 value);
 u16 PokeathlonCourse_GetReceivedScore(PokeathlonCourseData *data, int index);

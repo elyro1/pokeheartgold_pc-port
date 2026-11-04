@@ -26,7 +26,11 @@ extern const ManagedSpriteTemplate gHallOfFameShowcasePartyIconSpriteTemplate;
 extern const DpadMenuBox gHallOfFameShowcaseGridDpadBoxes[];
 extern const WindowTemplate gHallOfFameShowcaseWindowTemplates[];
 extern const ManagedSpriteTemplate gHallOfFameShowcaseMonPicSpriteTemplate1;
+#if defined(SDK_PORT)
+extern const ManagedSpriteTemplate gHallOfFameShowcaseMonPicSpriteTemplate2[];
+#else
 extern const ManagedSpriteTemplate gHallOfFameShowcaseMonPicSpriteTemplate2;
+#endif
 extern const ManagedSpriteTemplate gHallOfFameShowcaseCursorSpriteTemplate;
 extern const ManagedSpriteTemplate gHallOfFameShowcasePrevPageSpriteTemplate;
 extern const ManagedSpriteTemplate gHallOfFameShowcaseNextPageSpriteTemplate;

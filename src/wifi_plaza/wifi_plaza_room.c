@@ -1616,7 +1616,12 @@ static void WiFiPlazaInfoPanel_Update(WiFiPlazaInfoPanel *panel, WiFiPlazaRoomWo
     WiFiPlazaWork *lobby;
     int offset;
     WiFiPlazaRoomGraphics *graphics;
+#if defined(SDK_PORT)
+    int special, hasMessage, isOwn, token;
+    u16 *message;
+#else
     int special, hasMessage, isOwn, message, token;
+#endif
     struct WiFiPlazaPlayer *myPlayer;
     int playerIndex;
     struct WiFiPlazaPlayer *player;
@@ -1734,7 +1739,11 @@ static void WiFiPlazaInfoPanel_Update(WiFiPlazaInfoPanel *panel, WiFiPlazaRoomWo
             special = WiFiPlazaWork_IsSpecialVisitor(lobby, panel->requestPlayer);
             if (panel->requestArg == TRUE) {
                 hasMessage = WiFiPlazaWork_HasWordSet(lobby, panel->requestPlayer);
+#if defined(SDK_PORT)
+                message = WiFiPlazaWork_GetWordSet(lobby, panel->requestPlayer);
+#else
                 message = (int)WiFiPlazaWork_GetWordSet(lobby, panel->requestPlayer);
+#endif
                 if (message == 0) {
                     hasMessage = FALSE;
                 }
@@ -2454,3 +2463,7 @@ static void WiFiPlazaPanelButton_ResetTimer(WiFiPlazaPanelButton *button) {
 u32 WiFiPlazaRoom_GetTextSpeed(WiFiPlazaRoomWork *room) {
     return room->msgWindow.textSpeed;
 }
+#if defined(SDK_PORT)
+
+const OverlayManagerTemplate sWiFiPlazaMainOverlayTemplate = { WiFiPlazaRoom_Init, WiFiPlazaRoom_Main, WiFiPlazaRoom_Exit, FS_OVERLAY_ID(OVY_49) };
+#endif

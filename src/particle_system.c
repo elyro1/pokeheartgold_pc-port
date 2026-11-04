@@ -97,6 +97,11 @@ SPLEmitter *ParticleSystem_New(texAllocFun texAlloc, plttAllocFun plttAlloc, voi
     system = Heap_Alloc(heapID, sizeof(ParticleSystem));
     GF_ASSERT(system != NULL);
     memset(system, 0, sizeof(ParticleSystem));
+#if defined(SDK_PORT)
+    system->timingDomain = BattleTiming_GetDomain();
+    if (system->timingDomain == BATTLE_TIMING_NONE && heapID == HEAP_ID_BATTLE && BattleTiming_IsActive())
+        system->timingDomain = BATTLE_TIMING_ANIMATION;
+#endif
     system->texAlloc = texAlloc;
     system->plttAlloc = plttAlloc;
     system->pos = sParticleCameraPos;
@@ -130,7 +135,11 @@ void ParticleSystem_Free(SPLEmitter *emitter) {
 
     ParticleSystem_DeleteAllEmitters(system);
     if (system->flags & PARTICLE_TEX_VRAM_FRAME) {
+#if defined(SDK_PORT)
+        NNS_GfdSetFrmTexVramState(&system->texState);
+#else
         NNS_GfdSetFrmTexVramState(system->texKeys);
+#endif
     } else if (system->flags & PARTICLE_TEX_VRAM_LINKED) {
         for (i = 0; i < PARTICLE_VRAM_KEY_MAX; i++) {
             if (system->texKeys[i] != 0) {
@@ -140,7 +149,11 @@ void ParticleSystem_Free(SPLEmitter *emitter) {
         }
     }
     if (system->flags & PARTICLE_PLTT_VRAM_FRAME) {
+#if defined(SDK_PORT)
+        NNS_GfdSetFrmPlttVramState(&system->plttState);
+#else
         NNS_GfdSetFrmPlttVramState(system->plttKeys);
+#endif
     } else if (system->flags & PARTICLE_PLTT_VRAM_LINKED) {
         for (i = 0; i < PARTICLE_VRAM_KEY_MAX; i++) {
             if (system->plttKeys[i] != 0) {
@@ -177,6 +190,20 @@ void ParticleSystem_FreeAll(void) {
 }
 
 // SPL allocator of one slot: 4-aligned bump allocation in the system's heap
+#if defined(SDK_PORT)
+static void *ParticleSystem_AllocNativeSlot(int slot, u32 size) {
+    ParticleSystem *system = sParticleSystems[slot];
+    const uintptr_t alignment = _Alignof(max_align_t);
+    uintptr_t start = ((uintptr_t)system->heapCurrent + alignment - 1) & ~(alignment - 1);
+    uintptr_t next = (start + size + alignment - 1) & ~(alignment - 1);
+    if (next > (uintptr_t)system->heapEnd || next < start) return NULL;
+    system->heapCurrent = (void *)next;
+    return (void *)start;
+}
+
+#define DEFINE_SLOT_ALLOC(name, slot) \
+    static void *name(u32 size) { return ParticleSystem_AllocNativeSlot(slot, size); }
+#else
 #define DEFINE_SLOT_ALLOC(name, slot)                    \
     static void *name(u32 size) {                        \
         ParticleSystem *system = sParticleSystems[slot]; \
@@ -189,6 +216,7 @@ void ParticleSystem_FreeAll(void) {
         GF_ASSERT(next < (u8 *)system->heapEnd);         \
         return ret;                                      \
     }
+#endif
 
 DEFINE_SLOT_ALLOC(ParticleSystem_AllocSlot0, 0)
 DEFINE_SLOT_ALLOC(ParticleSystem_AllocSlot1, 1)
@@ -220,14 +248,22 @@ void ParticleSystem_SetResource(SPLEmitter *emitter, void *data, u32 flag, BOOL 
     GF_ASSERT(system->resource == NULL);
     system->flags = flag;
     if (flag & PARTICLE_TEX_VRAM_FRAME) {
+#if defined(SDK_PORT)
+        NNS_GfdGetFrmTexVramState(&system->texState);
+#else
         NNS_GfdGetFrmTexVramState(system->texKeys);
+#endif
     } else if (flag & PARTICLE_TEX_VRAM_LINKED) {
         for (i = 0; i < PARTICLE_VRAM_KEY_MAX; i++) {
             system->texKeys[i] = 0;
         }
     }
     if (flag & PARTICLE_PLTT_VRAM_FRAME) {
+#if defined(SDK_PORT)
+        NNS_GfdGetFrmPlttVramState(&system->plttState);
+#else
         NNS_GfdGetFrmPlttVramState(system->plttKeys);
+#endif
     } else if (flag & PARTICLE_PLTT_VRAM_LINKED) {
         for (j = 0; j < PARTICLE_VRAM_KEY_MAX; j++) {
             system->plttKeys[j] = 0;
@@ -317,6 +353,9 @@ void ParticleSystem_Draw(ParticleSystem *system) {
 }
 
 void ParticleSystem_Calc(ParticleSystem *system) {
+#if defined(SDK_PORT)
+    if (!BattleTiming_ShouldTick(system->timingDomain)) return;
+#endif
     SPL_Calc(system->manager);
 }
 

@@ -443,6 +443,9 @@ BOOL TrainerCardMainApp_Main(OverlayManager *manager, int *state) {
 BOOL TrainerCardMainApp_Exit(OverlayManager *manager, int *state) {
     TrainerCardMain *cardMain = OverlayManager_GetData(manager);
 
+#if defined(SDK_PORT)
+    Main_SetVBlankIntrCB(NULL, NULL);
+#endif
     TrainerCardMain_ResetBgAffine();
     TrainerCardMain_FreeStrings(cardMain);
     TrainerCardMain_FreeSprites(&cardMain->sprites);

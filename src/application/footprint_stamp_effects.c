@@ -1423,3 +1423,15 @@ void FootprintStamp_HandleStampReceived(u32 playerId, void *data, u32 unused, Fo
         FootprintStamp_PlaceStamp(work, data, playerId);
     }
 }
+#if defined(SDK_PORT)
+
+/* Native pointer tables from the corresponding DS data. */
+static void Native_FootprintStamp_HandlePlayerJoined(int id, const void *data, u32 size, void *arg) { FootprintStamp_HandlePlayerJoined((u32)id, (void *)data, size, arg); }
+static void Native_FootprintStamp_HandlePlayerLeft(int id, const void *data, u32 size, void *arg) { FootprintStamp_HandlePlayerLeft((u32)id, (void *)data, size, arg); }
+static void Native_FootprintStamp_HandleStampReceived(int id, const void *data, u32 size, void *arg) { FootprintStamp_HandleStampReceived((u32)id, (void *)data, size, arg); }
+const WiFiPlazaLobbyCommand gFootprintStampLinkCommands[] = {
+    {Native_FootprintStamp_HandlePlayerJoined, 0x0000000C},
+    {Native_FootprintStamp_HandlePlayerLeft, 0x00000000},
+    {Native_FootprintStamp_HandleStampReceived, 0x0000000C}
+};
+#endif

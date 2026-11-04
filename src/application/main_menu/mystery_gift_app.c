@@ -1,6 +1,9 @@
 #include "application/main_menu/mystery_gift_app.h"
+#if defined(SDK_PORT)
+#else
 
 #include <nitro/wm/wm_internal.h>
+#endif
 
 #include "global.h"
 
@@ -786,8 +789,17 @@ static void MysteryGiftApp_CreateListMenu(OverlayManager *manager, const Mystery
     data->listMenuItems = ListMenuItems_New(count, HEAP_ID_84);
     data->msgData = NewMsgDataFromNarc(MSGDATA_LOAD_DIRECT, NARC_msgdata_msg, NARC_msg_msg_0247_bin, HEAP_ID_84);
     int i;
+#if defined(SDK_PORT)
+    GF_ASSERT(count <= NELEMS(data->menuCallbacks));
+    data->menuCallbackCount = count;
+#endif
     for (i = 0; i < count; i++) {
+#if defined(SDK_PORT)
+        data->menuCallbacks[i] = items[i].func;
+        ListMenuItems_AppendFromMsgData(data->listMenuItems, data->msgData, items[i].msgId, i + 1);
+#else
         ListMenuItems_AppendFromMsgData(data->listMenuItems, data->msgData, items[i].msgId, (int)items[i].func);
+#endif
     }
     DestroyMsgData(data->msgData);
     ListMenuTemplate template = sMysteryGiftListMenuTemplate;
@@ -878,9 +890,16 @@ static void MysteryGiftApp_HandleListMenuInput(OverlayManager *manager, int *sta
         break;
     default:
         PlaySE(SEQ_SE_DP_SELECT);
+#if defined(SDK_PORT)
+        if (input > 0 && input <= data->menuCallbackCount && data->menuCallbacks[input - 1] != NULL) {
+            MysteryGiftMenuFunc callback = data->menuCallbacks[input - 1];
+            sMysteryGiftLinkState.selectedFunc = callback;
+            nextState = callback(manager);
+#else
         if (input != 0) {
             sMysteryGiftLinkState.selectedFunc = (MysteryGiftMenuFunc)input;
             nextState = ((MysteryGiftMenuFunc)input)(manager);
+#endif
             if (nextState != -1) {
                 *state = nextState;
                 return;
@@ -1201,7 +1220,11 @@ static void MysteryGiftAnim_DeleteRibbons(MysteryGiftAnimData *anim) {
 
 static void MysteryGiftAnim_InitSparkles(MysteryGiftAnimData *anim) {
     MysteryGiftDelayTable delaysCopy;
+#if defined(SDK_PORT)
+    uintptr_t delayPtr;
+#else
     u32 delayPtr;
+#endif
     MysteryGiftDelayTable delays;
     VecFx32 pos;
     int i;
@@ -1209,7 +1232,11 @@ static void MysteryGiftAnim_InitSparkles(MysteryGiftAnimData *anim) {
     MysteryGiftParticle *taskData;
 
     i = 0;
+#if defined(SDK_PORT)
+    delayPtr = (uintptr_t)delaysCopy.values;
+#else
     delayPtr = (u32)delaysCopy.values;
+#endif
     taskData = &anim->sparkles[0];
     delays = sMysteryGiftSparkleDelays;
     do {

@@ -190,6 +190,12 @@ typedef struct BagApp {
     BagAppScene scene;
     BagAppButtonFeedback buttonFeedback;
     int chosenAction;
+#if defined(SDK_PORT)
+    // NitroSystem's native palette unpacker returns rotating scratch storage.
+    // Pocket colors must remain valid across later item-icon palette loads.
+    u16 pocketBgColors[2][256];
+    u16 pocketObjColors[256];
+#endif
 } BagApp;
 
 void BagApp_LoadInfoPanelTilemap(BagApp *app, int mode);

@@ -292,7 +292,12 @@ extern const u8 gPlazaGameSeatAnims[][12];
 extern const u16 gPlazaGameAltMessages[20][2];
 extern const PlazaGameBgTemplate gPlazaGameEntryBgTemplates[];
 extern const PlazaGameBgTemplate gPlazaGameResultsBgTemplates[];
+#if defined(SDK_PORT)
+#include "communication_command.h"
+extern const CommCommand gPlazaGameCommands[];
+#else
 extern const u8 gPlazaGameCommands[];
+#endif
 
 void PlazaGameRoster_Init(PlazaGameRoster *roster, u32 fromLobby, SaveData *saveData, u8 voiceChat, PlazaGameArgs *args);
 int PlazaGameRoster_GetIndexOfNetId(const PlazaGameRoster *roster, u32 netId);

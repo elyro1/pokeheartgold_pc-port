@@ -790,8 +790,13 @@ static void WobbuffetPop_CreateParticleSystem(WobbuffetPop *game) {
     void *heap;
 
     ParticleSystem_ZeroAll();
+#if defined(SDK_PORT)
+    heap = Heap_Alloc(HEAP_ID_117, PARTICLE_WORK_SIZE(0x4800));
+    game->particleSystem = ParticleSystem_New(WobbuffetPop_AllocParticleTexVram, WobbuffetPop_AllocParticlePlttVram, heap, PARTICLE_WORK_SIZE(0x4800), TRUE, HEAP_ID_117);
+#else
     heap = Heap_Alloc(HEAP_ID_117, 0x4800);
     game->particleSystem = ParticleSystem_New(WobbuffetPop_AllocParticleTexVram, WobbuffetPop_AllocParticlePlttVram, heap, 0x4800, TRUE, HEAP_ID_117);
+#endif
     Camera_SetPerspectiveClippingPlane(FX32_ONE, 900 * FX32_ONE, ParticleSystem_GetCamera(game->particleSystem));
     ParticleSystem_SetResource(game->particleSystem, ParticleSystem_LoadResourceFile(NARC_a_2_1_1, 0, HEAP_ID_117), 10, TRUE);
 }
@@ -1833,3 +1838,13 @@ static void WobbuffetPopBalloon_SetMaterial(u32 diffuseIsVertexColor, u32 useShi
     specEmi = GX_RGB(31, 31, 31) | ((useShininess != 0 ? 1 : 0) << 15);
     NNS_G3dGeBufferOP_N(G3OP_SPE_EMI, &specEmi, 1);
 }
+#if defined(SDK_PORT)
+
+const OverlayManagerTemplate sWiFiPlazaWobbuffetPopOverlayTemplate = { WobbuffetPopApp_Init, WobbuffetPopApp_Main, WobbuffetPopApp_Exit, FS_OVERLAY_ID(OVY_93) };
+
+BOOL (*const gWobbuffetPopHostSteps[3])(WobbuffetPop *game, WobbuffetPopSequence *sequence) = {
+    WobbuffetPop_HostStartGame,
+    WobbuffetPop_HostPlayGame,
+    WobbuffetPop_HostFinishGame,
+};
+#endif

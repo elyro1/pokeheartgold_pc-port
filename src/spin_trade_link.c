@@ -17,7 +17,10 @@ typedef struct SpinTradeJoinRequest {
     u8 sender, count, command, accepted;
 } SpinTradeJoinRequest;
 
+#if defined(SDK_PORT)
+#else
 u32 MATH_CountPopulation(u32 value);
+#endif
 void CommState_SetMaxEntries(int count);
 typedef void (*SpinTradeLinkPacketHandler)(int, int, void *, SpinTradeLink *);
 static BOOL SpinTradeLink_SendPacket(SpinTradeLink *link, u32 command, void *data, u32 size);

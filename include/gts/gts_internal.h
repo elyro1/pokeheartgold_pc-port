@@ -118,11 +118,21 @@ typedef struct GtsServerAnswer {
 } GtsServerAnswer;
 
 extern volatile GtsServer gGtsServer; // polled every frame (GtsServer_Update)
+#if defined(SDK_PORT)
+#else
 extern GtsFriendKey gGtsServerFriendKey;
 extern u8 gGtsServerRequest[];
+#endif
 extern GtsServerPending gGtsServerPending;
 extern volatile GtsServerAnswer gGtsServerAnswer; // written by the response callback
+#if defined(SDK_PORT)
+// The DS labels these inside gGtsServer / gGtsServerAnswer; natively they are views of those members.
+#define gGtsServerFriendKey (*(GtsFriendKey *)gGtsServer.friendKey)
+#define gGtsServerRequest ((u8 *)gGtsServer.request.bytes)
+#define gGtsServerShortResponse ((u8 *)gGtsServerAnswer.shortResponse)
+#else
 extern u8 gGtsServerShortResponse[];
+#endif
 
 // {first letter, letter count} of the letter groups ABC .. YZ.
 typedef struct GtsLetterGroup {

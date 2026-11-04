@@ -232,7 +232,15 @@ extern const GraphicsBanks gSafariDecorationGraphicsBanks;
 extern const TouchscreenHitbox gSafariDecorationListHitboxes[];
 extern const WindowTemplate gSafariDecorationWindowTemplates[];
 extern const UnmanagedSpriteTemplate gSafariDecorationSpriteTemplates[];
+#if defined(SDK_PORT)
+extern const u8 gSafariDecorationObjectGroup0[];
+extern const u8 gSafariDecorationObjectGroup1[];
+extern const u8 gSafariDecorationObjectGroup2[];
+extern const u8 gSafariDecorationObjectGroup3[];
+const SafariDecorationObjectGroup gSafariDecorationObjectGroups[];
+#else
 extern const SafariDecorationObjectGroup gSafariDecorationObjectGroups[];
+#endif
 extern const u8 gSafariDecorationTrainerGroups[][4];
 
 static void SafariDecoration_InitFromArgs(SafariDecoration *decor, SafariDecorationArgsView *args);
@@ -1473,3 +1481,17 @@ u8 SafariDecoration_GetSizeClass(u8 width, u8 height) {
     }
     return 3;
 }
+#if defined(SDK_PORT)
+
+const SafariDecorationObjectGroup gSafariDecorationObjectGroups[4] = {
+    { 6, gSafariDecorationObjectGroup0 },
+    { 6, gSafariDecorationObjectGroup1 },
+    { 6, gSafariDecorationObjectGroup2 },
+    { 6, gSafariDecorationObjectGroup3 },
+};
+
+const u8 gSafariDecorationTrainerGroups[10][4] = {
+    { 0, 1, 2, 3 }, { 0, 1, 2, 3 }, { 0, 1, 2, 3 }, { 1, 2, 3, 0 }, { 1, 2, 3, 0 },
+    { 1, 2, 3, 0 }, { 2, 3, 0, 1 }, { 2, 3, 0, 1 }, { 3, 0, 1, 2 }, { 3, 0, 1, 2 },
+};
+#endif

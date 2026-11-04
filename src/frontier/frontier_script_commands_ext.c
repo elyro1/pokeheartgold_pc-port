@@ -1163,7 +1163,11 @@ static void FrontierTransition_RowScrollTask(SysTask *task, FrontierTransitionWo
                             }
                             x %= 256;
                         }
+#if defined(SDK_PORT)
+                        G2x_SetBGyAffine_((uintptr_t)dest, &matrix, 0, 0, x, y);
+#else
                         G2x_SetBGyAffine_((u32)dest, &matrix, 0, 0, x, y);
+#endif
                     }
                     {
                         s16 x = bg3X + line->x;
@@ -1180,7 +1184,11 @@ static void FrontierTransition_RowScrollTask(SysTask *task, FrontierTransitionWo
                             }
                             x %= 256;
                         }
+#if defined(SDK_PORT)
+                        G2x_SetBGyAffine_((uintptr_t)dest + 16, &matrix, 0, 0, x, y);
+#else
                         G2x_SetBGyAffine_((u32)dest + 16, &matrix, 0, 0, x, y);
+#endif
                     }
                     j++;
                     dest += 32;
@@ -1219,7 +1227,11 @@ static void FrontierTransition_RowScrollTask(SysTask *task, FrontierTransitionWo
                             }
                             x %= 256;
                         }
+#if defined(SDK_PORT)
+                        G2x_SetBGyAffine_((uintptr_t)dest, &matrix, 0, 0, x, y);
+#else
                         G2x_SetBGyAffine_((u32)dest, &matrix, 0, 0, x, y);
+#endif
                     }
                     {
                         s16 x = bg3X + line->x;
@@ -1236,7 +1248,11 @@ static void FrontierTransition_RowScrollTask(SysTask *task, FrontierTransitionWo
                             }
                             x %= 256;
                         }
+#if defined(SDK_PORT)
+                        G2x_SetBGyAffine_((uintptr_t)dest + 16, &matrix, 0, 0, x, y);
+#else
                         G2x_SetBGyAffine_((u32)dest + 16, &matrix, 0, 0, x, y);
+#endif
                     }
                     j++;
                     dest += 32;
@@ -1661,3 +1677,15 @@ static BOOL FrtCmd_MenuSetAlignBottom(FrontierScriptContext *ctx) {
     FrontierMenu_SetAlignBottom(system->menu, ReadScriptByte(ctx));
     return TRUE;
 }
+#if defined(SDK_PORT)
+
+/* Native tables from asm/frontier_script_commands_data.s; adapters give differing originals the table's signature. */
+BOOL (*const gFrontierTransitionFuncs[6])(FrontierTransitionWork *work) = {
+    FrontierTransition_Flash,
+    FrontierTransition_FlashWipeHorizontal,
+    FrontierTransition_FlashWipeVertical,
+    FrontierTransition_RowScroll1,
+    FrontierTransition_RowScroll2,
+    FrontierTransition_Wave,
+};
+#endif

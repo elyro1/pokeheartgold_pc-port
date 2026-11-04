@@ -14,6 +14,9 @@
 #include "field_time_events.h"
 #include "heap.h"
 #include "map_object.h"
+#if defined(SDK_PORT)
+#include "map_object_behavior.h"
+#endif
 #include "map_object_behavior_internal.h"
 #include "map_object_movement_commands.h"
 #include "map_object_movement_commands_internal.h"
@@ -891,3 +894,77 @@ static BOOL TrainerApproach_Finish(TrainerApproachWork *work) {
     work->done = TRUE;
     return FALSE;
 }
+#if defined(SDK_PORT)
+
+/* Native tables from asm/map_object_behavior_data.s; adapters give differing originals the table's signature. */
+const MapObjectAction gMapObjectTypeBehaviorInits[] = {
+    TypeBehavior_NoOpInit,
+    TypeBehavior_NoOpInit,
+    TypeBehavior_NoOpInit,
+    TypeBehavior_NoOpInit,
+    TypeBehavior_LookSidewaysInit,
+    TypeBehavior_SpinInit,
+    TypeBehavior_SpinInit,
+    TypeBehavior_NoOpInit,
+    TypeBehavior_NoOpInit,
+    TypeBehavior_NoOpInit,
+    TypeBehavior_NoOpInit,
+    TypeBehavior_NoOpInit,
+};
+static BOOL Native_TypeBehavior_NoOpCheck(LocalMapObject * a0) { return (BOOL)TypeBehavior_NoOpCheck(a0); }
+const MapObjectPredicate gMapObjectTypeBehaviorChecks[] = {
+    Native_TypeBehavior_NoOpCheck,
+    Native_TypeBehavior_NoOpCheck,
+    Native_TypeBehavior_NoOpCheck,
+    Native_TypeBehavior_NoOpCheck,
+    TypeBehavior_LookSidewaysCheck,
+    TypeBehavior_SpinCheck,
+    TypeBehavior_SpinCheck,
+    Native_TypeBehavior_NoOpCheck,
+    Native_TypeBehavior_NoOpCheck,
+    Native_TypeBehavior_NoOpCheck,
+    Native_TypeBehavior_NoOpCheck,
+    Native_TypeBehavior_NoOpCheck,
+};
+static BOOL Native_TypeBehavior_NoOpUpdate(LocalMapObject * a0) { return (BOOL)TypeBehavior_NoOpUpdate(a0); }
+const MapObjectPredicate gMapObjectTypeBehaviorUpdates[] = {
+    Native_TypeBehavior_NoOpUpdate,
+    Native_TypeBehavior_NoOpUpdate,
+    Native_TypeBehavior_NoOpUpdate,
+    Native_TypeBehavior_NoOpUpdate,
+    TypeBehavior_LookSidewaysUpdate,
+    TypeBehavior_SpinUpdate,
+    TypeBehavior_SpinUpdate,
+    Native_TypeBehavior_NoOpUpdate,
+    Native_TypeBehavior_NoOpUpdate,
+    Native_TypeBehavior_NoOpUpdate,
+    Native_TypeBehavior_NoOpUpdate,
+    Native_TypeBehavior_NoOpUpdate,
+};
+const TrainerSightFunc gTrainerSightDistanceFuncs[4] = {
+    TrainerSight_GetDistanceNorth,
+    TrainerSight_GetDistanceSouth,
+    TrainerSight_GetDistanceWest,
+    TrainerSight_GetDistanceEast,
+};
+const TrainerApproachStateFunc gTrainerApproachStateFuncs[18] = {
+    TrainerApproach_UnpauseTrainer,
+    TrainerApproach_FaceDirection,
+    TrainerApproach_WaitForPlayer,
+    TrainerApproach_StartFace,
+    TrainerApproach_WaitFace,
+    TrainerApproach_SpawnExclamation,
+    TrainerApproach_WaitExclamation,
+    TrainerApproach_StartReveal,
+    TrainerApproach_WaitReveal,
+    TrainerApproach_Wait,
+    TrainerApproach_CheckDistance,
+    TrainerApproach_StartStep,
+    TrainerApproach_WaitStep,
+    TrainerApproach_WaitArrived,
+    TrainerApproach_TurnPlayer,
+    TrainerApproach_WaitPlayerTurn,
+    TrainerApproach_ResetTrainerMovement,
+    TrainerApproach_Finish,
+};
+#endif

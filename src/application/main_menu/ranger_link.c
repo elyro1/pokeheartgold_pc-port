@@ -1,6 +1,10 @@
 #include "application/main_menu/ranger_link.h"
 
+#if defined(SDK_PORT)
+#include <nitro/wm.h>
+#else
 #include <nitro/wm/wm_internal.h>
+#endif
 
 #include "global.h"
 

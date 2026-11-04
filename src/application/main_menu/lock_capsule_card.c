@@ -43,6 +43,46 @@
 // Main menu > Mystery Gift > the Lock Capsule card (the special Wonder Card, RECEIVED_WONDER_CARD_IDX): shows the
 // card and flips it between its front and back.
 struct LockCapsuleCardView {
+#if defined(SDK_PORT)
+    enum HeapID heapId;                          // 0x0000
+    u8 unk_0004[0x29F8];                         // 0x0004
+    BgConfig *bgConfig;                          // 0x29FC
+    MessageFormat *msgFormat;                    // 0x2A00
+    MsgData *msgData;                            // 0x2A04
+    Window windows[11];                          // 0x2A08, card text boxes (gLockCapsuleCardTextBoxes)
+    u8 unk_2AB8[0x90];                           // 0x2AB8
+    u32 baseTiles[11];                           // 0x2B48
+    u8 unk_2B74[0x24];                           // 0x2B74
+    u32 boxBaseTile;                             // 0x2B98, of the text box LockCapsuleCard_PrintTextBox is printing
+    const WonderCardTextBox *box;                // 0x2B9C, the text box LockCapsuleCard_PrintTextBox is printing
+    MysteryGiftSave *mysteryGift;                // 0x2BA0
+    SaveData *saveData;                          // 0x2BA4
+    Options *options;                            // 0x2BA8
+    int frame;                                   // 0x2BAC
+    u32 unk_2BB0;                                // 0x2BB0
+    WonderCard *card;                            // 0x2BB4
+    int page;                                    // 0x2BB8
+    struct ListMenu *listMenu;                   // 0x2BBC
+    ListMenuItem *listMenuItems;                 // 0x2BC0
+    Window messageWindow;                        // 0x2BC4
+    Window menuWindow;                           // 0x2BD4
+    int menuBaseTile;                            // 0x2BE4
+    u8 unk_2BE8[0xC];                            // 0x2BE8
+    u32 unk_2BF4;                                // 0x2BF4
+    int nextState;                               // 0x2BF8
+    SpriteList *spriteList;                      // 0x2BFC
+    u8 unk_2C00[0x17C];                          // 0x2C00
+    Sprite *buttonSprites[2];                    // 0x2D7C
+    Sprite *monIconSprites[3];                   // 0x2D84
+    u8 unk_2D90[sizeof(WonderCard)];             // 0x2D90
+    WonderCardFlipEffect flipEffect;             // 0x30E8
+    void (*callback)(LockCapsuleCardView *view); // 0x3D00, run every frame while set
+    int selection;                               // 0x3D04
+    WaitingIcon *waitingIcon;                    // 0x3D08
+    MysteryGiftMenuFunc nativeMenuCallbacks[4];
+    int nativeMenuCount;
+}; // size: 0x3D0C
+#else
     enum HeapID heapId;
     u8 unk_0004[0x29F8];
     BgConfig *bgConfig;
@@ -79,7 +119,12 @@ struct LockCapsuleCardView {
     int selection;
     WaitingIcon *waitingIcon;
 };
+#endif
 
+#if defined(SDK_PORT)
+// Declared here rather than through font.h / text.h: the card screens pass the u32 font ids of their text box
+// tables unconverted (those headers type them as the u8 FontID; matching).
+#endif
 extern void ResetAllTextPrinters(void);
 extern u8 AddTextPrinterParameterizedWithColor(Window *window, u32 fontId, String *string, u32 x, u32 y, u32 textSpeed, u32 color, void *callback);
 
@@ -284,10 +329,19 @@ static void LockCapsuleCard_CreateListMenu(LockCapsuleCardView *view, const Myst
     if (view->listMenu != NULL) {
         DestroyListMenu(view->listMenu, NULL, NULL);
     }
+#if defined(SDK_PORT)
+    GF_ASSERT(count >= 0 && count <= NELEMS(view->nativeMenuCallbacks));
+    view->nativeMenuCount = count;
+#endif
     view->listMenuItems = ListMenuItems_New(count, HEAP_ID_85);
     view->msgData = NewMsgDataFromNarc(MSGDATA_LOAD_DIRECT, NARC_msgdata_msg, NARC_msg_msg_0247_bin, HEAP_ID_85);
     for (i = 0; i < count; i++) {
+#if defined(SDK_PORT)
+        view->nativeMenuCallbacks[i] = items[i].func;
+        ListMenuItems_AppendFromMsgData(view->listMenuItems, view->msgData, items[i].msgId, i + 1);
+#else
         ListMenuItems_AppendFromMsgData(view->listMenuItems, view->msgData, items[i].msgId, (int)items[i].func);
+#endif
     }
     DestroyMsgData(view->msgData);
     template = sLockCapsuleCardListMenuTemplate;
@@ -495,13 +549,21 @@ static void LockCapsuleCard_HandleListMenuInput(OverlayManager *manager, int *st
         if (input == 0) {
             break;
         }
+#if defined(SDK_PORT)
+        if (input > view->nativeMenuCount || view->nativeMenuCallbacks[input - 1] == NULL) break;
+#else
         // small values are states, the others menu functions
         if (input < 31) {
             *state = input;
             break;
         }
+#endif
         sLockCapsuleCardMenuInput = input;
+#if defined(SDK_PORT)
+        nextState = view->nativeMenuCallbacks[input - 1](manager);
+#else
         nextState = ((MysteryGiftMenuFunc)input)(manager);
+#endif
         if (nextState != -1) {
             *state = nextState;
         }
@@ -899,3 +961,27 @@ enum MysteryGiftCheckResult MysteryGift_CheckCanReceive(SaveData *saveData, Wond
     }
     return MYSTERY_GIFT_CHECK_OK;
 }
+#if defined(SDK_PORT)
+
+/* Native pointer tables from the corresponding DS data. */
+static BOOL Native_LockCapsuleCard_PrintMessageOnly(void *view, Window *window, u32 color) { return LockCapsuleCard_PrintMessageOnly(); }
+static BOOL Native_LockCapsuleCard_PrintCardTitle(void *view, Window *window, u32 color) { return LockCapsuleCard_PrintCardTitle(view, window, color); }
+static BOOL Native_LockCapsuleCard_PrintStatus(void *view, Window *window, u32 color) { return LockCapsuleCard_PrintStatus(view, window, color); }
+static BOOL Native_LockCapsuleCard_BufferReceiveDate(void *view, Window *window, u32 color) { return LockCapsuleCard_BufferReceiveDate(view); }
+static BOOL Native_LockCapsuleCard_PrintCardText(void *view, Window *window, u32 color) { return LockCapsuleCard_PrintCardText(view, window, color); }
+static BOOL Native_LockCapsuleCard_PrintNothing(void *view, Window *window, u32 color) { return LockCapsuleCard_PrintNothing(); }
+static BOOL Native_LockCapsuleCard_ShowCardMenu(void *view, Window *window, u32 color) { return LockCapsuleCard_ShowCardMenu(view, window, color); }
+const WonderCardTextBox gLockCapsuleCardTextBoxes[11] = {
+    {0, 2, 2, 0xC, 2, 1, 0x00010200, -1, 0x25, Native_LockCapsuleCard_PrintMessageOnly, 0, 0},
+    {0, 6, 0x11, 0xB, 2, 1, 0x000F0200, -1, 0x29, Native_LockCapsuleCard_PrintMessageOnly, 0, 0},
+    {0, 2, 9, 0x1C, 4, 1, 0x00010200, -1, 0, Native_LockCapsuleCard_PrintStatus, 0, 0},
+    {0, 2, 6, 0x1C, 2, 1, 0x000F0200, -1, 0, Native_LockCapsuleCard_PrintCardTitle, 0, 0},
+    {0, 0x12, 0x11, 0xB, 2, 1, 0x00010200, -1, 0x32, Native_LockCapsuleCard_BufferReceiveDate, 0, 0},
+    {1, 2, 3, 0x1C, 0xA, 1, 0x00010200, -1, 0, Native_LockCapsuleCard_PrintCardText, 0, 0},
+    {1, 2, 0xE, 0x1C, 4, 1, 0x00010200, -1, 0x2A, Native_LockCapsuleCard_PrintNothing, 0, 0},
+    {2, 2, 0x13, 0x1B, 4, 1, 0x00010200, 0xF, 0x25, Native_LockCapsuleCard_PrintMessageOnly, 0, 0},
+    {2, 0x12, 9, 0xC, 4, 1, 0x00010200, 5, 0, Native_LockCapsuleCard_ShowCardMenu, 0, 0},
+    {2, 0x18, 0xD, 6, 4, 1, 0x00010200, 5, 0, 0, 0, 0},
+    {2, 0x18, 0xD, 6, 4, 1, 0x00010200, 5, 0, 0, 0, 0}
+};
+#endif

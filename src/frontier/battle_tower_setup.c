@@ -146,7 +146,11 @@ static u32 BattleTower_PickTrainerMonSets(FrontierFieldSystem *tower, FrontierTr
 }
 
 void BattleTower_GetRoomTrainer(SaveData *saveData, FrontierTrainer *trainer, int index) {
+#if defined(SDK_PORT)
+    void *download;
+#else
     u32 download;
+#endif
 
     MI_CpuFill8(trainer, 0, sizeof(FrontierTrainer));
     download = Save_BattleRoomDownload_Get(saveData);

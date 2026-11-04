@@ -52,7 +52,12 @@ u32 GetMoveTblAttr(MoveTbl *moveTbl, MoveAttr attr) {
     case MOVEATTR_CONTEST_TYPE:
         return moveTbl->contestType;
     default:
+#if defined(SDK_PORT)
+        GF_ASSERT(FALSE);
+        return 0;
+#else
         return (u32)moveTbl;
+#endif
     }
 }
 

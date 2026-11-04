@@ -805,3 +805,25 @@ BOOL PokedexApp_WeightAnim_Throw8(PokedexWeightCheckAnim *anim) {
     }
     return TRUE;
 }
+#if defined(SDK_PORT)
+
+BOOL (*const gWeightCheckAnimFuncs[])(PokedexWeightCheckAnim *anim) = {
+    PokedexApp_WeightAnim_Even,
+    PokedexApp_WeightAnim_Tip1,
+    PokedexApp_WeightAnim_Tip2,
+    PokedexApp_WeightAnim_Tip3,
+    PokedexApp_WeightAnim_Tip4,
+    PokedexApp_WeightAnim_Tip5,
+    PokedexApp_WeightAnim_Tip6,
+    PokedexApp_WeightAnim_Tip7,
+    PokedexApp_WeightAnim_TipToStop,
+    PokedexApp_WeightAnim_Throw1,
+    PokedexApp_WeightAnim_Throw2,
+    PokedexApp_WeightAnim_Throw3,
+    PokedexApp_WeightAnim_Throw4,
+    PokedexApp_WeightAnim_Throw5,
+    PokedexApp_WeightAnim_Throw6,
+    PokedexApp_WeightAnim_Throw7,
+    PokedexApp_WeightAnim_Throw8,
+};
+#endif

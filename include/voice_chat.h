@@ -3,6 +3,9 @@
 
 #include "global.h"
 
+#if defined(SDK_PORT)
+typedef struct VoiceChatWork VoiceChatWork;
+#else
 #include "nnsys/snd_internal.h"
 #include "vct/vct_session.h"
 
@@ -42,6 +45,7 @@ typedef struct VoiceChatWork {
     u16 unk_1A8C[16];
     u32 unk_1AAC;
 } VoiceChatWork;
+#endif
 
 typedef struct VoiceChat {
     s32 frameBudget; // in 1/64000 s units of VCT_Main calls still owed
@@ -50,6 +54,10 @@ typedef struct VoiceChat {
 } VoiceChat;
 
 extern VoiceChat gVoiceChat;
+#if defined(SDK_PORT)
+extern VoiceChatWork *gVoiceChatWork;
+static inline BOOL VoiceChat_IsAvailable(void) { return FALSE; }
+#endif
 
 void VoiceChat_Update(void);
 BOOL VoiceChat_ReceiveData(u32 aid, void *data, u32 size);

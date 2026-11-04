@@ -1,5 +1,11 @@
 #include "global.h"
 
+#if defined(SDK_PORT)
+#include "main.h"
+#include "port/layer_scroll.h"
+#include "port/sim_config_prj.h"
+#endif
+
 #include "demo/opening/gs_opening.naix"
 
 #include "gf_gfx_loader.h"
@@ -36,6 +42,13 @@ static void IntroMovie_Scene2_DeleteSprites(IntroMovieOverlayData *data, IntroMo
 static void IntroMovie_Scene2_CreateSprites(IntroMovieOverlayData *data, IntroMovieScene2Data *sceneData);
 static void IntroMovie_Scene2_StartSpritePanEffect(IntroMovieScene2Data *sceneData, int whichSprites, int xSpeed, int ySpeed, int duration);
 static BOOL IntroMovie_Scene2_WaitSpritePanEffect(IntroMovieScene2Data *sceneData, int whichSprites);
+static int IntroMovie_Scene2_PanDuration(IntroMovieScene2Data *sceneData, int duration) {
+#if defined(SDK_PORT)
+    if (sceneData->smoothPan) return duration * 2;
+#endif
+    return duration;
+}
+
 static void Task_IntroMovie_Scene2_SpritePan(SysTask *task, void *pVoid);
 
 static const int sIntroMovie_Scene2_FlowerSpriteAppearTiming[10] = {
@@ -78,9 +91,46 @@ BOOL IntroMovie_Scene2(IntroMovieOverlayData *data, void *pVoid) {
     return FALSE;
 }
 
+#if defined(SDK_PORT)
+static void IntroMovie_Scene2_UpdateScroll(IntroMovieOverlayData *data) {
+    // Both trainers pan together. Keep the OAM tile assembly intact and apply
+    // its shared fractional translation when compositing the OBJ layer.
+    VecFx32 *position = Sprite_GetMatrixPtr(data->scene2Data.ethanSprite0);
+    SIM_Set2DLayerOffset(0, 4, -(position->x & (FX32_ONE - 1)),
+        -(position->y & (FX32_ONE - 1)));
+}
+
+static void IntroMovie_Scene2_UpdateBgScroll(IntroMovieOverlayData *data) {
+    for (int layer = 0; layer < 2; ++layer) {
+        IntroMovieBgScrollAnim *anim = &data->bgAnimCnt.scroll[layer];
+        if (anim->duration <= 0) continue;
+        fx32 x = (s64)anim->xChange * FX32_ONE * anim->counter / anim->duration;
+        fx32 y = (s64)anim->yChange * FX32_ONE * anim->counter / anim->duration;
+        // Background tasks truncate the signed displacement toward zero.
+        SIM_Set2DLayerOffset(0, layer, x - x / FX32_ONE * FX32_ONE,
+            y - y / FX32_ONE * FX32_ONE);
+    }
+}
+
+static void IntroMovie_Scene2_ResetScroll(void) {
+    for (int layer = 0; layer < 5; ++layer) SIM_Set2DLayerOffset(0, layer, 0, 0);
+}
+#endif
+
 static void IntroMovie_Scene2_VBlankCB(void *pVoid) {
     IntroMovieOverlayData *data = (IntroMovieOverlayData *)pVoid;
     DoScheduledBgGpuUpdates(IntroMovie_GetBgConfig(data));
+#if defined(SDK_PORT)
+    if (data->scene2Data.smoothPan) {
+        // Submit OAM and its sampling residual together. Setting the residual
+        // in the overlay update pairs it with the previous frame's hardware
+        // OAM until VBlank, causing a backwards jump at pixel boundaries.
+        // Movement tasks have now advanced both sprites and backgrounds.
+        IntroMovie_Scene2_UpdateBgScroll(data);
+        IntroMovie_Scene2_UpdateScroll(data);
+        SpriteList_RenderAndAnimateSprites(data->spriteList);
+    }
+#endif
     OamManager_ApplyAndResetBuffers();
 }
 
@@ -107,6 +157,11 @@ static void IntroMovie_Scene2_InitFlyoverGrassBgScrollAnims(IntroMovieOverlayDat
     IntroMovieBgLinearAnims *bgAnimCnt = IntroMovie_GetBgLinearAnimsController(data);
     IntroMovie_StartBgScroll_VBlank(bgConfig, bgAnimCnt->scroll, GF_BG_LYR_MAIN_1, 0, 0x140, 0);
     IntroMovie_StartBgScroll_VBlank(bgConfig, bgAnimCnt->scroll, GF_BG_LYR_MAIN_0, 0, 0xC0, 0);
+#if defined(SDK_PORT)
+    // The PC screens touch: continue the upper grass map at scanline 192.
+    // Both layers then advance by the same amount on every VBlank.
+    BgSetPosTextAndCommit(bgConfig, GF_BG_LYR_SUB_0, BG_POS_OP_SET_Y, 192);
+#endif
     IntroMovie_StartBgScroll_VBlank(bgConfig, bgAnimCnt->scroll, GF_BG_LYR_MAIN_2, 0, 0x40, -1);
     IntroMovie_StartBgScroll_VBlank(bgConfig, bgAnimCnt->scroll, GF_BG_LYR_SUB_0, 0, 0x40, -1);
 }
@@ -127,8 +182,8 @@ static BOOL IntroMovie_Scene2_Main(IntroMovieOverlayData *data, IntroMovieScene2
             ++sceneData->flowerIndex;
         }
         if (stepTimer > 55) {
-            IntroMovie_StartBgScroll_NotVBlank(bgConfig, bgAnimCnt->scroll, GF_BG_LYR_MAIN_1, 0, -0xC0, 5);
-            IntroMovie_StartBgScroll_NotVBlank(bgConfig, bgAnimCnt->scroll, GF_BG_LYR_MAIN_0, 0, -0xC0, 5);
+            IntroMovie_StartBgScroll_NotVBlank(bgConfig, bgAnimCnt->scroll, GF_BG_LYR_MAIN_1, 0, -0xC0, IntroMovie_Scene2_PanDuration(sceneData, 5));
+            IntroMovie_StartBgScroll_NotVBlank(bgConfig, bgAnimCnt->scroll, GF_BG_LYR_MAIN_0, 0, -0xC0, IntroMovie_Scene2_PanDuration(sceneData, 5));
             IntroMovie_Scene2_StartSpritePanEffect(sceneData, 0, 0, 0xC0, 5);
             IntroMovie_Scene2_StartSpritePanEffect(sceneData, 1, 0, 0xC0, 5);
             BeginNormalPaletteFade(FADE_SUB_ONLY, FADE_TYPE_BRIGHTNESS_OUT, FADE_TYPE_BRIGHTNESS_OUT, RGB_BLACK, 8, 1, HEAP_ID_INTRO_MOVIE);
@@ -137,8 +192,13 @@ static BOOL IntroMovie_Scene2_Main(IntroMovieOverlayData *data, IntroMovieScene2
         break;
     case INTRO_SCENE2_START_SLOW_PAN_ETHAN:
         if (IntroMovie_WaitBgScrollAnim(bgAnimCnt->scroll, GF_BG_LYR_MAIN_1) && IntroMovie_WaitBgScrollAnim(bgAnimCnt->scroll, GF_BG_LYR_MAIN_0) && IntroMovie_Scene2_WaitSpritePanEffect(sceneData, 0) && IntroMovie_Scene2_WaitSpritePanEffect(sceneData, 1) && IsPaletteFadeFinished()) {
-            IntroMovie_StartBgScroll_NotVBlank(bgConfig, bgAnimCnt->scroll, GF_BG_LYR_MAIN_1, 0x20, 0, 0x5A);
-            IntroMovie_StartBgScroll_NotVBlank(bgConfig, bgAnimCnt->scroll, GF_BG_LYR_MAIN_0, 0x20, 0, 0x5A);
+#if defined(SDK_PORT)
+            sceneData->smoothPan = SIM_Config_prj_GetConfig()->enable60fps;
+            sceneData->halfFrame = FALSE;
+            if (sceneData->smoothPan) Main_SetForce30Hz(FALSE);
+#endif
+            IntroMovie_StartBgScroll_NotVBlank(bgConfig, bgAnimCnt->scroll, GF_BG_LYR_MAIN_1, 0x20, 0, IntroMovie_Scene2_PanDuration(sceneData, 0x5A));
+            IntroMovie_StartBgScroll_NotVBlank(bgConfig, bgAnimCnt->scroll, GF_BG_LYR_MAIN_0, 0x20, 0, IntroMovie_Scene2_PanDuration(sceneData, 0x5A));
             IntroMovie_Scene2_StartSpritePanEffect(sceneData, 0, -0x20, 0, 0x5A);
             IntroMovie_Scene2_StartSpritePanEffect(sceneData, 1, -0x20, 0, 0x5A);
             IntroMovie_AdvanceSceneStep(data);
@@ -146,8 +206,8 @@ static BOOL IntroMovie_Scene2_Main(IntroMovieOverlayData *data, IntroMovieScene2
         break;
     case INTRO_SCENE2_SLOW_PAN_ETHAN:
         if (IntroMovie_WaitBgScrollAnim(bgAnimCnt->scroll, GF_BG_LYR_MAIN_1) && IntroMovie_WaitBgScrollAnim(bgAnimCnt->scroll, GF_BG_LYR_MAIN_0) && IntroMovie_Scene2_WaitSpritePanEffect(sceneData, 0) && IntroMovie_Scene2_WaitSpritePanEffect(sceneData, 1)) {
-            IntroMovie_StartBgScroll_NotVBlank(bgConfig, bgAnimCnt->scroll, GF_BG_LYR_MAIN_1, 0x40, 0, 7);
-            IntroMovie_StartBgScroll_NotVBlank(bgConfig, bgAnimCnt->scroll, GF_BG_LYR_MAIN_0, 0x40, 0, 7);
+            IntroMovie_StartBgScroll_NotVBlank(bgConfig, bgAnimCnt->scroll, GF_BG_LYR_MAIN_1, 0x40, 0, IntroMovie_Scene2_PanDuration(sceneData, 7));
+            IntroMovie_StartBgScroll_NotVBlank(bgConfig, bgAnimCnt->scroll, GF_BG_LYR_MAIN_0, 0x40, 0, IntroMovie_Scene2_PanDuration(sceneData, 7));
             IntroMovie_Scene2_StartSpritePanEffect(sceneData, 0, -0x40, 0, 7);
             IntroMovie_Scene2_StartSpritePanEffect(sceneData, 1, -0x40, 0, 7);
             IntroMovie_AdvanceSceneStep(data);
@@ -155,8 +215,8 @@ static BOOL IntroMovie_Scene2_Main(IntroMovieOverlayData *data, IntroMovieScene2
         break;
     case INTRO_SCENE2_FAST_PAN_TO_LYRA:
         if (IntroMovie_WaitBgScrollAnim(bgAnimCnt->scroll, GF_BG_LYR_MAIN_1) && IntroMovie_WaitBgScrollAnim(bgAnimCnt->scroll, GF_BG_LYR_MAIN_0) && IntroMovie_Scene2_WaitSpritePanEffect(sceneData, 0) && IntroMovie_Scene2_WaitSpritePanEffect(sceneData, 1)) {
-            IntroMovie_StartBgScroll_NotVBlank(bgConfig, bgAnimCnt->scroll, GF_BG_LYR_MAIN_1, 0x20, 0, 0x42);
-            IntroMovie_StartBgScroll_NotVBlank(bgConfig, bgAnimCnt->scroll, GF_BG_LYR_MAIN_0, 0x20, 0, 0x42);
+            IntroMovie_StartBgScroll_NotVBlank(bgConfig, bgAnimCnt->scroll, GF_BG_LYR_MAIN_1, 0x20, 0, IntroMovie_Scene2_PanDuration(sceneData, 0x42));
+            IntroMovie_StartBgScroll_NotVBlank(bgConfig, bgAnimCnt->scroll, GF_BG_LYR_MAIN_0, 0x20, 0, IntroMovie_Scene2_PanDuration(sceneData, 0x42));
             IntroMovie_Scene2_StartSpritePanEffect(sceneData, 0, -0x20, 0, 0x42);
             IntroMovie_Scene2_StartSpritePanEffect(sceneData, 1, -0x20, 0, 0x42);
             IntroMovie_AdvanceSceneStep(data);
@@ -164,8 +224,8 @@ static BOOL IntroMovie_Scene2_Main(IntroMovieOverlayData *data, IntroMovieScene2
         break;
     case INTRO_SCENE2_SLOW_PAN_LYRA:
         if (IntroMovie_WaitBgScrollAnim(bgAnimCnt->scroll, GF_BG_LYR_MAIN_1) && IntroMovie_WaitBgScrollAnim(bgAnimCnt->scroll, GF_BG_LYR_MAIN_0) && IntroMovie_Scene2_WaitSpritePanEffect(sceneData, 0) && IntroMovie_Scene2_WaitSpritePanEffect(sceneData, 1)) {
-            IntroMovie_StartBgScroll_NotVBlank(bgConfig, bgAnimCnt->scroll, GF_BG_LYR_MAIN_1, 0, -0x80, 10);
-            IntroMovie_StartBgScroll_NotVBlank(bgConfig, bgAnimCnt->scroll, GF_BG_LYR_MAIN_0, 0, -0x40, 5);
+            IntroMovie_StartBgScroll_NotVBlank(bgConfig, bgAnimCnt->scroll, GF_BG_LYR_MAIN_1, 0, -0x80, IntroMovie_Scene2_PanDuration(sceneData, 10));
+            IntroMovie_StartBgScroll_NotVBlank(bgConfig, bgAnimCnt->scroll, GF_BG_LYR_MAIN_0, 0, -0x40, IntroMovie_Scene2_PanDuration(sceneData, 5));
             IntroMovie_Scene2_StartSpritePanEffect(sceneData, 0, 0, 0x80, 10);
             IntroMovie_Scene2_StartSpritePanEffect(sceneData, 1, 0, 0x80, 10);
             IntroMovie_AdvanceSceneStep(data);
@@ -173,6 +233,12 @@ static BOOL IntroMovie_Scene2_Main(IntroMovieOverlayData *data, IntroMovieScene2
         break;
     case INTRO_SCENE2_CIRCLE_WIPE_OUT:
         if (IntroMovie_WaitBgScrollAnim(bgAnimCnt->scroll, GF_BG_LYR_MAIN_1) && IntroMovie_WaitBgScrollAnim(bgAnimCnt->scroll, GF_BG_LYR_MAIN_0) && IntroMovie_Scene2_WaitSpritePanEffect(sceneData, 0) && IntroMovie_Scene2_WaitSpritePanEffect(sceneData, 1)) {
+#if defined(SDK_PORT)
+            IntroMovie_Scene2_ResetScroll();
+            sceneData->smoothPan = FALSE;
+            sceneData->halfFrame = FALSE;
+            Main_SetForce30Hz(TRUE);
+#endif
             IntroMovie_BeginCircleWipeEffect(data, 1, 1, 8);
             IntroMovie_AdvanceSceneStep(data);
         }
@@ -193,6 +259,12 @@ static void IntroMovie_Scene2_Exit(IntroMovieOverlayData *data, IntroMovieScene2
 
     bgAnimCnt = IntroMovie_GetBgLinearAnimsController(data);
     bgConfig = IntroMovie_GetBgConfig(data);
+#if defined(SDK_PORT)
+    IntroMovie_Scene2_ResetScroll();
+    sceneData->smoothPan = FALSE;
+    sceneData->halfFrame = FALSE;
+    Main_SetForce30Hz(TRUE);
+#endif
     Main_SetVBlankIntrCB(NULL, NULL);
     if (sceneData->needFreeGfx) {
         for (u8 i = 0; i < 2; ++i) {
@@ -262,6 +334,13 @@ static void IntroMovie_Scene2_LoadBgGfx(BgConfig *bgConfig) {
     GfGfxLoader_LoadScrnData(NARC_demo_opening_gs_opening, NARC_gs_opening_gs_opening_00000038_NSCR_lz, bgConfig, GF_BG_LYR_MAIN_0, 0, 0, TRUE, HEAP_ID_INTRO_MOVIE);
     GfGfxLoader_GXLoadPal(NARC_demo_opening_gs_opening, NARC_gs_opening_gs_opening_00000032_NCLR, GF_PAL_LOCATION_MAIN_BG, (enum GFPalSlotOffset)0, 0x80, HEAP_ID_INTRO_MOVIE);
     GfGfxLoader_GXLoadPal(NARC_demo_opening_gs_opening, NARC_gs_opening_gs_opening_00000031_NCLR, GF_PAL_LOCATION_SUB_BG, (enum GFPalSlotOffset)0, 0x80, HEAP_ID_INTRO_MOVIE);
+#if defined(SDK_PORT)
+    // Use one repeating grass texture across both screens instead of the
+    // separate lower-screen artwork composed for the DS hinge gap.
+    GfGfxLoader_LoadCharData(NARC_demo_opening_gs_opening, NARC_gs_opening_gs_opening_00000033_NCGR_lz, bgConfig, GF_BG_LYR_SUB_0, 0, 0, TRUE, HEAP_ID_INTRO_MOVIE);
+    GfGfxLoader_LoadScrnData(NARC_demo_opening_gs_opening, NARC_gs_opening_gs_opening_00000035_NSCR_lz, bgConfig, GF_BG_LYR_SUB_0, 0, 0, TRUE, HEAP_ID_INTRO_MOVIE);
+    GfGfxLoader_GXLoadPal(NARC_demo_opening_gs_opening, NARC_gs_opening_gs_opening_00000032_NCLR, GF_PAL_LOCATION_SUB_BG, (enum GFPalSlotOffset)0, 0x80, HEAP_ID_INTRO_MOVIE);
+#endif
     OS_WaitIrq(TRUE, OS_IE_V_BLANK);
     GfGfx_BothDispOn();
 }
@@ -378,7 +457,7 @@ static void IntroMovie_Scene2_StartSpritePanEffect(IntroMovieScene2Data *sceneDa
     }
     GF_ASSERT(!spritePanEffect->active);
     spritePanEffect->active = TRUE;
-    spritePanEffect->duration = duration;
+    spritePanEffect->duration = IntroMovie_Scene2_PanDuration(sceneData, duration);
     spritePanEffect->counter = 0;
     spritePanEffect->finished = 0;
     VecFx32 *mtx = Sprite_GetMatrixPtr(spritePanEffect->sprite0);
@@ -411,18 +490,26 @@ static void Task_IntroMovie_Scene2_SpritePan(SysTask *task, void *pVoid) {
     IntroMovieScene2SpritePanController *spritePanCnt = (IntroMovieScene2SpritePanController *)pVoid;
     VecFx32 position = { 0, 0, 0 };
     ++spritePanCnt->counter;
+#if defined(SDK_PORT)
+    // Preserve fractions throughout the slow pan instead of stepping by pixels.
+    position.x = spritePanCnt->xOffset * FX32_ONE +
+        (s64)spritePanCnt->xSpeed * FX32_ONE * spritePanCnt->counter / spritePanCnt->duration;
+    position.y = spritePanCnt->yOffset * FX32_ONE +
+        (s64)spritePanCnt->ySpeed * FX32_ONE * spritePanCnt->counter / spritePanCnt->duration;
+#else
     int x = spritePanCnt->xSpeed * spritePanCnt->counter / spritePanCnt->duration;
     int y = spritePanCnt->ySpeed * spritePanCnt->counter / spritePanCnt->duration;
     x += spritePanCnt->xOffset;
     y += spritePanCnt->yOffset;
+    position.x = x * FX32_ONE;
+    position.y = y * FX32_ONE;
+#endif
     if (spritePanCnt->counter >= spritePanCnt->duration) {
         SysTask_Destroy(spritePanCnt->task);
         spritePanCnt->task = NULL;
         spritePanCnt->finished = TRUE;
         spritePanCnt->active = FALSE;
     }
-    position.x = x * FX32_ONE;
-    position.y = y * FX32_ONE;
     Sprite_SetMatrix(spritePanCnt->sprite0, &position);
     Sprite_SetMatrix(spritePanCnt->sprite1, &position);
     Sprite_SetMatrix(spritePanCnt->sprite2, &position);

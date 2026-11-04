@@ -1,6 +1,10 @@
 #include "wifi_setup/wifi_setup_ui_parts.h"
 
+#if defined(SDK_PORT)
+#include <nitro/wm.h>
+#else
 #include <nitro/wm/wm_internal.h>
+#endif
 #include <string.h>
 
 #include "global.h"

@@ -952,3 +952,43 @@ static void WiFiPlazaEvent_UpdateMoverMarkers(WiFiPlazaEventMovers *work, int in
         }
     }
 }
+#if defined(SDK_PORT)
+
+/* Native pointer tables from the corresponding DS data. */
+static void Native_WiFiPlazaEventEffect_UpdateNone(WiFiPlazaEventEffect *effect, int arg) { WiFiPlazaEventEffect_UpdateNone(effect, (u32)arg); }
+static void Native_WiFiPlazaEventEffect_UpdatePhase2(WiFiPlazaEventEffect *effect, int arg) { WiFiPlazaEventEffect_UpdatePhase2(effect, (u32)arg); }
+static void Native_WiFiPlazaEventEffect_UpdatePhase3(WiFiPlazaEventEffect *effect, int arg) { WiFiPlazaEventEffect_UpdatePhase3(effect, (u32)arg); }
+static void Native_WiFiPlazaEventEffect_UpdatePhase4(WiFiPlazaEventEffect *effect, int arg) { WiFiPlazaEventEffect_UpdatePhase4(effect, (u32)arg); }
+static void Native_WiFiPlazaEventEffect_UpdatePhase5(WiFiPlazaEventEffect *effect, int arg) { WiFiPlazaEventEffect_UpdatePhase5(effect, (u32)arg); }
+void (*const gWiFiPlazaEventEffectPhaseUpdates[])(WiFiPlazaEventEffect *effect, int arg) = {
+    Native_WiFiPlazaEventEffect_UpdateNone,
+    Native_WiFiPlazaEventEffect_UpdateNone,
+    Native_WiFiPlazaEventEffect_UpdatePhase2,
+    Native_WiFiPlazaEventEffect_UpdatePhase3,
+    Native_WiFiPlazaEventEffect_UpdatePhase4,
+    Native_WiFiPlazaEventEffect_UpdatePhase5
+};
+static void Native_WiFiPlazaEventEffect_StartHideProps(WiFiPlazaEventEffect *effect, u32 arg) { WiFiPlazaEventEffect_StartHideProps(effect); }
+static void Native_WiFiPlazaEventEffect_StartPhase2(WiFiPlazaEventEffect *effect, u32 arg) { WiFiPlazaEventEffect_StartPhase2(effect); }
+static void Native_WiFiPlazaEventEffect_StartPhase3(WiFiPlazaEventEffect *effect, u32 arg) { WiFiPlazaEventEffect_StartPhase3(effect); }
+static void Native_WiFiPlazaEventEffect_StartPhase4(WiFiPlazaEventEffect *effect, u32 arg) { WiFiPlazaEventEffect_StartPhase4(effect); }
+static void Native_WiFiPlazaEventEffect_StartPhase5(WiFiPlazaEventEffect *effect, u32 arg) { WiFiPlazaEventEffect_StartPhase5(effect); }
+void (*const gWiFiPlazaEventEffectPhaseStarts[])(WiFiPlazaEventEffect *effect, u32 arg) = {
+    Native_WiFiPlazaEventEffect_StartHideProps,
+    Native_WiFiPlazaEventEffect_StartHideProps,
+    Native_WiFiPlazaEventEffect_StartPhase2,
+    Native_WiFiPlazaEventEffect_StartPhase3,
+    Native_WiFiPlazaEventEffect_StartPhase4,
+    Native_WiFiPlazaEventEffect_StartPhase5
+};
+BOOL (*const gWiFiPlazaEventWobbleSteps[])(WiFiPlazaEventWobble *wobble, WiFiPlazaModels *models, int index) = {
+    WiFiPlazaEventWobble_Step,
+    WiFiPlazaEventWobble_Step
+};
+static BOOL Native_WiFiPlazaEventWobble_InitSmall(WiFiPlazaEventWobble *wobble, WiFiPlazaModels *models, int index) { WiFiPlazaEventWobble_InitSmall(wobble); return TRUE; }
+static BOOL Native_WiFiPlazaEventWobble_InitLarge(WiFiPlazaEventWobble *wobble, WiFiPlazaModels *models, int index) { WiFiPlazaEventWobble_InitLarge(wobble); return TRUE; }
+BOOL (*const gWiFiPlazaEventWobbleInits[])(WiFiPlazaEventWobble *wobble, WiFiPlazaModels *models, int index) = {
+    Native_WiFiPlazaEventWobble_InitSmall,
+    Native_WiFiPlazaEventWobble_InitLarge
+};
+#endif

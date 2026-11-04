@@ -9,7 +9,11 @@
 #define BUTTONMODE_SWAPXY       2
 #define BUTTONMODE_LEQUALSA     3
 
+#if defined(SDK_PORT)
+#define OFFSET_OF(p_type, field) __builtin_offsetof(__typeof__(*(p_type)0), field)
+#else
 #define OFFSET_OF(p_type, field) ((u32) & (((p_type)NULL)->field))
+#endif
 
 typedef void (*GFIntrCB)(void *);
 

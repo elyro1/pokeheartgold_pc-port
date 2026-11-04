@@ -5,7 +5,10 @@
 #include "gf_gfx_loader.h"
 #include "location_gmm_dat.h"
 
+#if defined(SDK_PORT)
+#else
 static void WiFiPlaza_GetLongitude(NARC *narc, enum HeapID heapID, int country, u16 region, s32 *longitude);
+#endif
 
 // Local time of a player's country / region: `time` shifted by the longitude difference to country 219 region 3.
 WiFiPlazaTime WiFiPlaza_GetLocalTime(int country, u16 region, u32 time, enum HeapID heapID) {
@@ -33,7 +36,11 @@ WiFiPlazaTime WiFiPlaza_GetLocalTime(int country, u16 region, u32 time, enum Hea
 }
 
 // Longitude (y angle) of a country (file 18 of the earth place NARC) or, for countries with regions, of a region.
+#if defined(SDK_PORT)
+void WiFiPlaza_GetLongitude(NARC *narc, enum HeapID heapID, int country, u16 region, s32 *longitude) {
+#else
 static void WiFiPlaza_GetLongitude(NARC *narc, enum HeapID heapID, int country, u16 region, s32 *longitude) {
+#endif
     BOOL found = FALSE;
     u32 size;
     u32 regionSize;

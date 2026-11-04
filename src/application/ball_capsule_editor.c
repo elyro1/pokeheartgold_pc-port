@@ -1424,7 +1424,11 @@ static void BallCapsuleEditor_CreateMenu(BgConfig *bgConfig, Window *unusedWindo
     msgData = NewMsgDataFromNarc(MSGDATA_LOAD_DIRECT, NARC_msgdata_msg, NARC_msg_msg_0011_bin, HEAP_ID_52);
     for (i = 0; i < count; i++) {
         string = NewString_ReadMsgData(msgData, gBallCapsuleEditorMenuItems[items[i]].msgId);
+#if defined(SDK_PORT)
+        ListMenuItems_AddItem(editor->display.menuItems, string, items[i] + 1);
+#else
         ListMenuItems_AddItem(editor->display.menuItems, string, (int)gBallCapsuleEditorMenuItems[items[i]].func);
+#endif
         String_Delete(string);
     }
     DestroyMsgData(msgData);
@@ -2149,7 +2153,11 @@ BOOL BallCapsuleEditor_ModeSelect(BallCapsuleEditor *editor) {
             break;
         default:
             if (input != 0) {
+#if defined(SDK_PORT)
+                if (gBallCapsuleEditorMenuItems[input - 1].func(editor) != TRUE) {
+#else
                 if (((BOOL(*)(BallCapsuleEditor *))input)(editor) != TRUE) {
+#endif
                     BallCapsuleEditor_MenuQuit(editor);
                 } else {
                     BallCapsuleEditor_PrintMessage(&editor->display.windows[BALL_CAPSULE_EDITOR_WINDOW_PROMPT], 3, msg_0011_00007, FALSE);
@@ -3291,3 +3299,22 @@ static void BallCapsuleEditor_ClearCapsuleMon(BallCapsuleEditor *editor, int cap
     editor->capsules[capsule].partySlot = BALL_CAPSULE_EDITOR_NO_MON;
     BallCapsuleEditor_RefreshCapsuleIcons(editor);
 }
+#if defined(SDK_PORT)
+
+/* Native mode table from asm/ball_capsule_editor_data.s. */
+BOOL (*const gBallCapsuleEditorModes[5])(BallCapsuleEditor *editor) = {
+    BallCapsuleEditor_ModeSelect,
+    BallCapsuleEditor_ModeEdit,
+    BallCapsuleEditor_ModeRemove,
+    BallCapsuleEditor_ModeSwitch,
+    BallCapsuleEditor_ModeNone,
+};
+
+const BallCapsuleEditorMenuItem gBallCapsuleEditorMenuItems[5] = {
+    { 0x00000000, BallCapsuleEditor_MenuEdit },
+    { 0x00000001, BallCapsuleEditor_MenuQuit },
+    { 0x00000002, BallCapsuleEditor_MenuSet },
+    { 0x00000003, BallCapsuleEditor_MenuRemove },
+    { 0x00000004, BallCapsuleEditor_MenuSwitch },
+};
+#endif

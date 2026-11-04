@@ -426,7 +426,11 @@ int GtsSelector_Main(GtsSelector *selector) {
 
 // The button touched on the page, -1 for none. Pages above 7 return the selector (never used).
 static int GtsSelector_GetTouchedButton(GtsSelector *selector, u32 page) {
+#if defined(SDK_PORT)
+    int button = -1;
+#else
     int button = (int)selector;
+#endif
     switch (page) {
     case GTS_SELECTOR_PAGE_SPECIES_GROUPS:
         return TouchscreenHitbox_FindRectAtTouchNew(gGtsSelectorGroupHitboxes);
@@ -1830,3 +1834,77 @@ int GtsSelector_CountCountriesOfLetter(GtsSelector *selector, u32 letter) {
     int start;
     return Gts_GetCountryGroupRange(letter, &start);
 }
+#if defined(SDK_PORT)
+
+/* Native tables from asm/gts_data.s; adapters give differing originals the table's signature. */
+int GtsSelector_Idle(GtsSelector *selector);
+int GtsSelector_WaitShow(GtsSelector *selector);
+int GtsSelector_WaitMove(GtsSelector *selector);
+int GtsSelector_WaitHide(GtsSelector *selector);
+int GtsSelector_OpenSpeciesGroups(GtsSelector *selector);
+int GtsSelector_HandleSpeciesGroups(GtsSelector *selector);
+int GtsSelector_CloseSpeciesGroups(GtsSelector *selector);
+int GtsSelector_ReopenSpeciesGroups(GtsSelector *selector);
+int GtsSelector_OpenSpeciesLetters(GtsSelector *selector);
+int GtsSelector_HandleSpeciesLetters(GtsSelector *selector);
+int GtsSelector_CloseSpeciesLetters(GtsSelector *selector);
+int GtsSelector_BackToSpeciesLetters(GtsSelector *selector);
+int GtsSelector_OpenSpeciesList(GtsSelector *selector);
+int GtsSelector_HandleSpeciesList(GtsSelector *selector);
+int GtsSelector_CancelSpeciesList(GtsSelector *selector);
+int GtsSelector_FinishSpecies(GtsSelector *selector);
+int GtsSelector_OpenCountryGroups(GtsSelector *selector);
+int GtsSelector_HandleCountryGroups(GtsSelector *selector);
+int GtsSelector_CloseCountryGroups(GtsSelector *selector);
+int GtsSelector_ReopenCountryGroups(GtsSelector *selector);
+int GtsSelector_OpenCountryLetters(GtsSelector *selector);
+int GtsSelector_HandleCountryLetters(GtsSelector *selector);
+int GtsSelector_CloseCountryLetters(GtsSelector *selector);
+int GtsSelector_BackToCountryLetters(GtsSelector *selector);
+int GtsSelector_OpenCountryList(GtsSelector *selector);
+int GtsSelector_HandleCountryList(GtsSelector *selector);
+int GtsSelector_CancelCountryList(GtsSelector *selector);
+int GtsSelector_FinishCountry(GtsSelector *selector);
+int GtsSelector_OpenGenders(GtsSelector *selector);
+int GtsSelector_HandleGenders(GtsSelector *selector);
+int GtsSelector_FinishGender(GtsSelector *selector);
+int GtsSelector_OpenLevels(GtsSelector *selector);
+int GtsSelector_HandleLevels(GtsSelector *selector);
+int GtsSelector_FinishLevel(GtsSelector *selector);
+int (*const gGtsSelectorStates[])(GtsSelector *selector) = {
+    GtsSelector_Idle,
+    GtsSelector_WaitShow,
+    GtsSelector_WaitMove,
+    GtsSelector_WaitHide,
+    GtsSelector_OpenSpeciesGroups,
+    GtsSelector_HandleSpeciesGroups,
+    GtsSelector_CloseSpeciesGroups,
+    GtsSelector_ReopenSpeciesGroups,
+    GtsSelector_OpenSpeciesLetters,
+    GtsSelector_HandleSpeciesLetters,
+    GtsSelector_CloseSpeciesLetters,
+    GtsSelector_BackToSpeciesLetters,
+    GtsSelector_OpenSpeciesList,
+    GtsSelector_HandleSpeciesList,
+    GtsSelector_CancelSpeciesList,
+    GtsSelector_FinishSpecies,
+    GtsSelector_OpenCountryGroups,
+    GtsSelector_HandleCountryGroups,
+    GtsSelector_CloseCountryGroups,
+    GtsSelector_ReopenCountryGroups,
+    GtsSelector_OpenCountryLetters,
+    GtsSelector_HandleCountryLetters,
+    GtsSelector_CloseCountryLetters,
+    GtsSelector_BackToCountryLetters,
+    GtsSelector_OpenCountryList,
+    GtsSelector_HandleCountryList,
+    GtsSelector_CancelCountryList,
+    GtsSelector_FinishCountry,
+    GtsSelector_OpenGenders,
+    GtsSelector_HandleGenders,
+    GtsSelector_FinishGender,
+    GtsSelector_OpenLevels,
+    GtsSelector_HandleLevels,
+    GtsSelector_FinishLevel,
+};
+#endif

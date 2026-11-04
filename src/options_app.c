@@ -358,6 +358,9 @@ BOOL OptionsMenu_Init(OverlayManager *manager, int *state) {
 
 BOOL OptionsMenu_Exit(OverlayManager *manager, int *state) {
     OptionsApp_Data *data = OverlayManager_GetData(manager);
+#if defined(SDK_PORT)
+    enum HeapID heapID = data->heapID;
+#endif
 
     if (data->exitChoice == 1) {
         data->options.textSpeed = data->menuEntries[MENU_ENTRY_TEXT_SPEED].value;
@@ -385,7 +388,11 @@ BOOL OptionsMenu_Exit(OverlayManager *manager, int *state) {
     TextFlags_SetCanTouchSpeedUpPrint(TRUE);
 
     OverlayManager_FreeData(manager);
+#if defined(SDK_PORT)
+    Heap_Destroy(heapID);
+#else
     Heap_Destroy(data->heapID);
+#endif
 
     return TRUE;
 }
@@ -516,6 +523,11 @@ static BOOL OptionsApp_Setup(OptionsApp_Data *data) {
 static BOOL OptionsApp_Free(OptionsApp_Data *data) {
     switch (data->setupAndFreeState) {
     case 0:
+#if defined(SDK_PORT)
+        // No presentation callback may access graphics after they are freed.
+        Main_SetVBlankIntrCB(NULL, NULL);
+        HBlankInterruptDisable();
+#endif
         GF_DestroyVramTransferManager();
         OptionsApp_FreeWindows(data);
 

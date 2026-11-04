@@ -851,12 +851,20 @@ void BattleSystem_SetBackground(BattleSystem *battleSystem) {
     battleSystem->bgTiles = Heap_Alloc(HEAP_ID_BATTLE, 0x10000);
     battleSystem->bgPalette = Heap_Alloc(HEAP_ID_BATTLE, 0x200);
 
+#if defined(SDK_PORT)
+    MIi_CpuCopy32((u8 *)HW_BG_VRAM + 0x10000, (u32 *)battleSystem->bgTiles, 0x10000);
+#else
     MIi_CpuCopy32((void *)0x6010000, (u32 *)battleSystem->bgTiles, 0x10000);
+#endif
     dst = (u32 *)battleSystem->bgPalette;
     src = (u32 *)PaletteData_GetUnfadedBuf(battleSystem->palette, PLTTBUF_MAIN_BG);
     MIi_CpuCopy32(src, dst, 0x200);
 
+#if defined(SDK_PORT)
+    vram = (u8 *)HW_OBJ_VRAM;
+#else
     vram = (u8 *)0x6400000;
+#endif
     image = Sprite_GetImageProxy(battleSystem->terrains[1].sprite->sprite);
     vram += image->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN];
 
@@ -883,7 +891,11 @@ void BattleSystem_SetBackground(BattleSystem *battleSystem) {
         }
     }
 
+#if defined(SDK_PORT)
+    vram = (u8 *)HW_OBJ_VRAM;
+#else
     vram = (u8 *)0x6400000;
+#endif
     image = Sprite_GetImageProxy(battleSystem->terrains[0].sprite->sprite);
     vram += image->vramLocation.baseAddrOfVram[NNS_G2D_VRAM_TYPE_2DMAIN];
 

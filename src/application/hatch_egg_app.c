@@ -719,7 +719,12 @@ BOOL HatchEggApp_Init(OverlayManager *man, int *state) {
     HatchEggApp *app;
     Main_SetVBlankIntrCB(NULL, NULL);
     HBlankInterruptDisable();
+#if defined(SDK_PORT)
+    // Native sprite/animation records and heap headers exceed the DS budget.
+    Heap_Create(HEAP_ID_3, HEAP_ID_70, 0x60000);
+#else
     Heap_Create(HEAP_ID_3, HEAP_ID_70, 0x40000);
+#endif
     app = OverlayManager_CreateAndGetData(man, sizeof(HatchEggApp), HEAP_ID_70);
     memset(app, 0, sizeof(HatchEggApp));
     app->args = OverlayManager_GetArgs(man);

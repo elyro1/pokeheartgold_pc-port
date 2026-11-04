@@ -2866,3 +2866,34 @@ void PlazaGame_HandleContinueCommand(int netId, int size, void *data, PlazaGameR
 void PlazaGame_HandleQuitCommand(int netId, int size, void *data, PlazaGameResults *results) {
     PlazaGameResults_ReceiveContinue(results, FALSE);
 }
+#if defined(SDK_PORT)
+
+/* Native vote command table from asm/plaza_game_data.s. */
+#define NATIVE_PLAZA_RECV(name) \
+    static void Native_##name(int netId, int size, void *data, void *context) { name(netId, size, data, context); }
+NATIVE_PLAZA_RECV(PlazaGame_HandleVoteYesCommand)
+NATIVE_PLAZA_RECV(PlazaGame_HandleVoteNoCommand)
+NATIVE_PLAZA_RECV(PlazaGame_HandleContinueCommand)
+NATIVE_PLAZA_RECV(PlazaGame_HandleQuitCommand)
+NATIVE_PLAZA_RECV(PlazaGame_HandleSelectionCommand)
+#undef NATIVE_PLAZA_RECV
+static u32 Native_PlazaGame_GetCommandSizeNone(void) { return (u32)PlazaGame_GetCommandSizeNone(); }
+static u32 Native_PlazaGame_GetCommandSizeU32(void) { return (u32)PlazaGame_GetCommandSizeU32(); }
+const CommCommand gPlazaGameCommands[] = {
+    Native_PlazaGame_HandleVoteYesCommand,
+    Native_PlazaGame_GetCommandSizeNone,
+    0,
+    Native_PlazaGame_HandleVoteNoCommand,
+    Native_PlazaGame_GetCommandSizeNone,
+    0,
+    Native_PlazaGame_HandleContinueCommand,
+    Native_PlazaGame_GetCommandSizeNone,
+    0,
+    Native_PlazaGame_HandleQuitCommand,
+    Native_PlazaGame_GetCommandSizeNone,
+    0,
+    Native_PlazaGame_HandleSelectionCommand,
+    Native_PlazaGame_GetCommandSizeU32,
+    0,
+};
+#endif

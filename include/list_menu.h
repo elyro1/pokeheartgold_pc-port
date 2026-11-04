@@ -84,6 +84,11 @@ void ListMenuOverrideSetColors(struct ListMenu *list, u8 cursorPal, u8 fillValue
 void ListMenuGetCurrentItemArrayId(struct ListMenu *list, u16 *index_p);
 void ListMenuGetScrollAndRow(struct ListMenu *list, u16 *cursorPos_p, u16 *itemsAbove_p);
 s32 ListMenuGetValueByArrayId(struct ListMenu *list, s32 index);
+#if defined(SDK_PORT)
+typedef intptr_t ListMenuFieldValue;
+ListMenuFieldValue ListMenuGetTemplateField(struct ListMenu *list, enum ListMenuAttr attr);
+#else
 s32 ListMenuGetTemplateField(struct ListMenu *list, enum ListMenuAttr attr);
+#endif
 
 #endif // POKEHEARTGOLD_LIST_MENU_H

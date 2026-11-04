@@ -12,6 +12,25 @@ u32 TP_CheckBusy(u32);
 u16 TP_GetLatestIndexInAuto(void);
 
 TouchpadState gTouchpadState;
+#if defined(SDK_PORT)
+
+static u16 sNativeTouchIndex;
+
+// SDL supplies one calibrated point per game frame. Repeat it for the DS
+// subframe slots; drawing code interpolates between consecutive frames.
+static u16 Touchpad_CaptureNativeSamples(void) {
+    TPData sample;
+    sample.x = gSystem.touchX;
+    sample.y = gSystem.touchY;
+    sample.touch = gSystem.touchHeld ? TP_TOUCH_ON : TP_TOUCH_OFF;
+    sample.validity = gSystem.touchHeld ? TP_VALIDITY_VALID : TP_VALIDITY_INVALID_XY;
+    for (u32 i = 0; i < gTouchpadState.count; i++) {
+        sNativeTouchIndex = (sNativeTouchIndex + 1) % NELEMS(gTouchpadState.samples);
+        gTouchpadState.samples[sNativeTouchIndex] = sample;
+    }
+    return sNativeTouchIndex;
+}
+#endif
 
 void GF_TouchpadInit(void) {
     memset(&gTouchpadState, 0, sizeof(gTouchpadState));
@@ -64,7 +83,13 @@ BOOL GF_TouchpadStartSampling(int frequency) {
 
 void GF_TouchpadSetSamplingState(u16 mode, u8 autoRead, TPData *data, u32 capacity, u32 write, u32 count) {
     gTouchpadState.mode = mode;
+#if defined(SDK_PORT)
+    // Keep System_HandleInput on the SDL-backed synchronous sampling path.
+    gSystem.touchpadReadAuto = FALSE;
+    sNativeTouchIndex = 0;
+#else
     gSystem.touchpadReadAuto = autoRead;
+#endif
     gTouchpadState.buffer = data;
     gTouchpadState.capacity = capacity;
     gTouchpadState.count = count;
@@ -80,6 +105,9 @@ void TouchSamples_Clear(TPData *data, int count) {
 }
 
 int GF_TouchpadStopAutoSampling(void) {
+#if defined(SDK_PORT)
+    return 1;
+#else
     u32 retries = 0;
     u32 busy;
     if (gTouchpadState.mode == TOUCHPAD_MODE_OFF) {
@@ -97,6 +125,7 @@ int GF_TouchpadStopAutoSampling(void) {
         return 2;
     }
     return 1;
+#endif
 }
 
 BOOL GF_TouchpadStopSampling(void) {
@@ -125,8 +154,12 @@ int GF_TouchpadUpdate(TouchOutput *out, int mode, u32 threshold) {
         return 0;
     }
     if (gTouchpadState.mode) {
+#if defined(SDK_PORT)
+        latest = Touchpad_CaptureNativeSamples();
+#else
         latest = TP_GetLatestIndexInAuto();
         TouchSamples_Calibrate(gTouchpadState.samples, NELEMS(gTouchpadState.samples));
+#endif
         if (out) {
             TouchOutput_CollectValid(out, latest);
         }
@@ -163,6 +196,9 @@ void GF_TouchpadPauseOnLidClose(void) {
 }
 
 int GF_TouchpadStartAutoSampling(u32 frequency) {
+#if defined(SDK_PORT)
+    return 1;
+#else
     int retries = 0;
     u32 busy;
     do {
@@ -177,6 +213,7 @@ int GF_TouchpadStartAutoSampling(u32 frequency) {
         return 2;
     }
     return 1;
+#endif
 }
 
 int GF_TouchpadRecordSamples(int mode, int latest, u32 threshold) {
@@ -201,12 +238,27 @@ int GF_TouchpadRecordMoves(int mode, int latest, u32 threshold) {
         }
         if (gTouchpadState.samples[index].touch == 1 && gTouchpadState.samples[index].validity == 0) {
             int dx, dy, prev;
+#if defined(SDK_PORT)
+            if (gTouchpadState.write == 0) {
+                // There is no preceding element at the beginning of the buffer.
+                dx = dy = threshold;
+            } else
+            {
+                dx = gTouchpadState.samples[index].x;
+                prev = gTouchpadState.buffer[gTouchpadState.write - 1].x;
+                dx = prev >= dx ? prev - dx : dx - prev;
+                dy = gTouchpadState.samples[index].y;
+                prev = gTouchpadState.buffer[gTouchpadState.write - 1].y;
+                dy = prev >= dy ? prev - dy : dy - prev;
+            }
+#else
             dx = gTouchpadState.samples[index].x;
             prev = gTouchpadState.buffer[gTouchpadState.write - 1].x;
             dx = prev >= dx ? prev - dx : dx - prev;
             dy = gTouchpadState.samples[index].y;
             prev = gTouchpadState.buffer[gTouchpadState.write - 1].y;
             dy = prev >= dy ? prev - dy : dy - prev;
+#endif
             if ((u32)dx >= threshold || (u32)dy >= threshold) {
                 gTouchpadState.buffer[gTouchpadState.write] = gTouchpadState.samples[index];
                 gTouchpadState.write++;

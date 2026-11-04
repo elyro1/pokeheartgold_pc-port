@@ -1,0 +1,1066 @@
+{
+  "src/chat/chat_callbacks.c": {
+    "provider": "libntrdwc/gs/chat",
+    "reason": "GameSpy callback queue is supplied by the native SDK."
+  },
+  "src/chat/chat_channel.c": {
+    "provider": "libntrdwc/gs/chat",
+    "reason": "GameSpy channel state is supplied by the native SDK."
+  },
+  "src/chat/chat_cipher.c": {
+    "provider": "libntrdwc/gs/chat",
+    "reason": "GameSpy chat cipher is supplied by the native SDK."
+  },
+  "src/chat/chat_handlers.c": {
+    "provider": "libntrdwc/gs/chat",
+    "reason": "GameSpy server handlers are supplied by the native SDK."
+  },
+  "src/chat/chat_main.c": {
+    "provider": "libntrdwc/gs/chat",
+    "reason": "GameSpy chat API is supplied by the native SDK."
+  },
+  "src/chat_requests.c": {
+    "provider": "libntrdwc/gs/chat",
+    "reason": "GameSpy chat request filters are supplied by the native SDK."
+  },
+  "src/chat/chat_socket.c": {
+    "provider": "libntrdwc/gs/chat",
+    "reason": "GameSpy chat socket API is supplied by the native SDK."
+  },
+  "src/chat_socket_buffer.c": {
+    "provider": "libntrdwc/gs/chat",
+    "reason": "GameSpy socket buffers are supplied by the native SDK."
+  },
+  "src/to91_msl_array_new.cpp": {
+    "provider": "host C++ runtime",
+    "reason": "Use the native operator new[] implementation and exception ABI."
+  },
+  "src/to91_msl_scalar_new.cpp": {
+    "provider": "host C++ runtime",
+    "reason": "Use the native operator new implementation and exception ABI."
+  },
+  "lib/src/nitrocrypto_rc4.c": {
+    "provider": "pc/support/rc4.c",
+    "reason": "The original implementation uses ARM assembly."
+  },
+  "lib/src/nitrocrypto_rc4_fast.c": {
+    "provider": "pc/support/rc4_fast.c",
+    "reason": "The original implementation uses ARM assembly."
+  },
+  "src/overlay_13_thumb_1.c": {
+    "provider": "pc/support/offline_wifi_setup.c",
+    "reason": "Offline baseline: the DS Wi-Fi configuration utility is replaced at its RunWifiSetupApp entry point."
+  },
+  "src/wifi_setup/wifi_setup.c": {
+    "provider": "pc/support/offline_wifi_setup.c",
+    "reason": "The DS Wi-Fi setup utility is replaced at its public entry point."
+  },
+  "src/wifi_setup/wifi_setup_access_points.c": {
+    "provider": "pc/support/offline_wifi_setup.c",
+    "reason": "The DS Wi-Fi setup utility is replaced at its public entry point."
+  },
+  "src/wifi_setup/wifi_setup_address_entry.c": {
+    "provider": "pc/support/offline_wifi_setup.c",
+    "reason": "The DS Wi-Fi setup utility is replaced at its public entry point."
+  },
+  "src/wifi_setup/wifi_setup_address_entry_init.c": {
+    "provider": "pc/support/offline_wifi_setup.c",
+    "reason": "The DS Wi-Fi setup utility is replaced at its public entry point."
+  },
+  "src/wifi_setup/wifi_setup_ap_scan_state.c": {
+    "provider": "pc/support/offline_wifi_setup.c",
+    "reason": "The DS Wi-Fi setup utility is replaced at its public entry point."
+  },
+  "src/wifi_setup/wifi_setup_ap_select.c": {
+    "provider": "pc/support/offline_wifi_setup.c",
+    "reason": "The DS Wi-Fi setup utility is replaced at its public entry point."
+  },
+  "src/wifi_setup/wifi_setup_api.c": {
+    "provider": "pc/support/offline_wifi_setup.c",
+    "reason": "The DS Wi-Fi setup utility is replaced at its public entry point."
+  },
+  "src/wifi_setup/wifi_setup_app.c": {
+    "provider": "pc/support/offline_wifi_setup.c",
+    "reason": "The DS Wi-Fi setup utility is replaced at its public entry point."
+  },
+  "src/wifi_setup/wifi_setup_auto_setup.c": {
+    "provider": "pc/support/offline_wifi_setup.c",
+    "reason": "The DS Wi-Fi setup utility is replaced at its public entry point."
+  },
+  "src/wifi_setup/wifi_setup_bg_screen.c": {
+    "provider": "pc/support/offline_wifi_setup.c",
+    "reason": "The DS Wi-Fi setup utility is replaced at its public entry point."
+  },
+  "src/wifi_setup_bg_screen_state.c": {
+    "provider": "pc/support/offline_wifi_setup.c",
+    "reason": "Offline baseline: the DS Wi-Fi configuration utility is replaced at its RunWifiSetupApp entry point."
+  },
+  "src/wifi_setup/wifi_setup_busy_icon.c": {
+    "provider": "pc/support/offline_wifi_setup.c",
+    "reason": "The DS Wi-Fi setup utility is replaced at its public entry point."
+  },
+  "src/wifi_setup/wifi_setup_connect.c": {
+    "provider": "pc/support/offline_wifi_setup.c",
+    "reason": "The DS Wi-Fi setup utility is replaced at its public entry point."
+  },
+  "src/wifi_setup/wifi_setup_connection_menu.c": {
+    "provider": "pc/support/offline_wifi_setup.c",
+    "reason": "The DS Wi-Fi setup utility is replaced at its public entry point."
+  },
+  "src/wifi_setup/wifi_setup_crypto.c": {
+    "provider": "pc/support/offline_wifi_setup.c",
+    "reason": "The DS Wi-Fi setup utility is replaced at its public entry point."
+  },
+  "src/wifi_setup/wifi_setup_error_screen.c": {
+    "provider": "pc/support/offline_wifi_setup.c",
+    "reason": "The DS Wi-Fi setup utility is replaced at its public entry point."
+  },
+  "src/wifi_setup/wifi_setup_keyboard_input.c": {
+    "provider": "pc/support/offline_wifi_setup.c",
+    "reason": "The DS Wi-Fi setup utility is replaced at its public entry point."
+  },
+  "src/wifi_setup/wifi_setup_keyboard_layout.c": {
+    "provider": "pc/support/offline_wifi_setup.c",
+    "reason": "The DS Wi-Fi setup utility is replaced at its public entry point."
+  },
+  "src/wifi_setup/wifi_setup_keyboard_slide_in.c": {
+    "provider": "pc/support/offline_wifi_setup.c",
+    "reason": "The DS Wi-Fi setup utility is replaced at its public entry point."
+  },
+  "src/wifi_setup/wifi_setup_keyboard_view.c": {
+    "provider": "pc/support/offline_wifi_setup.c",
+    "reason": "The DS Wi-Fi setup utility is replaced at its public entry point."
+  },
+  "src/wifi_setup/wifi_setup_keypad.c": {
+    "provider": "pc/support/offline_wifi_setup.c",
+    "reason": "The DS Wi-Fi setup utility is replaced at its public entry point."
+  },
+  "src/wifi_setup/wifi_setup_keypad_layout.c": {
+    "provider": "pc/support/offline_wifi_setup.c",
+    "reason": "The DS Wi-Fi setup utility is replaced at its public entry point."
+  },
+  "src/wifi_setup/wifi_setup_keypad_view.c": {
+    "provider": "pc/support/offline_wifi_setup.c",
+    "reason": "The DS Wi-Fi setup utility is replaced at its public entry point."
+  },
+  "src/wifi_setup/wifi_setup_link.c": {
+    "provider": "pc/support/offline_wifi_setup.c",
+    "reason": "The DS Wi-Fi setup utility is replaced at its public entry point."
+  },
+  "src/wifi_setup/wifi_setup_local_wireless.c": {
+    "provider": "pc/support/offline_wifi_setup.c",
+    "reason": "The DS Wi-Fi setup utility is replaced at its public entry point."
+  },
+  "src/wifi_setup/wifi_setup_md5.c": {
+    "provider": "pc/support/offline_wifi_setup.c",
+    "reason": "The DS Wi-Fi setup utility is replaced at its public entry point."
+  },
+  "src/wifi_setup/wifi_setup_packet.c": {
+    "provider": "pc/support/offline_wifi_setup.c",
+    "reason": "The DS Wi-Fi setup utility is replaced at its public entry point."
+  },
+  "src/wifi_setup/wifi_setup_platform.c": {
+    "provider": "pc/support/offline_wifi_setup.c",
+    "reason": "The DS Wi-Fi setup utility is replaced at its public entry point."
+  },
+  "src/wifi_setup/wifi_setup_protocol.c": {
+    "provider": "pc/support/offline_wifi_setup.c",
+    "reason": "The DS Wi-Fi setup utility is replaced at its public entry point."
+  },
+  "src/wifi_setup/wifi_setup_result.c": {
+    "provider": "pc/support/offline_wifi_setup.c",
+    "reason": "The DS Wi-Fi setup utility is replaced at its public entry point."
+  },
+  "src/wifi_setup/wifi_setup_screens.c": {
+    "provider": "pc/support/offline_wifi_setup.c",
+    "reason": "The DS Wi-Fi setup utility is replaced at its public entry point."
+  },
+  "src/wifi_setup/wifi_setup_scroll_bar.c": {
+    "provider": "pc/support/offline_wifi_setup.c",
+    "reason": "The DS Wi-Fi setup utility is replaced at its public entry point."
+  },
+  "src/wifi_setup_scroll_bar_state.c": {
+    "provider": "pc/support/offline_wifi_setup.c",
+    "reason": "Offline baseline: the DS Wi-Fi configuration utility is replaced at its RunWifiSetupApp entry point."
+  },
+  "src/wifi_setup/wifi_setup_session.c": {
+    "provider": "pc/support/offline_wifi_setup.c",
+    "reason": "The DS Wi-Fi setup utility is replaced at its public entry point."
+  },
+  "src/wifi_setup/wifi_setup_settings.c": {
+    "provider": "pc/support/offline_wifi_setup.c",
+    "reason": "The DS Wi-Fi setup utility is replaced at its public entry point."
+  },
+  "src/wifi_setup/wifi_setup_share.c": {
+    "provider": "pc/support/offline_wifi_setup.c",
+    "reason": "The DS Wi-Fi setup utility is replaced at its public entry point."
+  },
+  "src/wifi_setup/wifi_setup_state.c": {
+    "provider": "pc/support/offline_wifi_setup.c",
+    "reason": "The DS Wi-Fi setup utility is replaced at its public entry point."
+  },
+  "src/wifi_setup/wifi_setup_ui_parts.c": {
+    "provider": "pc/support/offline_wifi_setup.c",
+    "reason": "The DS Wi-Fi setup utility is replaced at its public entry point."
+  },
+  "src/wifi_setup/wifi_setup_ui_system.c": {
+    "provider": "pc/support/offline_wifi_setup.c",
+    "reason": "The DS Wi-Fi setup utility is replaced at its public entry point."
+  },
+  "src/wifi_setup/wifi_setup_usb_connector_screen.c": {
+    "provider": "pc/support/offline_wifi_setup.c",
+    "reason": "The DS Wi-Fi setup utility is replaced at its public entry point."
+  },
+  "src/wifi_setup/wifi_setup_wcm.c": {
+    "provider": "pc/support/offline_wifi_setup.c",
+    "reason": "The DS Wi-Fi setup utility is replaced at its public entry point."
+  },
+  "src/wifi_setup/wifi_setup_worker.c": {
+    "provider": "pc/support/offline_wifi_setup.c",
+    "reason": "The DS Wi-Fi setup utility is replaced at its public entry point."
+  },
+  "src/voice_chat.c": {
+    "provider": "pc/support/offline_voice.c",
+    "reason": "Offline baseline: native VCT cannot establish voice sessions; public entries report unavailable without opening audio or sessions."
+  },
+  "src/voice_chat_conference.c": {
+    "provider": "pc/support/offline_voice.c",
+    "reason": "Offline baseline: native VCT cannot establish voice sessions; public entries report unavailable without opening audio or sessions."
+  },
+  "src/text_0205B4EC.c": {
+    "provider": "src/dialog_box.c",
+    "reason": "The original main.lsf selects dialog_box.c. This unused older file duplicates its nine public functions."
+  },
+  "src/lobby/ppw_lobby_get_work.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/ppw_lobby_initialize_async.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/ppw_lobby_initialize.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/ppw_lobby_player_destroy.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/ppw_lobby_shutdown.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/ppw_lobby_process.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/ppw_lobby_web_request_delete.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/lobby_byte_vector_data.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/ppw_lobby_join_sub_channel_async.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/ppw_lobby_get_channel_base_name.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/ppw_lobby_leave_sub_channel.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/ppw_lobby_get_time_info.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/ppw_lobby_get_sub_channel_state.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/ppw_lobby_set_channel_data.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/ppw_lobby_get_channel_data.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/ppw_lobby_get_channel_name.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/lobby_u32_vector_data2.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/ppw_lobby_update_my_profile.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby_char_vector_assign_range.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/ov45_022327b8.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby/ppw_lobby_start_recruit.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/lobby_timer_map_make_entry.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/lobby_string_format.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/ppw_lobby_recruit.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/lobby_timer_map_find.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/ov45_02232e60.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby/lobby_char_vector_init_range.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/lobby_timer_map_find_insert_pos.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/lobby_string_assign_range.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/ov45_02238508.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby/ppw_lobby_player_set_destroy_nodes.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby_string_vector_append_copies_slow.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby_string_vector_erase_at_end.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby_char_vector_append_zeros_slow.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby_char_vector_buffer.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby_char_vector_buffer_deallocate.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby_string_vector_buffer_allocate.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby_string_vector_buffer_deallocate.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/ppw_lobby_schedule_init.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/ppw_lobby_schedule_copy.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/ppw_lobby_schedule_copy_to_vector.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/ov45_02238c74.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/ov45_02238d54.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby/lobby_event_deque_append_range.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/ov45_02238f18.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby/lobby_event_deque_copy.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/lobby_sort_stable_sort.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby_sort_stable_sort_adaptive.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby_sort_merge_adaptive.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby/lobby_sort_rotate.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby_sort_lower_bound.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby_sort_upper_bound.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/ov45_02239bbc.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/ov45_02239df0.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/ov45_02239f48.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/ov45_0223a0cc.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/ov45_0223a4c8.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/ov45_0223a7e4.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/ov45_0223a9c0.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby/lobby_event_vector_assign_range.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/ov45_0223aca4.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby/lobby_vip_vector_assign_range.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/ov45_0223ae84.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/ppw_lobby_schedule_questionnaire.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/ppw_lobby_schedule_process.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/ppw_lobby_schedule_start.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby/lobby_event_deque_iterator_at.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/lobby_event_deque_add_back_capacity.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/ov45_0223b764.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby_event_deque_erase_at_begin.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/ov45_0223b8e0.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/ov45_0223ba3c.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby_event_deque_map_recommend_size.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby_event_deque_map_length_error.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby_vip_vector_reallocate.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby_vip_vector_recommend_size.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby/lobby_event_vector_reallocate.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby_event_vector_recommend_size.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/ov45_0223bf9c.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/ov45_0223c53c.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby_event_deque_map_copy_backward.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby/lobby_event_deque_map_copy.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/ov45_0223ca14.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby/lobby_event_deque_map_buffer.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby_event_deque_map_iterator_distance.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby_event_deque_map_init_copy.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby_event_deque_map_append_range.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby/lobby_event_deque_map_copy_to_array.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/lobby_event_deque_map_allocate.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby_event_deque_map_iterator_distance2.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby/ppw_lobby_parse_message.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/ov45_0223d644.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby/ppw_lobby_encode_message.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/ov45_0223db8c.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby/ppw_lobby_players.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/ov45_0223df4c.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby/ppw_lobby_players_get_entered_ids.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/ppw_lobby_players_set_self.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/ppw_lobby_player_has_profiles.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/ppw_lobby_players_all_have_profiles.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/ov45_0223e558.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/ov45_0223e648.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby/lobby_u32_vector_buffer.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby_u32_vector_buffer_deallocate.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby/lobby_chat_on_disconnected.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/lobby_chat_on_private_message.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/lobby_chat_split_string.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby_chat_on_channel_message.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby_chat_on_user_joined.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby_chat_on_user_parted.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby_chat_on_user_changed_nick.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby_chat_on_user_mode_changed.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby/lobby_chat_callbacks.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby_chat_on_nick_error.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby_chat_manager_get_nick.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/ov45_0223fc6c.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby/lobby_request_map_find.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/ov45_0223fe28.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/ov45_0223ffe8.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/ov45_0224005c.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby_chat_on_enter_channel.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby_chat_on_get_channel_keys.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby_chat_on_broadcast_key_changed.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby_chat_on_get_channel_mode.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby/lobby_chat_timer_connect_timeout.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/lobby_chat_process.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/lobby_chat_is_in_channel.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/lobby_chat_initialize.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/lobby_chat_manager_get_names.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/lobby_chat_shutdown.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/lobby_chat_enter_channel.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/lobby_chat_channel_commands.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/ov45_022417b4.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/ov45_02241a20.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/ov45_02241b84.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby/lobby_chat_set_channel_mode.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/ov45_02241e24.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby/lobby_requests.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby_request_map_insert_node.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/ov45_022421e4.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby/lobby_string_find_first_of.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/lobby_mem.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/ov45_0224268c.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby/lobby_chat_manager.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/lobby_chat_add_channel.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/ov45_02242be0.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby/lobby_chat_add_channel_users.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/ov45_0224307c.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby/lobby_chat_users.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby_user_id_set_erase_key.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby/lobby_chat_remove_channel.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/lobby_u32_vector_assign_from_set.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/lobby_channel_map_erase_key.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/lobby_chat_find_user_id_by_nick.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/lobby_chat_rename_user.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/lobby_user_map_make_entry.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/lobby_channel_map.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/lobby_channel_map_insert_node.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby_user_id_set_insert.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby_user_id_set_erase.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby_user_id_set_assign.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/ov45_02243cf8.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby_user_id_set_insert_node.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby_user_map_insert.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby/lobby_user_map.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby_chat_map_destroy.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby_channel_map_find_insert_pos.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS PPW lobby implementation (main.lsf: ppw_lobby_get_work through lobby_tree_nodes); the offline native build fails requests at the public lobby API."
+  },
+  "src/lobby/lobby_tree_nodes.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/application/main_menu/ranger_link.c": {
+    "provider": "pc/support/offline_peripherals.c",
+    "reason": "Physical Ranger/Pokewalker links are unavailable on PC; application-facing requests stay disconnected and never start DS WM/card SPI or IR threads."
+  },
+  "src/application/pokewalker/pokewalker_ir.c": {
+    "provider": "pc/support/offline_peripherals.c",
+    "reason": "Physical Ranger/Pokewalker links are unavailable on PC; application-facing requests stay disconnected and never start DS WM/card SPI or IR threads."
+  },
+  "src/application/pokewalker/pokewalker_ir_requests.c": {
+    "provider": "pc/support/offline_peripherals.c",
+    "reason": "Physical Ranger/Pokewalker links are unavailable on PC; application-facing requests stay disconnected and never start DS WM/card SPI or IR threads."
+  },
+  "src/application/pokewalker/pokewalker_ir_status.c": {
+    "provider": "pc/support/offline_peripherals.c",
+    "reason": "Physical Ranger/Pokewalker links are unavailable on PC; application-facing requests stay disconnected and never start DS WM/card SPI or IR threads."
+  },
+  "src/lobby/lobby_chat_add_channel_user.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/lobby_event_deque_map_destroy.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/lobby_user_id_set.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/lobby_vip_vector_growth.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/ppw_lobby_player_set.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/ppw_lobby_schedule.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/ppw_lobby_schedule_progress.c": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/lobby_char_vector_append_fill_slow.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/lobby_char_vector_assign.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/lobby_chat_channel_callbacks.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/lobby_chat_channel_queries.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/lobby_chat_get_channel_mode_async.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/lobby_chat_manager_init.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/lobby_chat_on_enum_channels.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/lobby_chat_on_enum_users.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/lobby_chat_remove_user_if_unused.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/lobby_event_deque_assign.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/lobby_event_deque_capacity.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/lobby_event_deque_destroy.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/lobby_event_deque_map_copy_range.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/lobby_event_deque_map_insert_range.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/lobby_sort_adaptive.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/lobby_sort_buffer.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/lobby_sort_merge_backward.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/lobby_sort_merge_buffer_forward.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/lobby_string_compare_no_case.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/lobby_u32_vector_assign_range.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/lobby_u32_vector_reallocate.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/lobby_user_id_set_copy_nodes.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/lobby_vector_growth.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/ppw_lobby.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/ppw_lobby_players_clear.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/ppw_lobby_players_update_states.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/ppw_lobby_schedule_load.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/ppw_lobby_schedule_set_vip_records.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  },
+  "src/lobby/ppw_lobby_schedule_validate_vip_records.cpp": {
+    "provider": "pc/support/offline_lobby.c",
+    "reason": "Private DS lobby implementation is replaced by the offline public API."
+  }
+}

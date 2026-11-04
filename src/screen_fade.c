@@ -1,3 +1,6 @@
+#if defined(SDK_PORT)
+#include "port/battle_timing.h"
+#endif
 #include "screen_fade.h"
 
 #include "global.h"
@@ -55,6 +58,9 @@ typedef struct PaletteFade {
     u16 active;
     u8 mainFaded;
     u8 subFaded;
+#if defined(SDK_PORT)
+    BattleTimingDomain timingDomain;
+#endif
     u16 color; // the color of the last fade, used when a fade passes 0xFFFF
 } PaletteFade;
 
@@ -138,6 +144,9 @@ void BeginNormalPaletteFade(enum FadeMode mode, enum FadeType mainType, enum Fad
     {
         PaletteFade *fade = &sPaletteFade;
         PaletteFade_Clear(&sPaletteFade);
+#if defined(SDK_PORT)
+        sPaletteFade.timingDomain = BattleTiming_GetDomain();
+#endif
         PaletteFade_SetMode(mode, &sPaletteFade);
         FadeBlankPair_Init(&sPaletteFade.blankPair);
         color = PaletteFade_ResolveColor(&sPaletteFade, color);
@@ -159,7 +168,13 @@ void BeginNormalPaletteFade(enum FadeMode mode, enum FadeType mainType, enum Fad
 
 void HandleFadeUpdateFrame(void) {
     PaletteFade *fade = &sPaletteFade;
+#if defined(SDK_PORT)
+    if (sPaletteFade.active != 0 && BattleTiming_ShouldTick(
+        fade->timingDomain
+    )) {
+#else
     if (sPaletteFade.active != 0) {
+#endif
         if (DoFadeUpdateFrame(fade, &fade->main, &fade->sub) == TRUE) {
             HandleEndFade(fade);
         }

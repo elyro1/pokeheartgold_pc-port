@@ -695,3 +695,21 @@ static void PokeathlonMedals_PrintStaticText(PokeathlonMedals *work) {
         PokeathlonUtil_PrintMessageAtXY(work->textContext, 2, trustTrophies + msg_0314_00113, 1, 0);
     }
 }
+#if defined(SDK_PORT)
+
+/* Native grid callback table from asm/pokeathlon_record_data.s, with the exact
+ * DpadGridCallback signature. */
+_Static_assert(sizeof(PokeathlonEventRecordDefaultEntry) == 10 && sizeof(PokeathlonCourseRecordSpritePos) == 12, "Pokeathlon record tables");
+_Static_assert(sizeof(PokeathlonCourseRecordBgTemplates) == 224 && sizeof(PokeathlonMedalsBgTemplates) == 196, "Pokeathlon background tables");
+_Static_assert(sizeof(PokeathlonEventRecordBgTemplates) == 168 && sizeof(PokeathlonTrophiesBgTemplates) == 112, "Pokeathlon background tables");
+static void Native_PokeathlonMedals_OnButton(void *work, int newTarget, int prevTarget) { PokeathlonMedals_OnButton(work, newTarget, prevTarget); }
+static void Native_PokeathlonMedals_OnSwitchToTouchMode(void *work, int newTarget, int prevTarget) { PokeathlonMedals_OnSwitchToTouchMode(work, newTarget, prevTarget); }
+static void Native_PokeathlonMedals_OnKeyMove(void *work, int newTarget, int prevTarget) { PokeathlonMedals_OnKeyMove(work, newTarget, prevTarget); }
+static void Native_PokeathlonMedals_OnTouch(void *work, int newTarget, int prevTarget) { PokeathlonMedals_OnTouch(work, newTarget, prevTarget); }
+const GridCallbacks gPokeathlonMedalsGridCallbacks = {
+    Native_PokeathlonMedals_OnButton,
+    Native_PokeathlonMedals_OnSwitchToTouchMode,
+    Native_PokeathlonMedals_OnKeyMove,
+    Native_PokeathlonMedals_OnTouch,
+};
+#endif

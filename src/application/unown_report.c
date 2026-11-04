@@ -132,11 +132,17 @@ typedef struct UnownReportTextBlock {
     u16 numMsgs : 2;
     u16 minLevel : 8;
 } UnownReportTextBlock;
+#if defined(SDK_PORT)
+_Static_assert(sizeof(UnownReportTextBlock) == 2, "literal data: UnownReportTextBlock");
+#endif
 
 typedef struct UnownReportInfoPage {
     UnownReportTextBlock left;
     UnownReportTextBlock right;
 } UnownReportInfoPage;
+#if defined(SDK_PORT)
+_Static_assert(sizeof(UnownReportInfoPage) == 4, "literal data: UnownReportInfoPage");
+#endif
 
 extern const ResdatIdList gUnownReportResdatIds;
 extern const TouchscreenHitbox gUnownReportHitboxes[];

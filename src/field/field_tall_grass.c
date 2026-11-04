@@ -344,3 +344,27 @@ void TallGrassUnusedEffect_Draw(FieldEffect *effect, TallGrassUnusedEffect *work
     FieldEffect_GetPosition(effect, &position);
     BillboardObject_SetPosition(work->billboard, &position);
 }
+#if defined(SDK_PORT)
+
+/* Native effect templates from asm/field_tall_grass_data.s: native state sizes and exact-signature adapters. */
+BOOL TallGrassEffect_Init(FieldEffect *effect, TallGrassEffect *work);
+BOOL TallGrassEffect_Destroy(FieldEffect *effect, TallGrassEffect *work);
+void TallGrassEffect_Update(FieldEffect *effect, TallGrassEffect *work);
+void TallGrassEffect_Draw(FieldEffect *effect, TallGrassEffect *work);
+static BOOL Native_TallGrassEffect_Init(FieldEffect *a0, void *a1) { return (BOOL)TallGrassEffect_Init(a0, a1); }
+static void Native_TallGrassEffect_Destroy(FieldEffect *a0, void *a1) { TallGrassEffect_Destroy(a0, a1); }
+static void Native_TallGrassEffect_Update(FieldEffect *a0, void *a1) { TallGrassEffect_Update(a0, a1); }
+static void Native_TallGrassEffect_Draw(FieldEffect *a0, void *a1) { TallGrassEffect_Draw(a0, a1); }
+_Static_assert(sizeof(TallGrassEffect) >= 0x40, "gTallGrassEffectTemplate state size");
+const FieldEffectBasicTemplate gTallGrassEffectTemplate = { sizeof(TallGrassEffect), Native_TallGrassEffect_Init, Native_TallGrassEffect_Destroy, Native_TallGrassEffect_Update, Native_TallGrassEffect_Draw };
+BOOL TallGrassUnusedEffect_Init(FieldEffect *effect, TallGrassUnusedEffect *work);
+BOOL TallGrassUnusedEffect_Destroy(FieldEffect *effect, TallGrassUnusedEffect *work);
+void TallGrassUnusedEffect_Update(FieldEffect *effect, TallGrassUnusedEffect *work);
+void TallGrassUnusedEffect_Draw(FieldEffect *effect, TallGrassUnusedEffect *work);
+static BOOL Native_TallGrassUnusedEffect_Init(FieldEffect *a0, void *a1) { return (BOOL)TallGrassUnusedEffect_Init(a0, a1); }
+static void Native_TallGrassUnusedEffect_Destroy(FieldEffect *a0, void *a1) { TallGrassUnusedEffect_Destroy(a0, a1); }
+static void Native_TallGrassUnusedEffect_Update(FieldEffect *a0, void *a1) { TallGrassUnusedEffect_Update(a0, a1); }
+static void Native_TallGrassUnusedEffect_Draw(FieldEffect *a0, void *a1) { TallGrassUnusedEffect_Draw(a0, a1); }
+_Static_assert(sizeof(TallGrassUnusedEffect) >= 0x28, "gTallGrassUnusedEffectTemplate state size");
+const FieldEffectBasicTemplate gTallGrassUnusedEffectTemplate = { sizeof(TallGrassUnusedEffect), Native_TallGrassUnusedEffect_Init, Native_TallGrassUnusedEffect_Destroy, Native_TallGrassUnusedEffect_Update, Native_TallGrassUnusedEffect_Draw };
+#endif

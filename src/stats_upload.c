@@ -1,6 +1,11 @@
 #include "global.h"
 
+#if defined(SDK_PORT)
+#include <base/dwc_memfunc.h>
+#include <base/dwc_error.h>
+#else
 #include "dwc/net_common_internal.h"
+#endif
 #include "dwc/stats_upload_internal.h"
 
 #include <nitro/code32.h>
@@ -8,7 +13,10 @@
 
 // Web stats upload client of the network library.
 
+#if defined(SDK_PORT)
+#else
 int snprintf(char *, u32, const char *, ...);
+#endif
 int sprintf(char *, const char *, ...);
 int strncmp(const char *, const char *, size_t);
 unsigned long strtoul(const char *, char **, int);
@@ -36,8 +44,11 @@ extern const char gStatsUploadStr_0000000000000000000000000000000000000000[]; //
 extern const char gStatsUploadEmptyString[];                       // ""
 
 static BOOL StatsUpload_CheckResponseHash(const char *response, int length);
+#if defined(SDK_PORT)
+#else
 static void StatsUpload_OnRequestProgress(void);
 static void StatsUpload_OnRequestCompleted(char *response, int length, int error);
+#endif
 static int StatsUpload_EncodeData(char *out, const u8 *first, int firstLength, const u8 *second, int secondLength);
 static void StatsUpload_SetFailed(void);
 static int StatsUpload_PrepareUpload(char *name, int pid, const void *data, int size, StatsUploadResponseFunc callback, BOOL useLastHash);
@@ -135,11 +146,19 @@ static BOOL StatsUpload_CheckResponseHash(const char *response, int length) {
 }
 
 // Progress callback of the HTTP requests.
+#if defined(SDK_PORT)
+static void StatsUpload_OnRequestProgress(DWCGHTTPState state, const char *buffer, int length, int received, int total, void *param) {
+#else
 static void StatsUpload_OnRequestProgress(void) {
+#endif
 }
 
 // Completion callback of the HTTP requests: the challenge (state 5) or the upload response (state 7).
+#if defined(SDK_PORT)
+static void StatsUpload_OnRequestCompleted(const char *response, int length, DWCGHTTPResult error, void *param) {
+#else
 static void StatsUpload_OnRequestCompleted(char *response, int length, int error) {
+#endif
     gStatsUpload.request = -1;
     if (gStatsUpload.state == STATS_UPLOAD_FAILED) {
         return;
@@ -217,6 +236,10 @@ static int StatsUpload_EncodeData(char *out, const u8 *first, int firstLength, c
     for (i = 0; i < firstLength; i++) {
         buf[i + 4] = first[i];
     }
+#if defined(SDK_PORT)
+    for (int secondIndex = 0; secondIndex < secondLength; secondIndex++) {
+        buf[4 + firstLength + secondIndex] = second[secondIndex];
+#else
     {
         int count = secondLength;
         first = NULL;
@@ -227,6 +250,7 @@ static int StatsUpload_EncodeData(char *out, const u8 *first, int firstLength, c
                 first++;
             } while ((s32)first < count);
         }
+#endif
     }
     for (i = 0; i < length; i++) {
         sum += buf[i + 4];
@@ -240,7 +264,11 @@ static int StatsUpload_EncodeData(char *out, const u8 *first, int firstLength, c
     buf[1] = sum >> 16;
     buf[2] = sum >> 8;
     buf[3] = sum;
+#if defined(SDK_PORT)
+    B64Encode((const char *)buf, out, length + 4, 2);
+#else
     B64Encode(buf, out, length + 4, 2);
+#endif
     DWC_Free(7, buf, 0);
     out[StatsUpload_GetBase64Length(length + 4)] = 0;
     return 0;

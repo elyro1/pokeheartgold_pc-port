@@ -2,6 +2,10 @@
 #define POKEHEARTGOLD_POKEPIC_H
 
 #include "global.h"
+#if defined(SDK_PORT)
+#include "port/battle_smoothing.h"
+#include "port/battle_timing.h"
+#endif
 
 #include "filesystem_files_def.h"
 #include "heap.h"
@@ -137,6 +141,10 @@ struct Pokepic;
 typedef void (*PokepicCallback)(struct Pokepic *, PokepicDrawParam *);
 
 typedef struct Pokepic {
+#if defined(SDK_PORT)
+    BattleVisualHistory battleVisualHistory;
+    BattleTimingDomain battleFadeTimingDomain;
+#endif
     u32 active : 1;
     u32 polygonId : 6;
     u32 needReloadChar : 1;

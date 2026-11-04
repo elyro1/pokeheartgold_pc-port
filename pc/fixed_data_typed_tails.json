@@ -1,0 +1,26 @@
+{
+  "asm/pokemon_summary_data.s": {
+    "symbol": "gOverlayTemplate_PokemonSummary",
+    "words": [
+      "PokemonSummary_Init",
+      "PokemonSummary_Main",
+      "PokemonSummary_Exit",
+      "0xFFFFFFFF"
+    ],
+    "provider": "src/pokemon_summary.c"
+  },
+  "asm/safari_decoration_data.s": {
+    "symbol": "gSafariDecorationObjectGroups",
+    "lines": [
+      ".word 6, gSafariDecorationObjectGroup0",
+      ".word 6, gSafariDecorationObjectGroup1",
+      ".word 6, gSafariDecorationObjectGroup2",
+      ".word 6, gSafariDecorationObjectGroup3",
+      "gSafariDecorationTrainerGroups:",
+      ".byte 0x00, 0x01, 0x02, 0x03, 0x00, 0x01, 0x02, 0x03",
+      ".byte 0x00, 0x01, 0x02, 0x03, 0x01, 0x02, 0x03, 0x00, 0x01, 0x02, 0x03, 0x00, 0x01, 0x02, 0x03, 0x00",
+      ".byte 0x02, 0x03, 0x00, 0x01, 0x02, 0x03, 0x00, 0x01, 0x03, 0x00, 0x01, 0x02, 0x03, 0x00, 0x01, 0x02"
+    ],
+    "provider": "src/application/safari_decoration.c"
+  }
+}

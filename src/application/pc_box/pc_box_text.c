@@ -84,13 +84,20 @@ void PCBox_RefreshTrayBoxThumbnail(PCBoxWork *work, u32 box) {
     }
 }
 
+#if defined(SDK_PORT)
+#else
 typedef union BoxTilePtrSlot {
     void *ptr;
     u32 raw;
 } BoxTilePtrSlot;
 
+#endif
 void PCBox_DrawBoxThumbnailMons(PCBoxWork *work, u32 box, void *dst) {
+#if defined(SDK_PORT)
+    BoxPokemon *mon;
+#else
     BoxTilePtrSlot mon;
+#endif
     u32 lock;
     u8 row;
     u8 col;
@@ -110,12 +117,21 @@ void PCBox_DrawBoxThumbnailMons(PCBoxWork *work, u32 box, void *dst) {
         col = 0;
         rowbase = row * 6;
         for (; col < 6; col++) {
+#if defined(SDK_PORT)
+            mon = PCStorage_GetMonByIndexPair(work->storage, box, col + rowbase);
+            lock = AcquireBoxMonLock(mon);
+            species = GetBoxMonData(mon, MON_DATA_SPECIES, NULL);
+            if (GetBoxMonData(mon, MON_DATA_SPECIES_EXISTS, NULL)) {
+                if (!GetBoxMonData(mon, MON_DATA_IS_EGG, NULL)) {
+                    form = (u16)GetBoxMonData(mon, MON_DATA_FORM, NULL);
+#else
             mon.ptr = PCStorage_GetMonByIndexPair(work->storage, box, col + rowbase);
             lock = AcquireBoxMonLock(mon.ptr);
             species = GetBoxMonData((void *)mon.raw, MON_DATA_SPECIES, NULL);
             if (GetBoxMonData(mon.ptr, MON_DATA_SPECIES_EXISTS, NULL)) {
                 if (!GetBoxMonData((void *)mon.raw, MON_DATA_IS_EGG, NULL)) {
                     form = (u16)GetBoxMonData(mon.ptr, MON_DATA_FORM, NULL);
+#endif
                     type = (u16)GetMonBaseStatEx_HandleAlternateForm(work->view->personalNarc, species, form, 0x1b);
                 } else if (species == SPECIES_MANAPHY) {
                     type = 1;
@@ -125,10 +141,18 @@ void PCBox_DrawBoxThumbnailMons(PCBoxWork *work, u32 box, void *dst) {
                 tile = (u16)(gPCBoxThumbnailTiles[type] + 0x20);
                 tile = (u16)((tile << 8) | tile);
                 for (yy = y; (s32)yy < (s32)(y + 2); yy = (u8)(yy + 1)) {
+#if defined(SDK_PORT)
+                    MIi_CpuClear16(tile, (u16 *)((u8 *)dst + ((x & 7) + ((yy & 7) * 8 + (((s32)yy >> 3) * 4 + (x >> 3)) * 64))), 2);
+#else
                     MIi_CpuClear16(tile, (u16 *)((u8 *)dst + ((x & 7) + ((yy & 7) * 8 + (u32)((u8 *)(((s32)yy >> 3) * 4) + (x >> 3)) * 64))), 2);
+#endif
                 }
             }
+#if defined(SDK_PORT)
+            ReleaseBoxMonLock(mon, lock);
+#else
             ReleaseBoxMonLock((void *)mon.raw, lock);
+#endif
             x += 2;
         }
         y = (u8)(y + 2);
@@ -1206,3 +1230,190 @@ void PCBox_GridOnButton(PCBoxWork *work, int target) {
 void PCBox_GridOnSwitchToTouchMode(PCBoxWork *work) {
     PCBox_SetSpriteVisible(work->view, PC_BOX_SPRITE_CURSOR, FALSE);
 }
+#if defined(SDK_PORT)
+
+/* Native tables from asm/overlay_14_state_dispatch_rodata_67.s; adapters give differing originals the field signatures. */
+void PCBox_WallpaperGridOnButton(PCBoxWork *work, u32 newTarget);
+void PCBox_GridOnSwitchToTouchMode(PCBoxWork *work);
+void PCBox_WallpaperGridOnKeyMove(PCBoxWork *work, u32 newTarget, u32 prevTarget);
+void PCBox_WallpaperGridOnTouch(PCBoxWork *work, u32 newTarget);
+void PCBox_WithdrawGridOnButton(PCBoxWork *work, u32 newTarget, u32 prevTarget);
+void PCBox_GridOnKeyMove(PCBoxWork *work, u32 newTarget, u32 prevTarget);
+void PCBox_WithdrawGridOnTouch(PCBoxWork *work, u32 newTarget);
+void PCBox_DepositGridOnButton(PCBoxWork *work, u32 newTarget, u32 prevTarget);
+void PCBox_GridOnTouch(PCBoxWork *work, u32 newTarget);
+void PCBox_DepositBoxGridOnButton(PCBoxWork *work, u32 newTarget);
+void PCBox_DepositBoxGridOnKeyMove(PCBoxWork *work, u32 newTarget, u32 prevTarget);
+void PCBox_DepositBoxGridOnTouch(PCBoxWork *work, u32 newTarget);
+void PCBox_BoxMenuGridOnButton(PCBoxWork *work, u32 newTarget);
+void PCBox_BoxMenuGridOnKeyMove(PCBoxWork *work, u32 newTarget, u32 prevTarget);
+void PCBox_BoxMenuGridOnTouch(PCBoxWork *work, u32 newTarget);
+void PCBox_MoveModePartyGridOnButton(PCBoxWork *work, u32 newTarget, u32 prevTarget);
+void PCBox_MoveModePartyGridOnKeyMove(PCBoxWork *work, u32 newTarget, u32 prevTarget);
+void PCBox_TrayGridOnButton(PCBoxWork *work, u32 newTarget);
+void PCBox_TrayGridOnKeyMove(PCBoxWork *work, u32 newTarget, u32 prevTarget);
+void PCBox_TrayGridOnTouch(PCBoxWork *work, u32 newTarget);
+void PCBox_MoveModeGridOnButton(PCBoxWork *work, u32 newTarget, u32 prevTarget);
+void PCBox_MoveModeGridOnKeyMove(PCBoxWork *work, u32 newTarget, u32 prevTarget);
+void PCBox_MoveModeGridOnTouch(PCBoxWork *work, u32 newTarget);
+void PCBox_GridOnButton(PCBoxWork *work, int target);
+void PCBox_ItemModePartyGridOnButton(PCBoxWork *work, u32 newTarget, u32 prevTarget);
+void PCBox_ItemModePartyGridOnKeyMove(PCBoxWork *work, u32 newTarget, u32 prevTarget);
+void PCBox_ItemModeGridOnButton(PCBoxWork *work, u32 newTarget, u32 prevTarget);
+void PCBox_ItemModeGridOnKeyMove(PCBoxWork *work, u32 newTarget, u32 prevTarget);
+void PCBox_ItemModeGridOnTouch(PCBoxWork *work, u32 newTarget);
+static void Native_PCBox_WallpaperGridOnButton_2016(void * a0, int a1, int a2) { PCBox_WallpaperGridOnButton((PCBoxWork *)a0, a1); }
+static void Native_PCBox_GridOnSwitchToTouchMode_2016(void * a0, int a1, int a2) { PCBox_GridOnSwitchToTouchMode((PCBoxWork *)a0); }
+static void Native_PCBox_WallpaperGridOnKeyMove_2016(void * a0, int a1, int a2) { PCBox_WallpaperGridOnKeyMove((PCBoxWork *)a0, a1, a2); }
+static void Native_PCBox_WallpaperGridOnTouch_2016(void * a0, int a1, int a2) { PCBox_WallpaperGridOnTouch((PCBoxWork *)a0, a1); }
+const GridCallbacks sPCBoxWallpaperGridCallbacks = {
+    Native_PCBox_WallpaperGridOnButton_2016,
+    Native_PCBox_GridOnSwitchToTouchMode_2016,
+    Native_PCBox_WallpaperGridOnKeyMove_2016,
+    Native_PCBox_WallpaperGridOnTouch_2016,
+};
+static void Native_PCBox_WithdrawGridOnButton_2016(void * a0, int a1, int a2) { PCBox_WithdrawGridOnButton((PCBoxWork *)a0, a1, a2); }
+static void Native_PCBox_GridOnKeyMove_2016(void * a0, int a1, int a2) { PCBox_GridOnKeyMove((PCBoxWork *)a0, a1, a2); }
+static void Native_PCBox_WithdrawGridOnTouch_2016(void * a0, int a1, int a2) { PCBox_WithdrawGridOnTouch((PCBoxWork *)a0, a1); }
+const GridCallbacks sPCBoxWithdrawGridCallbacks = {
+    Native_PCBox_WithdrawGridOnButton_2016,
+    Native_PCBox_GridOnSwitchToTouchMode_2016,
+    Native_PCBox_GridOnKeyMove_2016,
+    Native_PCBox_WithdrawGridOnTouch_2016,
+};
+static void Native_PCBox_DepositGridOnButton_2016(void * a0, int a1, int a2) { PCBox_DepositGridOnButton((PCBoxWork *)a0, a1, a2); }
+static void Native_PCBox_GridOnTouch_2016(void * a0, int a1, int a2) { PCBox_GridOnTouch((PCBoxWork *)a0, a1); }
+const GridCallbacks sPCBoxDepositGridCallbacks = {
+    Native_PCBox_DepositGridOnButton_2016,
+    Native_PCBox_GridOnSwitchToTouchMode_2016,
+    Native_PCBox_GridOnKeyMove_2016,
+    Native_PCBox_GridOnTouch_2016,
+};
+static void Native_PCBox_DepositBoxGridOnButton_2016(void * a0, int a1, int a2) { PCBox_DepositBoxGridOnButton((PCBoxWork *)a0, a1); }
+static void Native_PCBox_DepositBoxGridOnKeyMove_2016(void * a0, int a1, int a2) { PCBox_DepositBoxGridOnKeyMove((PCBoxWork *)a0, a1, a2); }
+static void Native_PCBox_DepositBoxGridOnTouch_2016(void * a0, int a1, int a2) { PCBox_DepositBoxGridOnTouch((PCBoxWork *)a0, a1); }
+const GridCallbacks sPCBoxDepositBoxGridCallbacks = {
+    Native_PCBox_DepositBoxGridOnButton_2016,
+    Native_PCBox_GridOnSwitchToTouchMode_2016,
+    Native_PCBox_DepositBoxGridOnKeyMove_2016,
+    Native_PCBox_DepositBoxGridOnTouch_2016,
+};
+static void Native_PCBox_BoxMenuGridOnButton_2016(void * a0, int a1, int a2) { PCBox_BoxMenuGridOnButton((PCBoxWork *)a0, a1); }
+static void Native_PCBox_BoxMenuGridOnKeyMove_2016(void * a0, int a1, int a2) { PCBox_BoxMenuGridOnKeyMove((PCBoxWork *)a0, a1, a2); }
+static void Native_PCBox_BoxMenuGridOnTouch_2016(void * a0, int a1, int a2) { PCBox_BoxMenuGridOnTouch((PCBoxWork *)a0, a1); }
+const GridCallbacks sPCBoxBoxMenuGridCallbacks = {
+    Native_PCBox_BoxMenuGridOnButton_2016,
+    Native_PCBox_GridOnSwitchToTouchMode_2016,
+    Native_PCBox_BoxMenuGridOnKeyMove_2016,
+    Native_PCBox_BoxMenuGridOnTouch_2016,
+};
+static void Native_PCBox_MoveModePartyGridOnButton_2016(void * a0, int a1, int a2) { PCBox_MoveModePartyGridOnButton((PCBoxWork *)a0, a1, a2); }
+static void Native_PCBox_MoveModePartyGridOnKeyMove_2016(void * a0, int a1, int a2) { PCBox_MoveModePartyGridOnKeyMove((PCBoxWork *)a0, a1, a2); }
+const GridCallbacks sPCBoxMoveModePartyGridCallbacks = {
+    Native_PCBox_MoveModePartyGridOnButton_2016,
+    Native_PCBox_GridOnSwitchToTouchMode_2016,
+    Native_PCBox_MoveModePartyGridOnKeyMove_2016,
+    Native_PCBox_GridOnTouch_2016,
+};
+static void Native_PCBox_TrayGridOnButton_2016(void * a0, int a1, int a2) { PCBox_TrayGridOnButton((PCBoxWork *)a0, a1); }
+static void Native_PCBox_TrayGridOnKeyMove_2016(void * a0, int a1, int a2) { PCBox_TrayGridOnKeyMove((PCBoxWork *)a0, a1, a2); }
+static void Native_PCBox_TrayGridOnTouch_2016(void * a0, int a1, int a2) { PCBox_TrayGridOnTouch((PCBoxWork *)a0, a1); }
+const GridCallbacks sPCBoxTrayGridCallbacks = {
+    Native_PCBox_TrayGridOnButton_2016,
+    Native_PCBox_GridOnSwitchToTouchMode_2016,
+    Native_PCBox_TrayGridOnKeyMove_2016,
+    Native_PCBox_TrayGridOnTouch_2016,
+};
+static void Native_PCBox_MoveModeGridOnButton_2016(void * a0, int a1, int a2) { PCBox_MoveModeGridOnButton((PCBoxWork *)a0, a1, a2); }
+static void Native_PCBox_MoveModeGridOnKeyMove_2016(void * a0, int a1, int a2) { PCBox_MoveModeGridOnKeyMove((PCBoxWork *)a0, a1, a2); }
+static void Native_PCBox_MoveModeGridOnTouch_2016(void * a0, int a1, int a2) { PCBox_MoveModeGridOnTouch((PCBoxWork *)a0, a1); }
+const GridCallbacks sPCBoxMoveModeGridCallbacks = {
+    Native_PCBox_MoveModeGridOnButton_2016,
+    Native_PCBox_GridOnSwitchToTouchMode_2016,
+    Native_PCBox_MoveModeGridOnKeyMove_2016,
+    Native_PCBox_MoveModeGridOnTouch_2016,
+};
+static void Native_PCBox_GridOnButton_2016(void * a0, int a1, int a2) { PCBox_GridOnButton((PCBoxWork *)a0, a1); }
+const GridCallbacks sPCBoxMarkingGridCallbacks = {
+    Native_PCBox_GridOnButton_2016,
+    Native_PCBox_GridOnSwitchToTouchMode_2016,
+    Native_PCBox_GridOnKeyMove_2016,
+    Native_PCBox_GridOnTouch_2016,
+};
+static void Native_PCBox_ItemModePartyGridOnButton_2016(void * a0, int a1, int a2) { PCBox_ItemModePartyGridOnButton((PCBoxWork *)a0, a1, a2); }
+static void Native_PCBox_ItemModePartyGridOnKeyMove_2016(void * a0, int a1, int a2) { PCBox_ItemModePartyGridOnKeyMove((PCBoxWork *)a0, a1, a2); }
+const GridCallbacks sPCBoxItemModePartyGridCallbacks = {
+    Native_PCBox_ItemModePartyGridOnButton_2016,
+    Native_PCBox_GridOnSwitchToTouchMode_2016,
+    Native_PCBox_ItemModePartyGridOnKeyMove_2016,
+    Native_PCBox_GridOnTouch_2016,
+};
+static void Native_PCBox_ItemModeGridOnButton_2016(void * a0, int a1, int a2) { PCBox_ItemModeGridOnButton((PCBoxWork *)a0, a1, a2); }
+static void Native_PCBox_ItemModeGridOnKeyMove_2016(void * a0, int a1, int a2) { PCBox_ItemModeGridOnKeyMove((PCBoxWork *)a0, a1, a2); }
+static void Native_PCBox_ItemModeGridOnTouch_2016(void * a0, int a1, int a2) { PCBox_ItemModeGridOnTouch((PCBoxWork *)a0, a1); }
+const GridCallbacks sPCBoxItemModeGridCallbacks = {
+    Native_PCBox_ItemModeGridOnButton_2016,
+    Native_PCBox_GridOnSwitchToTouchMode_2016,
+    Native_PCBox_ItemModeGridOnKeyMove_2016,
+    Native_PCBox_ItemModeGridOnTouch_2016,
+};
+
+/* Native grid layouts from asm/overlay_14_state_dispatch_rodata_67.s. */
+extern const TouchscreenHitbox sPCBoxBoxMenuGridHitboxes[];
+extern const TouchscreenHitbox sPCBoxDepositBoxGridHitboxes[];
+extern const TouchscreenHitbox sPCBoxDepositGridHitboxes[];
+extern const TouchscreenHitbox sPCBoxItemModeGridHitboxes[];
+extern const TouchscreenHitbox sPCBoxItemModePartyGridHitboxes[];
+extern const TouchscreenHitbox sPCBoxMarkingGridHitboxes[];
+extern const TouchscreenHitbox sPCBoxMoveModeGridHitboxes[];
+extern const TouchscreenHitbox sPCBoxMoveModePartyGridHitboxes[];
+extern const TouchscreenHitbox sPCBoxTrayGridHitboxes[];
+extern const TouchscreenHitbox sPCBoxWallpaperGridHitboxes[];
+extern const TouchscreenHitbox sPCBoxWithdrawGridHitboxes[];
+extern const DpadMenuBox sPCBoxBoxMenuGridDpadBoxes[];
+extern const DpadMenuBox sPCBoxDepositBoxGridDpadBoxes[];
+extern const DpadMenuBox sPCBoxDepositGridDpadBoxes[];
+extern const DpadMenuBox sPCBoxItemModeGridDpadBoxes[];
+extern const DpadMenuBox sPCBoxItemModePartyGridDpadBoxes[];
+extern const DpadMenuBox sPCBoxMarkingGridDpadBoxes[];
+extern const DpadMenuBox sPCBoxMoveModeGridDpadBoxes[];
+extern const DpadMenuBox sPCBoxMoveModePartyGridDpadBoxes[];
+extern const DpadMenuBox sPCBoxTrayGridDpadBoxes[];
+extern const DpadMenuBox sPCBoxWallpaperGridDpadBoxes[];
+extern const DpadMenuBox sPCBoxWithdrawGridDpadBoxes[];
+const PCBoxGridLayout gPCBoxGridLayouts[] = {
+    sPCBoxDepositGridHitboxes,
+    sPCBoxDepositGridDpadBoxes,
+    &sPCBoxDepositGridCallbacks,
+    sPCBoxDepositBoxGridHitboxes,
+    sPCBoxDepositBoxGridDpadBoxes,
+    &sPCBoxDepositBoxGridCallbacks,
+    sPCBoxWithdrawGridHitboxes,
+    sPCBoxWithdrawGridDpadBoxes,
+    &sPCBoxWithdrawGridCallbacks,
+    sPCBoxMoveModeGridHitboxes,
+    sPCBoxMoveModeGridDpadBoxes,
+    &sPCBoxMoveModeGridCallbacks,
+    sPCBoxTrayGridHitboxes,
+    sPCBoxTrayGridDpadBoxes,
+    &sPCBoxTrayGridCallbacks,
+    sPCBoxMoveModePartyGridHitboxes,
+    sPCBoxMoveModePartyGridDpadBoxes,
+    &sPCBoxMoveModePartyGridCallbacks,
+    sPCBoxItemModeGridHitboxes,
+    sPCBoxItemModeGridDpadBoxes,
+    &sPCBoxItemModeGridCallbacks,
+    sPCBoxItemModePartyGridHitboxes,
+    sPCBoxItemModePartyGridDpadBoxes,
+    &sPCBoxItemModePartyGridCallbacks,
+    sPCBoxMarkingGridHitboxes,
+    sPCBoxMarkingGridDpadBoxes,
+    &sPCBoxMarkingGridCallbacks,
+    sPCBoxBoxMenuGridHitboxes,
+    sPCBoxBoxMenuGridDpadBoxes,
+    &sPCBoxBoxMenuGridCallbacks,
+    sPCBoxWallpaperGridHitboxes,
+    sPCBoxWallpaperGridDpadBoxes,
+    &sPCBoxWallpaperGridCallbacks,
+};
+#endif

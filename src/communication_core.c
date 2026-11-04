@@ -81,7 +81,11 @@ static int Comm_InitWork(int create, int packetSize) {
 
         LinkSync_Init(HEAP_ID_15);
         sCommCore.allocation = Heap_Alloc(HEAP_ID_15, sizeof(CommWork) + 32);
+#if defined(SDK_PORT)
+        sCommCore.work = (CommWork *)(32 - ((uintptr_t)sCommCore.allocation & 31) + (uintptr_t)sCommCore.allocation);
+#else
         sCommCore.work = (CommWork *)(32 - ((u32)sCommCore.allocation & 31) + (u32)sCommCore.allocation);
+#endif
         MI_CpuFill8(sCommCore.work, 0, sizeof(CommWork));
 
         if (Comm_IsWifiLinkMode(CommState_GetLinkMode())) {

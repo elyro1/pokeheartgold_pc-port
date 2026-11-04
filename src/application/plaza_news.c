@@ -1131,3 +1131,10 @@ static void PlazaNewsFlash_Update(PlazaNewsFlash *flash) {
         flash->timer++;
     }
 }
+#if defined(SDK_PORT)
+#pragma force_active reset
+
+/* Native tables from asm/wifi_plaza_lobby_data.s; adapters give differing originals the field signatures. */
+static int Native_PlazaNews_Main_7731(OverlayManager * a0, int * a1) { return (int)PlazaNews_Main((OverlayManager *)a0, (u32 *)a1); }
+const OverlayManagerTemplate sWiFiPlazaNewsOverlayTemplate = { PlazaNews_Init, Native_PlazaNews_Main_7731, PlazaNews_Exit, FS_OVERLAY_ID(OVY_88) };
+#endif

@@ -4,6 +4,9 @@
 #include "menu_input_state.h"
 #include "overlay_manager.h"
 #include "save.h"
+#if defined(SDK_PORT)
+#include "trainer_card_types.h"
+#endif
 
 #define HEAP_ID_TRAINER_CARD ((enum HeapID)94)
 
@@ -15,7 +18,14 @@ typedef struct TrainerCardAppSettings {
 } TrainerCardAppSettings;
 
 typedef struct TrainerCardAppArgs {
+#if defined(SDK_PORT)
+    union {
+        u8 card[sizeof(TrainerCardData)];
+        TrainerCardData nativeCard;
+    };
+#else
     u8 card[0x66c];
+#endif
     TrainerCardAppSettings settings;
 } TrainerCardAppArgs;
 
@@ -34,7 +44,11 @@ typedef struct {
     enum HeapID heapID;
     u8 unk4[4];
     OverlayManager *ov_mgr;
+#if defined(SDK_PORT)
+    TrainerCardAppArgs *parentData;
+#else
     Ov50_021E5A3C *parentData;
+#endif
     void *unk10;
 } TrainerCardAppState;
 

@@ -3,6 +3,9 @@
 #include <nnsys/g3d_util_internal.h>
 
 #include "global.h"
+#if defined(SDK_PORT)
+typedef struct BillboardModelEntry { u16 id; u16 member; } BillboardModelEntry;
+#endif
 
 #include "constants/scrcmd.h"
 
@@ -89,11 +92,15 @@ typedef struct MapObjectRenderQueue {
     SysTask *releaseTask;
 } MapObjectRenderQueue;
 
+#if defined(SDK_PORT)
+// Model / gfx sequence NARC member of a billboard model or sequence id, 0xFF-terminated
+#else
 // Model / gfx sequence NARC member of a billboard model or sequence id, BILLBOARD_ID_NONE-terminated
 typedef struct BillboardModelEntry {
     u16 id;
     u16 member;
 } BillboardModelEntry;
+#endif
 
 typedef struct SpriteBillboardInfo {
     u8 unk_00[2];
@@ -687,6 +694,9 @@ static void MapObjectRender_FreeUnusedModels(MapObjectManager *manager, MapObjec
     ids = MapObjectRender_GetModelIds(render);
     cursor = ids + MapObjectRender_GetResidentModelCount(render);
     count = MapObjectRender_GetDynamicModelCount(render);
+#if defined(SDK_PORT)
+    if (count == 0) return;
+#endif
     do {
         if (*cursor != BILLBOARD_ID_NONE && !MapObjectManager_IsModelInUse(manager, *cursor, NULL)) {
             ResourceBank_Free(render->modelBank, *cursor);
@@ -744,6 +754,9 @@ static void MapObjectRender_FreeUnusedSequences(MapObjectManager *manager, MapOb
     ids = MapObjectRender_GetSequenceIds(render);
     cursor = ids + MapObjectRender_GetResidentSequenceCount(render);
     count = MapObjectRender_GetDynamicSequenceCount(render);
+#if defined(SDK_PORT)
+    if (count == 0) return;
+#endif
     do {
         if (*cursor != BILLBOARD_ID_NONE && !MapObjectManager_IsSequenceInUse(manager, *cursor, NULL)) {
             ResourceBank_Free(render->sequenceBank, *cursor);
@@ -1411,7 +1424,11 @@ static void MapObjectRender_CreateQueue(MapObjectRender *render, u32 count, u32 
     MapObjectRenderQueue *queue;
     pendingSize = count * sizeof(PendingBillboard);
     loadsSize = count * sizeof(TextureLoadRequest);
+#if defined(SDK_PORT)
+    transfersSize = pendingSize + count * sizeof(TextureTransfer);
+#else
     transfersSize = pendingSize * 2;
+#endif
     size = transfersSize + loadsSize + sizeof(MapObjectRenderQueue);
     queue = Heap_Alloc(HEAP_ID_FIELD1, size);
     GF_ASSERT(queue);

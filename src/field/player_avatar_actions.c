@@ -966,7 +966,11 @@ static enum FieldMoveTaskStepResult RockClimb_Finish(RockClimbWork *work, TaskMa
         return FIELD_MOVE_TASK_STEP_WAIT;
     }
     MapObject_ClearHeldMovementIfActive(work->mapObject);
+#if defined(SDK_PORT)
+    FieldEffectManager_DestroyEffect((FieldEffectHandle)work->effect);
+#else
     FieldEffectManager_DestroyEffect(work->effect);
+#endif
     return FIELD_MOVE_TASK_STEP_DONE;
 }
 

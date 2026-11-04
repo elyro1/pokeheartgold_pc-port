@@ -530,3 +530,69 @@ BOOL TouchscreenChoiceMenu_State_CancelYesNo(TouchscreenChoiceMenuData *data) {
     TouchscreenChoiceMenu_HideYesNo(data);
     return TouchscreenChoiceMenu_State_Done(data);
 }
+#if defined(SDK_PORT)
+
+/* Native-width pointer tables from asm/touchscreen_menu_data.s. */
+extern const s8 sTouchscreenChoiceMenu2ItemNeighbors[];
+extern const s8 sTouchscreenChoiceMenu3ItemNeighbors[];
+extern const s8 sTouchscreenChoiceMenu4ItemNeighbors[];
+extern const s8 sTouchscreenChoiceMenu5ItemNeighbors[];
+extern const s8 sTouchscreenChoiceMenu6ItemNeighbors[];
+extern const s8 sTouchscreenChoiceMenu7ItemNeighbors[];
+extern const s8 sTouchscreenChoiceMenu8ItemNeighbors[];
+const s8 * gTouchscreenChoiceMenuListNeighbors[7] = {
+    sTouchscreenChoiceMenu2ItemNeighbors,
+    sTouchscreenChoiceMenu3ItemNeighbors,
+    sTouchscreenChoiceMenu4ItemNeighbors,
+    sTouchscreenChoiceMenu5ItemNeighbors,
+    sTouchscreenChoiceMenu6ItemNeighbors,
+    sTouchscreenChoiceMenu7ItemNeighbors,
+    sTouchscreenChoiceMenu8ItemNeighbors,
+};
+extern const TouchscreenHitbox sTouchscreenChoiceMenu2ItemHitboxes[];
+extern const TouchscreenHitbox sTouchscreenChoiceMenu3ItemHitboxes[];
+extern const TouchscreenHitbox sTouchscreenChoiceMenu4ItemHitboxes[];
+extern const TouchscreenHitbox sTouchscreenChoiceMenu5ItemHitboxes[];
+extern const TouchscreenHitbox sTouchscreenChoiceMenu6ItemHitboxes[];
+extern const TouchscreenHitbox sTouchscreenChoiceMenu7ItemHitboxes[];
+extern const TouchscreenHitbox sTouchscreenChoiceMenu8ItemHitboxes[];
+const TouchscreenHitbox * gTouchscreenChoiceMenuListHitboxes[7] = {
+    sTouchscreenChoiceMenu2ItemHitboxes,
+    sTouchscreenChoiceMenu3ItemHitboxes,
+    sTouchscreenChoiceMenu4ItemHitboxes,
+    sTouchscreenChoiceMenu5ItemHitboxes,
+    sTouchscreenChoiceMenu6ItemHitboxes,
+    sTouchscreenChoiceMenu7ItemHitboxes,
+    sTouchscreenChoiceMenu8ItemHitboxes,
+};
+extern const WindowTemplate sTouchscreenChoiceMenu2ItemWindowTemplates[];
+extern const WindowTemplate sTouchscreenChoiceMenu3ItemWindowTemplates[];
+extern const WindowTemplate sTouchscreenChoiceMenu4ItemWindowTemplates[];
+extern const WindowTemplate sTouchscreenChoiceMenu5ItemWindowTemplates[];
+extern const WindowTemplate sTouchscreenChoiceMenu6ItemWindowTemplates[];
+extern const WindowTemplate sTouchscreenChoiceMenu7ItemWindowTemplates[];
+extern const WindowTemplate sTouchscreenChoiceMenu8ItemWindowTemplates[];
+const WindowTemplate * gTouchscreenChoiceMenuListWindowTemplates[7] = {
+    sTouchscreenChoiceMenu2ItemWindowTemplates,
+    sTouchscreenChoiceMenu3ItemWindowTemplates,
+    sTouchscreenChoiceMenu4ItemWindowTemplates,
+    sTouchscreenChoiceMenu5ItemWindowTemplates,
+    sTouchscreenChoiceMenu6ItemWindowTemplates,
+    sTouchscreenChoiceMenu7ItemWindowTemplates,
+    sTouchscreenChoiceMenu8ItemWindowTemplates,
+};
+TouchscreenChoiceMenuStateFunc gTouchscreenChoiceMenuStateFuncs[12] = {
+    TouchscreenChoiceMenu_State_Init,
+    TouchscreenChoiceMenu_State_Idle,
+    TouchscreenChoiceMenu_State_WaitReturn,
+    TouchscreenChoiceMenu_State_ShowYesNo,
+    TouchscreenChoiceMenu_State_YesNoInput,
+    TouchscreenChoiceMenu_State_YesNoEnd,
+    TouchscreenChoiceMenu_State_Done,
+    TouchscreenChoiceMenu_State_ShowList,
+    TouchscreenChoiceMenu_State_ListInput,
+    TouchscreenChoiceMenu_State_ListEnd,
+    TouchscreenChoiceMenu_State_ListWriteResult,
+    TouchscreenChoiceMenu_State_CancelYesNo,
+};
+#endif

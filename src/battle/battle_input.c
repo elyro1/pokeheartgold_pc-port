@@ -1303,7 +1303,11 @@ void *BattleInput_NewInit(NARC *unused, NARC *unused2, BattleSystem *battleSyste
     }
 
     battleInput->fontSystem = FontSystem_NewInit(13, HEAP_ID_BATTLE);
+#if defined(SDK_PORT)
+    battleInput->fadeTask = SysTask_CreateBattleUI(Task_FadeInBattleMenuBackground, battleInput, 1310);
+#else
     battleInput->fadeTask = SysTask_CreateOnMainQueue(Task_FadeInBattleMenuBackground, battleInput, 1310);
+#endif
 
     for (int i = 0; i < 7; i++) {
         NNSG2dScreenData *screenData;
@@ -1375,7 +1379,11 @@ void *BattleInput_NewInit(NARC *unused, NARC *unused2, BattleSystem *battleSyste
     TextFlags_ResetHasSpedUpInput();
     TextFlags_ResetHasContinuedInput();
 
+#if defined(SDK_PORT)
+    battleInput->bgTask = SysTask_CreateBattleUI(Task_BattleMenuMessageWaitForTouchResponse, battleInput, 55000);
+#else
     battleInput->bgTask = SysTask_CreateOnMainQueue(Task_BattleMenuMessageWaitForTouchResponse, battleInput, 55000);
+#endif
 
     return battleInput;
 }
@@ -1514,18 +1522,30 @@ void BattleInput_LoadBallGaugeResources(NARC *narc, BattleInput *battleInput) {
     SpriteSystem_LoadAnimResObjFromOpenNarc(spriteSystem, spriteManager, narc, 206, 1, 20016);
 
     for (i = 0; i < 6; i++) {
+#if defined(SDK_PORT)
+        battleInput->spriteBallGauge[i] = SpriteSystem_NewBattleUISprite(spriteSystem, spriteManager, &sBallGaugeTemplate);
+#else
         battleInput->spriteBallGauge[i] = SpriteSystem_NewSprite(spriteSystem, spriteManager, &sBallGaugeTemplate);
+#endif
         Sprite_SetPositionXYWithSubscreenOffset(battleInput->spriteBallGauge[i]->sprite, 19 * i + 12, 13, FX32_CONST(272));
         ManagedSprite_SetAffineOverwriteMode(battleInput->spriteBallGauge[i], 1);
 
+#if defined(SDK_PORT)
+        battleInput->spriteBallGaugeOpponent[i] = SpriteSystem_NewBattleUISprite(spriteSystem, spriteManager, &sBallGaugeOpponentTemplate);
+#else
         battleInput->spriteBallGaugeOpponent[i] = SpriteSystem_NewSprite(spriteSystem, spriteManager, &sBallGaugeOpponentTemplate);
+#endif
         Sprite_SetPositionXYWithSubscreenOffset(battleInput->spriteBallGaugeOpponent[i]->sprite, 246 + -12 * i, 9, FX32_CONST(272));
     }
 
     BattleInput_DisableBallGauge(battleInput);
 
     GF_ASSERT(battleInput->ballTask == NULL);
+#if defined(SDK_PORT)
+    battleInput->ballTask = SysTask_CreateBattleUI(Task_AnimateBallGauge, battleInput, 1300);
+#else
     battleInput->ballTask = SysTask_CreateOnMainQueue(Task_AnimateBallGauge, battleInput, 1300);
+#endif
 
     PaletteData *palette = BattleSystem_GetPaletteData(battleInput->battleSystem);
     BattleCursor_LoadResources(spriteSystem, spriteManager, palette, HEAP_ID_BATTLE, 20413, 20035, 20406, 20395);
@@ -1808,7 +1828,11 @@ void BattleInput_StartMenuScrollHorizontalTask(BattleInput *battleInput, int xSp
     battleInput->scrollXSpeed = xSpeed;
     battleInput->scrollXEnd = xEnd << 8;
 
+#if defined(SDK_PORT)
+    SysTask_CreateBattleUI(Task_BattleMenuScrollHorizontal, battleInput, 1200);
+#else
     SysTask_CreateOnMainQueue(Task_BattleMenuScrollHorizontal, battleInput, 1200);
+#endif
 }
 
 static void Task_BattleMenuScrollHorizontal(SysTask *task, void *data) {
@@ -1858,7 +1882,11 @@ static void BattleInput_InitMenuSlideIn(BattleInput *battleInput, int battlerId)
     menuSlideIn->ySet = ((40 * 100) - menuSlideIn->y) / 100;
 
     PlaySE(SEQ_SE_DP_SLIDEIN);
+#if defined(SDK_PORT)
+    SysTask_CreateBattleUI(Task_BattleMenuSlideIn, menuSlideIn, 1210);
+#else
     SysTask_CreateOnMainQueue(Task_BattleMenuSlideIn, menuSlideIn, 1210);
+#endif
 
     BOOL ret = Main_SetHBlankIntrCB(HBlankCB_BattleMenuSlideIn, menuSlideIn);
     GF_ASSERT(ret == 1);
@@ -2617,7 +2645,11 @@ static ManagedSprite *BattleInput_SetPokemonIcon(BattleInput *battleInput, Pokem
     spriteTemplate.resIdList[0] = resId;
     spriteTemplate.x = sPokemonIconPositions[battler][0];
     spriteTemplate.y = sPokemonIconPositions[battler][1];
+#if defined(SDK_PORT)
+    sprite = SpriteSystem_NewBattleUISprite(spriteSystem, spriteManager, &spriteTemplate);
+#else
     sprite = SpriteSystem_NewSprite(spriteSystem, spriteManager, &spriteTemplate);
+#endif
 
     ManagedSprite_SetPositionXYWithSubscreenOffset(sprite, spriteTemplate.x, spriteTemplate.y, FX32_CONST(272));
     Sprite_SetPalOffsetRespectVramOffset(sprite->sprite, Pokemon_GetIconPalette(pokemon));
@@ -2650,7 +2682,11 @@ static ManagedSprite *BattleInput_SetPokemonIcon(BattleInput *battleInput, Pokem
     ManagedSprite_TickFrame(sprite);
 
     battleInput->spritePokemonIcons[battler] = sprite;
+#if defined(SDK_PORT)
+    battleInput->taskAnimatePokemonIcon[battler] = SysTask_CreateBattleUI(Task_AnimatePokemonIconSprite, sprite, 1300);
+#else
     battleInput->taskAnimatePokemonIcon[battler] = SysTask_CreateOnMainQueue(Task_AnimatePokemonIconSprite, sprite, 1300);
+#endif
 
     return sprite;
 }
@@ -2667,7 +2703,11 @@ static ManagedSprite *BattleInput_SetBugContestPokemonIcon(BattleInput *battleIn
     spriteTemplate.resIdList[0] = 20039;
     spriteTemplate.x = 120;
     spriteTemplate.y = 8;
+#if defined(SDK_PORT)
+    ManagedSprite *sprite = SpriteSystem_NewBattleUISprite(spriteSystem, spriteManager, &spriteTemplate);
+#else
     ManagedSprite *sprite = SpriteSystem_NewSprite(spriteSystem, spriteManager, &spriteTemplate);
+#endif
 
     ManagedSprite_SetPositionXYWithSubscreenOffset(sprite, spriteTemplate.x, spriteTemplate.y, 0x110000);
 
@@ -3076,6 +3116,12 @@ static void BattleInput_FinishFeedback(BattleInput *battleInput, int freeResourc
 }
 
 static void BattleInput_FreePersistentResources(BattleInput *battleInput) {
+#if defined(SDK_PORT)
+    // A controller can replace the menu before its slower UI feedback finishes.
+    // Stop that task before deleting the sprites it animates. This also handles
+    // feedback finishing normally; its subsequent destroy call is harmless.
+    BattleInput_DestroyFeedbackTask(battleInput);
+#endif
     BattleInput_DeleteAndFreeTypeIconGraphics(battleInput);
     BattleInput_DeleteAndFreeCategoryIconGraphics(battleInput);
     BattleInput_DeleteTextObjects(battleInput);
@@ -3134,7 +3180,11 @@ static void BattleInput_StartFeedbackTask(SysTaskFunc task, BattleInput *battleI
     GF_ASSERT(battleInput->feedbackTask == NULL);
 
     MI_CpuClear8(&battleInput->feedback, sizeof(BattleInputFeedback));
+#if defined(SDK_PORT)
+    battleInput->feedbackTask = SysTask_CreateBattleUI(task, battleInput, 1300);
+#else
     battleInput->feedbackTask = SysTask_CreateOnMainQueue(task, battleInput, 1300);
+#endif
 }
 
 static void BattleInput_DestroyFeedbackTask(BattleInput *battleInput) {
@@ -4577,11 +4627,19 @@ static void BattleInput_CreateBugContestGraphics(BattleInput *battleInput) {
 
     NARC_Delete(narc);
 
+#if defined(SDK_PORT)
+    battleInput->spriteSportBall = SpriteSystem_NewBattleUISprite(spriteSystem, spriteManager, &sSpriteTemplateSportBall);
+#else
     battleInput->spriteSportBall = SpriteSystem_NewSprite(spriteSystem, spriteManager, &sSpriteTemplateSportBall);
+#endif
     ManagedSprite_SetPositionXYWithSubscreenOffset(battleInput->spriteSportBall, 208, 16, 0x110000);
     ManagedSprite_TickFrame(battleInput->spriteSportBall);
 
+#if defined(SDK_PORT)
+    battleInput->spriteBugNet = SpriteSystem_NewBattleUISprite(spriteSystem, spriteManager, &sSpriteTemplateBugNet);
+#else
     battleInput->spriteBugNet = SpriteSystem_NewSprite(spriteSystem, spriteManager, &sSpriteTemplateBugNet);
+#endif
     Sprite_SetAnimCtrlSeq(battleInput->spriteBugNet->sprite, 1);
     ManagedSprite_SetPositionXYWithSubscreenOffset(battleInput->spriteBugNet, 88, 8, 0x110000);
     ManagedSprite_TickFrame(battleInput->spriteBugNet);

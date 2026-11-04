@@ -129,7 +129,11 @@ static const GraphicsModes sConnectToRangerGraphicsModes = {
     ._2d3dMode = GX_BG0_AS_2D,
 };
 
+#if defined(SDK_PORT)
+extern const OverlayManagerTemplate gApp_MainMenu;
+#else
 const OverlayManagerTemplate gApp_MainMenu = { MainMenuApp_Init, MainMenuApp_Main, MainMenuApp_Exit, FS_OVERLAY_ID_NONE };
+#endif
 
 static BOOL ConnectToRanger_Exit(OverlayManager *manager, int *state);
 static BOOL ConnectToRanger_Init(OverlayManager *manager, int *state);
@@ -808,8 +812,13 @@ static BOOL ConnectToRanger_CheckTimeoutOrCancel(ConnectToRangerApp *app, u32 *c
 #pragma opt_common_subs off
 
 static int ConnectToRanger_RunTransfer(ConnectToRangerApp *app) {
+#if defined(SDK_PORT)
+    size_t stateOffset = offsetof(ConnectToRangerApp, connectState);
+    size_t linkInitialisedOffset = stateOffset - sizeof(BOOL);
+#else
     s32 stateOffset = (s32) & ((ConnectToRangerApp *)NULL)->connectState;
     s32 linkInitialisedOffset = stateOffset - 4;
+#endif
 #define CONNECT_STATE (*(u32 *)((u8 *)app + stateOffset))
 
     if (*(BOOL *)((u8 *)app + linkInitialisedOffset) == TRUE) {

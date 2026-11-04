@@ -127,6 +127,91 @@ static void HallOfFameShowcase_MoveCursor(HallOfFameShowcase *showcase, int targ
 static void HallOfFameShowcase_CreatePartyIcon(HallOfFameShowcase *showcase, u32 spriteIndex, u32 position, int charResId, u32 plttResId);
 static int HallOfFameShowcase_GetOverworldModelFileId(int species, int form, int isFemale);
 
+#if defined(SDK_PORT)
+/* Typed native definitions of asm/hall_of_fame_showcase_data.s. */
+static void Native_Showcase_GridOnButton(void *data, int target, int previous) { HallOfFameShowcase_GridOnButton(); }
+static void Native_Showcase_GridOnSwitchToTouchMode(void *data, int target, int previous) { HallOfFameShowcase_GridOnSwitchToTouchMode(); }
+static void Native_Showcase_GridOnKeyMove(void *data, int target, int previous) { HallOfFameShowcase_GridOnKeyMove(data, target); }
+static void Native_Showcase_GridOnTouch(void *data, int target, int previous) { HallOfFameShowcase_GridOnTouch(data, target); }
+const TouchscreenHitbox gHallOfFameShowcaseHitboxes[] = {
+    {.rect = {88, 119, 0, 23}},
+    {.rect = {88, 119, 232, 255}},
+    {.rect = {255, 0, 0, 0}},
+};
+const GraphicsModes gHallOfFameShowcaseGraphicsModes = {1, 0, 0, 0};
+const TileRect gHallOfFameShowcaseMonPicRect = {0, 0, 10, 10};
+const GridCallbacks gHallOfFameShowcaseGridCallbacks = {Native_Showcase_GridOnButton, Native_Showcase_GridOnSwitchToTouchMode, Native_Showcase_GridOnKeyMove, Native_Showcase_GridOnTouch};
+const OamCharTransferParam gHallOfFameShowcaseOamCharTransferParam = {1024, 65536, 16384, 1048592, 1048592};
+const s16 gHallOfFameShowcaseIconPositions[][2] = {{56, 72}, {128, 72}, {200, 72}, {56, 136}, {128, 136}, {200, 136}};
+const SpriteResourceCountsListUnion gHallOfFameShowcaseSpriteResourceCounts = {.asArray = {15, 15, 4, 4, 0, 0}};
+const BgTemplate gHallOfFameShowcaseBgTemplate_Main1 = {0, 0, 2048, 0, 1, 0, 30, 0, 0, 1, 0, 0, 0};
+const BgTemplate gHallOfFameShowcaseBgTemplate_Sub0 = {0, 0, 2048, 0, 1, 0, 31, 4, 0, 0, 0, 0, 0};
+const BgTemplate gHallOfFameShowcaseBgTemplate_Sub1 = {0, 0, 2048, 0, 1, 0, 30, 0, 0, 1, 0, 0, 0};
+const BgTemplate gHallOfFameShowcaseBgTemplate_Main0 = {0, 0, 2048, 0, 1, 0, 31, 4, 0, 0, 0, 0, 0};
+const TouchscreenHitbox gHallOfFameShowcaseGridHitboxes[] = {
+    {.rect = {254, 56, 64, 32}},
+    {.rect = {254, 128, 64, 32}},
+    {.rect = {254, 200, 64, 32}},
+    {.rect = {254, 56, 128, 32}},
+    {.rect = {254, 128, 128, 32}},
+    {.rect = {254, 200, 128, 32}},
+    {.rect = {160, 191, 192, 255}},
+    {.rect = {255, 0, 0, 0}},
+};
+const OamManagerParam gHallOfFameShowcaseOamManagerParam = {0, 128, 0, 32, 0, 128, 0, 32};
+const GraphicsBanks sShowcaseGraphicsBanks = {2, 0, 4, 0, 16, 0, 256, 0, 1, 96};
+const ManagedSpriteTemplate gHallOfFameShowcasePartyIconSpriteTemplate = {0, 0, 0, 0, 0, 0, 1, {-1, -1, -1, -1, -1, -1}, 1, 0};
+const DpadMenuBox gHallOfFameShowcaseGridDpadBoxes[] = {
+    {56, 72, 0, 0, 0, 3, 0, 1},
+    {128, 72, 0, 0, 1, 4, 0, 2},
+    {200, 72, 0, 0, 2, 5, 1, 2},
+    {56, 136, 0, 0, 0, 6, 3, 4},
+    {128, 136, 0, 0, 1, 6, 3, 5},
+    {200, 136, 0, 0, 2, 6, 4, 5},
+    {224, 176, 0, 0, 133, 6, 6, 6},
+};
+const WindowTemplate gHallOfFameShowcaseWindowTemplates[] = {
+    {4, 18, 2, 14, 2, 15, 1},
+    {4, 18, 7, 14, 4, 15, 57},
+    {4, 18, 14, 14, 2, 15, 169},
+    {4, 1, 18, 14, 2, 15, 225},
+    {4, 17, 18, 14, 2, 15, 281},
+    {4, 1, 21, 14, 2, 15, 337},
+    {4, 17, 21, 14, 2, 15, 393},
+    {0, 1, 0, 30, 2, 15, 1},
+    {4, 18, 2, 14, 2, 15, 29},
+    {4, 18, 7, 14, 4, 15, 113},
+    {4, 18, 14, 14, 2, 15, 197},
+    {4, 1, 18, 14, 2, 15, 253},
+    {4, 17, 18, 14, 2, 15, 309},
+    {4, 1, 21, 14, 2, 15, 365},
+    {4, 17, 21, 14, 2, 15, 421},
+    {0, 1, 0, 30, 2, 15, 61},
+    {0, 25, 21, 6, 2, 15, 121},
+};
+const ManagedSpriteTemplate gHallOfFameShowcaseMonPicSpriteTemplate1 = {64, 64, 0, 0, 0, 0, 2, {56512, 56512, 56512, 56512, -1, -1}, 1, 0};
+const ManagedSpriteTemplate gHallOfFameShowcaseMonPicSpriteTemplate2[] = {
+    {64, 64, 0, 0, 0, 0, 2, {56513, 56513, 56512, 56512, -1, -1}, 1, 0},
+    {512, 480, 0, 0, 0, 0, 1, {56514, 56514, 56513, 56513, -1, -1}, 2, 0},
+    {512, 480, 0, 0, 0, 0, 1, {56515, 56515, 56513, 56513, -1, -1}, 2, 0},
+    {512, 480, 0, 0, 0, 0, 1, {56516, 56516, 56513, 56513, -1, -1}, 2, 0},
+    {512, 480, 0, 0, 0, 0, 1, {56517, 56517, 56513, 56513, -1, -1}, 2, 0},
+    {512, 480, 0, 0, 0, 0, 1, {56518, 56518, 56513, 56513, -1, -1}, 2, 0},
+    {512, 480, 0, 0, 0, 0, 1, {56519, 56519, 56513, 56513, -1, -1}, 2, 0},
+    {512, 480, 0, 0, 0, 0, 1, {56520, 56520, 56513, 56513, -1, -1}, 2, 0},
+    {512, 480, 0, 0, 0, 0, 1, {56521, 56521, 56513, 56513, -1, -1}, 2, 0},
+    {512, 480, 0, 0, 0, 0, 1, {56522, 56522, 56513, 56513, -1, -1}, 2, 0},
+    {512, 480, 0, 0, 0, 0, 1, {56523, 56523, 56513, 56513, -1, -1}, 2, 0},
+    {512, 480, 0, 0, 0, 0, 1, {56524, 56524, 56513, 56513, -1, -1}, 2, 0},
+    {512, 480, 0, 0, 0, 0, 1, {56525, 56525, 56513, 56513, -1, -1}, 2, 0},
+};
+const ManagedSpriteTemplate gHallOfFameShowcaseCursorSpriteTemplate = {56, 72, 0, 3, 0, 1, 1, {56526, 56526, 56515, 56515, -1, -1}, 0, 0};
+const ManagedSpriteTemplate gHallOfFameShowcasePrevPageSpriteTemplate = {12, 104, 0, 0, 0, 0, 1, {56526, 56526, 56515, 56515, -1, -1}, 1, 0};
+const ManagedSpriteTemplate gHallOfFameShowcaseNextPageSpriteTemplate = {244, 104, 0, 1, 0, 0, 1, {56526, 56526, 56515, 56515, -1, -1}, 1, 0};
+const ManagedSpriteTemplate gHallOfFameShowcaseExitSpriteTemplate = {224, 176, 0, 2, 0, 0, 1, {56526, 56526, 56515, 56515, -1, -1}, 1, 0};
+_Static_assert(sizeof(DpadMenuBox) == 8, "showcase dpad boxes");
+
+#endif
 BOOL HallOfFameShowcase_Init(OverlayManager *man, int *state) {
     HallOfFameShowcase *showcase;
 
@@ -207,7 +292,11 @@ static void HallOfFameShowcase_VBlankCB(void *data) {
 
     DoScheduledBgGpuUpdates(showcase->bgConfig);
     SpriteSystem_TransferOam();
+#if defined(SDK_PORT)
+    OS_SetIrqCheckFlag(OS_IE_V_BLANK);
+#else
     dtcm[(HW_INTR_CHECK_BUF - HW_DTCM) / 4] |= OS_IE_V_BLANK; // OS_SetIrqCheckFlag, through the DTCM base address
+#endif
 }
 
 static void HallOfFameShowcase_LoadMainObjChar(const void *src, u32 offset, u32 size) {
@@ -319,7 +408,11 @@ static void HallOfFameShowcase_InitSprites(HallOfFameShowcase *showcase) {
     NARC_Delete(narc);
 
     showcase->sprites[0] = SpriteSystem_NewSpriteWithYOffset(showcase->spriteSystem, showcase->spriteManager, &gHallOfFameShowcaseMonPicSpriteTemplate1, FX32_CONST(512));
+#if defined(SDK_PORT)
+    showcase->sprites[1] = SpriteSystem_NewSpriteWithYOffset(showcase->spriteSystem, showcase->spriteManager, &gHallOfFameShowcaseMonPicSpriteTemplate2[0], FX32_CONST(512));
+#else
     showcase->sprites[1] = SpriteSystem_NewSpriteWithYOffset(showcase->spriteSystem, showcase->spriteManager, &gHallOfFameShowcaseMonPicSpriteTemplate2, FX32_CONST(512));
+#endif
     ManagedSprite_SetDrawFlag(showcase->sprites[0], FALSE);
     ManagedSprite_SetDrawFlag(showcase->sprites[1], FALSE);
     showcase->sprites[HOF_SHOWCASE_SPRITE_CURSOR] = SpriteSystem_NewSprite(showcase->spriteSystem, showcase->spriteManager, &gHallOfFameShowcaseCursorSpriteTemplate);

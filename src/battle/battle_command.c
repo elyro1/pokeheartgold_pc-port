@@ -1,3 +1,6 @@
+#if defined(SDK_PORT)
+#include "port/battle_timing.h"
+#endif
 #include "battle/battle_command.h"
 
 #include "global.h"
@@ -1025,7 +1028,11 @@ BOOL BtlCmd_WaitButtonABTime(BattleSystem *battleSystem, BattleContext *ctx) {
 
     if (waitFrames > ctx->waitCounter) {
         BattleScriptIncrementPointer(ctx, -2);
+#if defined(SDK_PORT)
+        if (BattleTiming_ShouldTick(BATTLE_TIMING_UI)) ctx->waitCounter += waitIncrement;
+#else
         ctx->waitCounter += waitIncrement;
+#endif
     } else {
         ctx->waitCounter = 0;
     }
@@ -5686,7 +5693,11 @@ BOOL BtlCmd_WaitTime(BattleSystem *battleSystem, BattleContext *ctx) {
 
     if (wait > ctx->waitCounter) {
         BattleScriptIncrementPointer(ctx, -2);
+#if defined(SDK_PORT)
+        if (BattleTiming_ShouldTick(BATTLE_TIMING_UI)) ctx->waitCounter += tSpeed;
+#else
         ctx->waitCounter += tSpeed;
+#endif
     } else {
         ctx->waitCounter = 0;
     }
@@ -7144,6 +7155,8 @@ extern u8 sStandardBallCatchRates[4];
 extern u8 sSafariCatchRateStages[13][2];
 extern u16 sMoonBallPokemon[14];
 
+#if defined(SDK_PORT)
+#else
 #define CP_SQRT_32BIT_MODE (0UL << REG_CP_SQRTCNT_MODE_SHIFT)
 
 static inline void CP_SetSqrtImm32_NS_(u32 param) {
@@ -7176,6 +7189,7 @@ static inline u32 CP_GetSqrtResult32(void) {
     CP_WaitSqrt();
     return CP_GetSqrtResultImm32();
 }
+#endif
 
 static u32 BattleSystem_CalculateBallShakes(BattleSystem *bsys, BattleContext *ctx) {
     s32 catchRate;
@@ -8119,3 +8133,234 @@ static void BattlerSetAbility(BattleContext *ctx, u8 battlerID, u8 ability) {
 static void BattlerSetItem(BattleContext *ctx, u8 battlerID, u16 item) {
     ctx->trainerAIData.heldItems[battlerID] = item;
 }
+#if defined(SDK_PORT)
+
+/* Native tables from asm/overlay_12_battle_command.s; adapters give differing originals the table's signature. */
+BtlCmdFunc sBattleScriptCommandTable[225] = {
+    BtlCmd_PlayEncounterAnimation,
+    BtlCmd_SetPokemonEncounter,
+    BtlCmd_PokemonSlideIn,
+    BtlCmd_PokemonSendOut,
+    BtlCmd_RecallPokemon,
+    BtlCmd_DeletePokemon,
+    BtlCmd_SetTrainerEncounter,
+    BtlCmd_ThrowPokeball,
+    BtlCmd_TrainerSlideOut,
+    BtlCmd_TrainerSlideIn,
+    BtlCmd_BackgroundSlideIn,
+    BtlCmd_HealthbarSlideIn,
+    BtlCmd_HealthbarSlideInDelay,
+    BtlCmd_HealthbarSlideOut,
+    BtlCmd_Wait,
+    BtlCmd_CalcDamage,
+    BtlCmd_CalcDamageRaw,
+    BtlCmd_PrintAttackMessage,
+    BtlCmd_PrintMessage,
+    BtlCmd_PrintGlobalMessage,
+    BtlCmd_PrintBufferedMessage,
+    BtlCmd_BufferMessage,
+    BtlCmd_BufferLocalMessage,
+    BtlCmd_PlayMoveAnimation,
+    BtlCmd_PlayMoveAnimationOnMons,
+    BtlCmd_FlickerMon,
+    BtlCmd_UpdateHealthbarValue,
+    BtlCmd_UpdateHealthbar,
+    BtlCmd_TryFaintMon,
+    BtlCmd_PlayFaintAnimation,
+    BtlCmd_WaitButtonABTime,
+    BtlCmd_PlaySound,
+    BtlCmd_CompareVarToValue,
+    BtlCmd_CompareMonDataToValue,
+    BtlCmd_FadeOutBattle,
+    BtlCmd_GoToSubscript,
+    BtlCmd_GoToEffectScript,
+    BtlCmd_GoToMoveScript,
+    BtlCmd_CalcCrit,
+    BtlCmd_CalcExpGain,
+    BtlCmd_StartGetExpTask,
+    BtlCmd_WaitGetExpTask,
+    BtlCmd_WaitGetExpTaskLoop,
+    BtlCmd_ShowParty,
+    BtlCmd_WaitMonSelection,
+    BtlCmd_SwitchAndUpdateMon,
+    BtlCmd_GoToIfAnySwitches,
+    BtlCmd_StartCatchMonTask,
+    BtlCmd_WaitCatchMonTask,
+    BtlCmd_SetMultiHit,
+    BtlCmd_UpdateVar,
+    BtlCmd_ChangeStatStage,
+    BtlCmd_UpdateMonData,
+    BtlCmd_ClearVolatileStatus,
+    BtlCmd_ToggleVanish,
+    BtlCmd_CheckAbility,
+    BtlCmd_Random,
+    BtlCmd_UpdateVar2,
+    BtlCmd_UpdateMonDataFromVar,
+    BtlCmd_Goto,
+    BtlCmd_Call,
+    BtlCmd_CallFromVar,
+    BtlCmd_SetMirrorMove,
+    BtlCmd_ResetAllStatChanges,
+    BtlCmd_LockMoveChoice,
+    BtlCmd_UnlockMoveChoice,
+    BtlCmd_SetHealthbarStatus,
+    BtlCmd_PrintTrainerMessage,
+    BtlCmd_PayPrizeMoney,
+    BtlCmd_PlayBattleAnimation,
+    BtlCmd_PlayBattleAnimationOnMons,
+    BtlCmd_PlayBattleAnimationFromVar,
+    BtlCmd_PrintRecallMessage,
+    BtlCmd_PrintSendOutMessage,
+    BtlCmd_PrintEncounterMessage,
+    BtlCmd_PrintFirstSendOutMessage,
+    BtlCmd_PrintBufferedTrainerMessage,
+    BtlCmd_TryConversion,
+    BtlCmd_CompareVarToVar,
+    BtlCmd_CompareMonDataToVar,
+    BtlCmd_AddPayDayMoney,
+    BtlCmd_TryLightScreen,
+    BtlCmd_TryReflect,
+    BtlCmd_TryMist,
+    BtlCmd_TryOHKOMove,
+    BtlCmd_DivideVarByValue,
+    BtlCmd_DivideVarByVar,
+    BtlCmd_TryMimic,
+    BtlCmd_Metronome,
+    BtlCmd_TryDisable,
+    BtlCmd_Counter,
+    BtlCmd_MirrorCoat,
+    BtlCmd_TryEncore,
+    BtlCmd_TryConversion2,
+    BtlCmd_TrySketch,
+    BtlCmd_TrySleepTalk,
+    BtlCmd_CalcFlailPower,
+    BtlCmd_TrySpite,
+    BtlCmd_TryPartyStatusRefresh,
+    BtlCmd_TryStealItem,
+    BtlCmd_TryProtection,
+    BtlCmd_TrySubstitute,
+    BtlCmd_TryWhirlwind,
+    BtlCmd_Transform,
+    BtlCmd_TrySpikes,
+    BtlCmd_CheckSpikes,
+    BtlCmd_TryPerishSong,
+    BtlCmd_GetTurnOrderBySpeed,
+    BtlCmd_GoToIfValidMon,
+    BtlCmd_EndOfTurnWeatherEffect,
+    BtlCmd_CalcRolloutPower,
+    BtlCmd_CalcFuryCutterPower,
+    BtlCmd_TryAttract,
+    BtlCmd_TrySafeguard,
+    BtlCmd_Present,
+    BtlCmd_CalcMagnitudePower,
+    BtlCmd_TryReplaceFaintedMon,
+    BtlCmd_RapidSpin,
+    BtlCmd_WeatherHPRecovery,
+    BtlCmd_CalcHiddenPowerParams,
+    BtlCmd_CopyStatStages,
+    BtlCmd_TryFutureSight,
+    BtlCmd_CheckMoveHit,
+    BtlCmd_TryTeleport,
+    BtlCmd_BeatUp,
+    BtlCmd_FollowMe,
+    BtlCmd_TryHelpingHand,
+    BtlCmd_TrySwapItems,
+    BtlCmd_TryWish,
+    BtlCmd_TryAssist,
+    BtlCmd_TrySetMagicCoat,
+    BtlCmd_MagicCoat,
+    BtlCmd_CalcRevengeDamageMul,
+    BtlCmd_TryBreakScreens,
+    BtlCmd_TryYawn,
+    BtlCmd_TryKnockOff,
+    BtlCmd_CalcHPFalloffPower,
+    BtlCmd_TryImprison,
+    BtlCmd_TryGrudge,
+    BtlCmd_TrySnatch,
+    BtlCmd_CalcWeightBasedPower,
+    BtlCmd_CalcWeatherBallParams,
+    BtlCmd_TryPursuit,
+    BtlCmd_ApplyTypeEffectiveness,
+    BtlCmd_IfTurnFlag,
+    BtlCmd_SetTurnFlag,
+    BtlCmd_CalcGyroBallPower,
+    BtlCmd_TryMetalBurst,
+    BtlCmd_CalcPaybackPower,
+    BtlCmd_CalcTrumpCardPower,
+    BtlCmd_CalcWringOutPower,
+    BtlCmd_TryMeFirst,
+    BtlCmd_TryCopycat,
+    BtlCmd_CalcPunishmentPower,
+    BtlCmd_TrySuckerPunch,
+    BtlCmd_CheckSideCondition,
+    BtlCmd_TryFeint,
+    BtlCmd_TryPyschoShift,
+    BtlCmd_TryLastResort,
+    BtlCmd_TryToxicSpikes,
+    BtlCmd_CheckToxicSpikes,
+    BtlCmd_CheckIgnorableAbility,
+    BtlCmd_IfSameSide,
+    BtlCmd_GenerateEndOfBattleItem,
+    BtlCmd_TrickRoom,
+    BtlCmd_IfMovedThisTurn,
+    BtlCmd_CheckItemHoldEffect,
+    BtlCmd_GetItemHoldEffect,
+    BtlCmd_GetItemEffectParam,
+    BtlCmd_TryCamouflage,
+    BtlCmd_GetTerrainMove,
+    BtlCmd_GetTerrainSecondaryEffect,
+    BtlCmd_CalcNaturalGiftParams,
+    BtlCmd_TryPluck,
+    BtlCmd_TryFling,
+    BtlCmd_YesNoMenu,
+    BtlCmd_WaitYesNoResult,
+    BtlCmd_ChoosePokemonMenu,
+    BtlCmd_WaitPokemonMenuResult,
+    BtlCmd_SetLinkBattleResult,
+    BtlCmd_CheckStealthRock,
+    BtlCmd_CheckEffectActivation,
+    BtlCmd_CheckChatterActivation,
+    BtlCmd_GetCurrentMoveData,
+    BtlCmd_SetMosaic,
+    BtlCmd_ChangeForm,
+    BtlCmd_SetBattleBackground,
+    BtlCmd_UseBagItem,
+    BtlCmd_TryEscape,
+    BtlCmd_ShowBattleStartPartyGauge,
+    BtlCmd_HideBattleStartPartyGauge,
+    BtlCmd_ShowPartyGauge,
+    BtlCmd_HidePartyGauge,
+    BtlCmd_LoadPartyGaugeGraphics,
+    BtlCmd_FreePartyGaugeGraphics,
+    BtlCmd_IncrementGameStat,
+    BtlCmd_RestoreSprite,
+    BtlCmd_TriggerAbilityOnHit,
+    BtlCmd_SpriteToOAM,
+    BtlCmd_OAMToSprite,
+    BtlCmd_CheckWhiteout,
+    BtlCmd_BoostRandomStatBy2,
+    BtlCmd_RemoveItem,
+    BtlCmd_TryRecycle,
+    BtlCmd_CheckItemHoldEffectOnHit,
+    BtlCmd_PrintBattleResultMessage,
+    BtlCmd_PrintEscapeMessage,
+    BtlCmd_PrintForfeitMessage,
+    BtlCmd_CheckHoldOnWith1HP,
+    BtlCmd_TryRestoreStatusOnSwitch,
+    BtlCmd_CheckSubstitute,
+    BtlCmd_CheckIgnoreWeather,
+    BtlCmd_SetRandomTarget,
+    BtlCmd_CheckItemHoldEffectOnUTurn,
+    BtlCmd_RefreshSprite,
+    BtlCmd_PlayMoveHitSound,
+    BtlCmd_PlayBGM,
+    BtlCmd_CheckSafariGameDone,
+    BtlCmd_WaitTime,
+    BtlCmd_CheckCurMoveIsType,
+    BtlCmd_LoadArchivedMonData,
+    BtlCmd_RefreshMonData,
+    BtlCmd_222,
+    BtlCmd_223,
+    BtlCmd_EndScript,
+};
+#endif

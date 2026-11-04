@@ -1,6 +1,9 @@
 #include "record_mixing/record_mixing_exchange.h"
 
 #include "global.h"
+#if defined(SDK_PORT)
+#include "frontier_data_access.h"
+#endif
 
 #include "record_mixing/record_mixing_records.h"
 
@@ -171,3 +174,41 @@ void RecordMixing_MergeReceivedRecords(SaveData *saveData, u8 (*buffers)[RECORD_
     SaveBlock23_ClearArraysAndReset(block23);
     SaveBlock23_Reset(block23);
 }
+#if defined(SDK_PORT)
+
+static u32 Native_Save_Rankings_GetMixingSize(SaveData *saveData) { return Save_Rankings_GetMixingSize(); }
+static void *Native_RecordMixing_Rankings_Load(SaveData *saveData, enum HeapID heapID, u32 size) { return RecordMixing_Rankings_Load(saveData, heapID); }
+static u32 Native_BattleRoomTrainer_sizeof(SaveData *saveData) { return BattleRoomTrainer_sizeof(); }
+const RecordMixingHandler sRecordMixingHandlers[RECORD_MIXING_NUM_HANDLERS] = {
+    RecordMixing_FriendGroup_GetSize,
+    RecordMixing_FriendGroup_Load,
+    RecordMixing_FriendGroup_Merge,
+    RecordMixing_Fashion_GetSize,
+    RecordMixing_Fashion_Load,
+    RecordMixing_Fashion_Merge,
+    RecordMixing_Block23List0_GetSize,
+    RecordMixing_Block23List0_Load,
+    0,
+    RecordMixing_Block23List1_GetSize,
+    RecordMixing_Block23List1_Load,
+    0,
+    RecordMixing_Block23List2_GetSize,
+    RecordMixing_Block23List2_Load,
+    0,
+    Native_Save_Rankings_GetMixingSize,
+    Native_RecordMixing_Rankings_Load,
+    RecordMixing_Rankings_Merge,
+    Native_BattleRoomTrainer_sizeof,
+    RecordMixing_BattleRoomTrainer_Load,
+    RecordMixing_BattleRoomTrainer_Merge,
+    RecordMixing_Block23List0_GetSize,
+    RecordMixing_Block23List0_Load2,
+    0,
+    RecordMixing_Block23List1_GetSize,
+    RecordMixing_Block23List1_Load2,
+    0,
+    RecordMixing_Block23List2_GetSize,
+    RecordMixing_Block23List2_Load2,
+    RecordMixing_Block23_Merge,
+};
+#endif

@@ -52,8 +52,11 @@ extern void ResetAllTextPrinters(void);
 extern u8 TextPrinterCheckActive(u8 printerId);
 extern void TextFlags_SetCanTouchSpeedUpPrint(BOOL enable);
 
+#if defined(SDK_PORT)
+#else
 BOOL CTRDG_IsExisting(void);
 void CTRDG_ReadAgbFlash(u16 sector, u32 offset, void *dest, u32 size);
+#endif
 
 extern int gAgbCartridgePulledOutInSleep;
 
@@ -129,7 +132,10 @@ static int MigrateFromAgb_GetTextX(MigrateFromAgbText *text, String *string, int
 static void MigrateFromAgb_InitObjTransfer(void);
 static void MigrateFromAgb_InitSpriteResources(MigrateFromAgbApp *app);
 static void MigrateFromAgb_InitSpriteHeader(MigrateFromAgbApp *app);
+#if defined(SDK_PORT)
+#else
 static void MigrateFromAgb_InitSpriteTemplate(SpriteTemplate *template, MigrateFromAgbApp *app, int unused, NNS_G2D_VRAM_TYPE whichScreen);
+#endif
 static u32 MigrateFromAgb_GetBoxMonSpecies(MigrateFromAgbApp *app, int box, int slot);
 static u32 MigrateFromAgb_GetBoxMonIsEgg(MigrateFromAgbApp *app, int box, int slot);
 static u32 MigrateFromAgb_GetBoxMonPersonality(MigrateFromAgbApp *app, int box, int slot);
@@ -544,7 +550,11 @@ static void MigrateFromAgb_InitSpriteHeader(MigrateFromAgbApp *app) {
     GfGfx_EngineATogglePlanes(GX_PLANEMASK_OBJ, GF_PLANE_TOGGLE_ON);
 }
 
+#if defined(SDK_PORT)
+static void MigrateFromAgb_InitSpriteTemplate(SpriteTemplate *template, MigrateFromAgbApp *app, SpriteResourcesHeader *unused, NNS_G2D_VRAM_TYPE whichScreen) {
+#else
 static void MigrateFromAgb_InitSpriteTemplate(SpriteTemplate *template, MigrateFromAgbApp *app, int unused, NNS_G2D_VRAM_TYPE whichScreen) {
+#endif
     template->spriteList = app->spriteList;
     template->header = &app->resHeader;
     template->position.z = 0;
@@ -721,7 +731,11 @@ static void MigrateFromAgb_CreateBoxSprites(MigrateFromAgbApp *app) {
 
     int x, index, yPos;
     TouchscreenHitbox *hitbox;
+#if defined(SDK_PORT)
+    MigrateFromAgb_InitSpriteTemplate(&template, app, &app->resHeader, NNS_G2D_VRAM_TYPE_2DMAIN);
+#else
     MigrateFromAgb_InitSpriteTemplate(&template, app, (int)&app->resHeader, NNS_G2D_VRAM_TYPE_2DMAIN);
+#endif
     loops.y = 40;
     index = 0;
     loops.row = 0;
@@ -783,7 +797,11 @@ end:;
 
 static Sprite *MigrateFromAgb_CreateSprite(MigrateFromAgbApp *app, int x, int y, int anim, BOOL draw) {
     SpriteTemplate template;
+#if defined(SDK_PORT)
+    MigrateFromAgb_InitSpriteTemplate(&template, app, &app->resHeader, NNS_G2D_VRAM_TYPE_2DMAIN);
+#else
     MigrateFromAgb_InitSpriteTemplate(&template, app, (int)&app->resHeader, NNS_G2D_VRAM_TYPE_2DMAIN);
+#endif
     template.position.x = x << FX32_SHIFT;
     template.position.y = y << FX32_SHIFT;
     template.drawPriority = 10;
@@ -1138,7 +1156,11 @@ static void MigrateFromAgb_ShowConfirmScreen(MigrateFromAgbApp *app) {
     Sprite_SetDrawFlag(app->buttons[0].sprite, FALSE);
     Sprite_SetDrawFlag(app->buttons[2].sprite, FALSE);
     Sprite_SetDrawFlag(app->buttons[1].sprite, FALSE);
+#if defined(SDK_PORT)
+    MigrateFromAgb_InitSpriteTemplate(&template, app, &app->resHeader, NNS_G2D_VRAM_TYPE_2DMAIN);
+#else
     MigrateFromAgb_InitSpriteTemplate(&template, app, (int)&app->resHeader, NNS_G2D_VRAM_TYPE_2DMAIN);
+#endif
     for (i = 0; i < MIGRATE_FROM_AGB_MON_COUNT; i++) {
         template.position.x = (28 + i * 40) << FX32_SHIFT;
         template.position.y = 142 << FX32_SHIFT;

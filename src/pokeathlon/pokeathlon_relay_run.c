@@ -250,7 +250,11 @@ BOOL PokeathlonRelayRun_Init(PokeathlonCourseData *course) {
         PokeathlonRelayRun *data = PokeathlonCourse_AllocWork(course, sizeof(PokeathlonRelayRun));
         MI_CpuFill8(data, 0, sizeof(PokeathlonRelayRun));
         data->bgConfig = BgConfig_Alloc(HEAP_ID_144);
+#if defined(SDK_PORT)
+        PokeathlonCourse_SetEventDataTransfer(course, data->layoutToSend, data->layout, sizeof(data->layout));
+#else
         PokeathlonCourse_SetEventDataTransfer(course, (u32)data->layoutToSend, (u32)data->layout, sizeof(data->layout));
+#endif
         PokeathlonCourse_SetHudPlanes(course, GX_PLANEMASK_BG3);
         ObjCharTransferTemplate charTransfer;
         charTransfer.maxTasks = 151;

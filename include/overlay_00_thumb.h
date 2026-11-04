@@ -13,7 +13,10 @@ void WifiConnection_StopVoiceChat(void);
 void WifiConnection_StartVoiceChat(int heapId);
 void WifiConnection_SetOwnStatusData(void *data, int size);
 void WifiConnection_SetVoiceChatEnabled(u8 value);
+#if defined(SDK_PORT)
+#else
 void DWC_SetAuthServer(int server);
+#endif
 void WifiConnection_SetExtraHeapEnabled(BOOL enable, int heapId);
 s32 WifiConnection_GetFriendStatus(s32 index);
 s32 WifiConnection_GetNewClientIndex(void);

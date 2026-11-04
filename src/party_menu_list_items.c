@@ -54,6 +54,43 @@ static void PartyMonContextMenuAction_Softboiled(PartyMenu *partyMenu, int *pSta
 static void PartyMonContextMenuAction_Headbutt(PartyMenu *partyMenu, int *pState);
 static int PartyMonContextMenuAction_TransferHP(PartyMenu *partyMenu);
 
+#if defined(SDK_PORT)
+/* Native menu values are action IDs. Keep callback addresses in a typed table. */
+static const PartyMonContextMenuActionFunc _02101CB8[] = {
+    [PARTY_MON_CONTEXT_MENU_SWITCH] = PartyMonContextMenuAction_Switch,
+    [PARTY_MON_CONTEXT_MENU_SUMMARY] = PartyMonContextMenuAction_Summary,
+    [PARTY_MON_CONTEXT_MENU_ITEM] = PartyMonContextMenuAction_Item,
+    [PARTY_MON_CONTEXT_MENU_GIVE] = PartyMonContextMenuAction_Give,
+    [PARTY_MON_CONTEXT_MENU_TAKE] = PartyMonContextMenuAction_Take,
+    [PARTY_MON_CONTEXT_MENU_MAIL] = PartyMonContextMenuAction_Mail,
+    [PARTY_MON_CONTEXT_MENU_READ_MAIL] = PartyMonContextMenuAction_ReadMail,
+    [PARTY_MON_CONTEXT_MENU_TAKE_MAIL] = PartyMonContextMenuAction_TakeMail,
+    [PARTY_MON_CONTEXT_MENU_STORE] = PartyMonContextMenuAction_Store,
+    [PARTY_MON_CONTEXT_MENU_QUIT] = NULL,
+    [PARTY_MON_CONTEXT_MENU_UNUSED] = NULL,
+    [PARTY_MON_CONTEXT_MENU_ENTER] = PartyMonContextMenuAction_Enter,
+    [PARTY_MON_CONTEXT_MENU_NO_ENTRY] = PartyMonContextMenuAction_NoEntry,
+    [PARTY_MON_CONTEXT_MENU_CONTEST_ENTER] = PartyMonContextMenuAction_ContestEnter,
+    [PARTY_MON_CONTEXT_MENU_SET] = PartyMonContextMenuAction_Set,
+    [PARTY_MON_CONTEXT_MENU_CONFIRM] = PartyMonContextMenuAction_Confirm,
+    [PARTY_MON_CONTEXT_MENU_CUT] = PartyMonContextMenuAction_Cut,
+    [PARTY_MON_CONTEXT_MENU_FLY] = PartyMonContextMenuAction_Fly,
+    [PARTY_MON_CONTEXT_MENU_SURF] = PartyMonContextMenuAction_Surf,
+    [PARTY_MON_CONTEXT_MENU_STRENGTH] = PartyMonContextMenuAction_Strength,
+    [PARTY_MON_CONTEXT_MENU_ROCK_SMASH] = PartyMonContextMenuAction_RockSmash,
+    [PARTY_MON_CONTEXT_MENU_WATERFALL] = PartyMonContextMenuAction_Waterfall,
+    [PARTY_MON_CONTEXT_MENU_ROCK_CLIMB] = PartyMonContextMenuAction_RockClimb,
+    [PARTY_MON_CONTEXT_MENU_WHIRLPOOL] = PartyMonContextMenuAction_Whirlpool,
+    [PARTY_MON_CONTEXT_MENU_FLASH] = PartyMonContextMenuAction_Flash,
+    [PARTY_MON_CONTEXT_MENU_TELEPORT] = PartyMonContextMenuAction_Teleport,
+    [PARTY_MON_CONTEXT_MENU_DIG] = PartyMonContextMenuAction_Dig,
+    [PARTY_MON_CONTEXT_MENU_SWEET_SCENT] = PartyMonContextMenuAction_SweetScent,
+    [PARTY_MON_CONTEXT_MENU_CHATTER] = PartyMonContextMenuAction_Chatter,
+    [PARTY_MON_CONTEXT_MENU_HEADBUTT] = PartyMonContextMenuAction_Headbutt,
+    [PARTY_MON_CONTEXT_MENU_MILK_DRINK] = PartyMonContextMenuAction_MilkDrink,
+    [PARTY_MON_CONTEXT_MENU_SOFTBOILED] = PartyMonContextMenuAction_Softboiled,
+    [PARTY_MON_CONTEXT_MENU_MAX] = NULL,
+#else
 static const u32 _02101CB8[] = {
     [PARTY_MON_CONTEXT_MENU_SWITCH] = (u32)PartyMonContextMenuAction_Switch,
     [PARTY_MON_CONTEXT_MENU_SUMMARY] = (u32)PartyMonContextMenuAction_Summary,
@@ -88,10 +125,21 @@ static const u32 _02101CB8[] = {
     [PARTY_MON_CONTEXT_MENU_MILK_DRINK] = (u32)PartyMonContextMenuAction_MilkDrink,
     [PARTY_MON_CONTEXT_MENU_SOFTBOILED] = (u32)PartyMonContextMenuAction_Softboiled,
     [PARTY_MON_CONTEXT_MENU_MAX] = LIST_CANCEL,
+#endif
 };
 
 u32 GetPartyMenuContextMenuActionFunc(int index) {
+#if defined(SDK_PORT)
+    GF_ASSERT(index >= 0 && index < NELEMS(_02101CB8));
+    return _02101CB8[index] == NULL ? (u32)LIST_CANCEL : (u32)index;
+}
+
+PartyMonContextMenuActionFunc PartyMenu_GetContextMenuAction(u32 action) {
+    GF_ASSERT(action < NELEMS(_02101CB8) && _02101CB8[action] != NULL);
+    return _02101CB8[action];
+#else
     return _02101CB8[index];
+#endif
 }
 
 static void PartyMonContextMenuAction_Item(PartyMenu *partyMenu, int *pState) {

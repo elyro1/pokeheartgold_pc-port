@@ -1,6 +1,9 @@
 #ifndef POKEHEARTGOLD_PARTICLE_SYSTEM_H
 #define POKEHEARTGOLD_PARTICLE_SYSTEM_H
 
+#if defined(SDK_PORT)
+#include "particle_work_size.h"
+#endif
 #include "camera.h"
 #include "filesystem_files_def.h"
 #include "spl.h"

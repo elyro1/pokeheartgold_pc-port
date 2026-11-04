@@ -9,6 +9,9 @@
 
 #include "billboard_lists.h"
 #include "field_effects.h"
+#if defined(SDK_PORT)
+#include "field_emote_mark.h"
+#endif
 #include "map_object.h"
 #include "sound_playback.h"
 
@@ -96,10 +99,51 @@ FieldEffect *EmoteMark_Spawn(LocalMapObject *mapObject, int kind, BOOL playSound
 BOOL MapObjectEmoteMarkEffect_Init(FieldEffect *effect, EmoteMarkEffect *work);
 void MapObjectEmoteMarkEffect_Update(FieldEffect *effect, EmoteMarkEffect *work);
 
+#if defined(SDK_PORT)
+// DS builds retain asm/field_emote_mark_data.s; native builds use the typed definitions below.
+// sEmoteMarkTemplate is an unused fixed-position mark; gMapObjectEmoteMarkTemplate follows a map object.
+#else
 // sEmoteMarkTemplate is a mark at a fixed position that nothing creates; gMapObjectEmoteMarkTemplate follows a
 // map object.
+#endif
 extern const FieldEffectBasicTemplate gMapObjectEmoteMarkTemplate;
 extern const BillboardSequenceRange gEmoteMarkRecordParams[2];
+#if defined(SDK_PORT)
+
+static BOOL EmoteMarkEffect_Init_Native(FieldEffect *effect, void *state) {
+    return EmoteMarkEffect_Init(effect, state);
+}
+static void EmoteMarkEffect_Destroy_Native(FieldEffect *effect, void *state) {
+    EmoteMarkEffect_Destroy(effect, state);
+}
+static void EmoteMarkEffect_Update_Native(FieldEffect *effect, void *state) {
+    EmoteMarkEffect_Update(effect, state);
+}
+static void EmoteMarkEffect_Draw_Native(FieldEffect *effect, void *state) {
+    EmoteMarkEffect_Draw(effect, state);
+}
+const FieldEffectBasicTemplate sEmoteMarkTemplate = {
+    sizeof(EmoteMarkEffect),
+    EmoteMarkEffect_Init_Native,
+    EmoteMarkEffect_Destroy_Native,
+    EmoteMarkEffect_Update_Native,
+    EmoteMarkEffect_Draw_Native,
+};
+static BOOL MapObjectEmoteMarkEffect_Init_Native(FieldEffect *effect, void *state) {
+    return MapObjectEmoteMarkEffect_Init(effect, state);
+}
+static void MapObjectEmoteMarkEffect_Update_Native(FieldEffect *effect, void *state) {
+    MapObjectEmoteMarkEffect_Update(effect, state);
+}
+const FieldEffectBasicTemplate gMapObjectEmoteMarkTemplate = {
+    sizeof(EmoteMarkEffect),
+    MapObjectEmoteMarkEffect_Init_Native,
+    EmoteMarkEffect_Destroy_Native,
+    MapObjectEmoteMarkEffect_Update_Native,
+    EmoteMarkEffect_Draw_Native,
+};
+const BillboardSequenceRange gEmoteMarkRecordParams[2] = {{0, 1, 0}, {0, 0, 2}};
+#endif
 
 EmoteMark *EmoteMark_New(FieldEffectManager *manager) {
     EmoteMark *emoteMark = FieldEffectManager_HeapAllocAndFill(manager, sizeof(EmoteMark), FALSE, 0);

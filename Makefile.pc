@@ -1,0 +1,65 @@
+# Native builds are deliberately separate from the matching DS build.
+GAME_VERSION ?= HEARTGOLD
+MESON ?= meson
+NINJA ?= ninja
+PYTHON ?= python3
+JOBS ?= 4
+MESON_ARGS ?=
+RUNTIME_ARGS ?=
+
+ifeq ($(OS),Windows_NT)
+PC_PLATFORM ?= win64
+else
+PC_PLATFORM ?= linux
+endif
+ifneq ($(filter win64,$(MAKECMDGOALS)),)
+PC_PLATFORM := win64
+endif
+ifneq ($(filter linux,$(MAKECMDGOALS)),)
+PC_PLATFORM := linux
+endif
+
+ifeq ($(PC_PLATFORM),win64)
+PC_EXEEXT := .exe
+else ifneq ($(PC_PLATFORM),linux)
+$(error PC_PLATFORM must be linux or win64)
+endif
+
+ifeq ($(GAME_VERSION),HEARTGOLD)
+PC_GAME := heartgold
+else ifeq ($(GAME_VERSION),SOULSILVER)
+PC_GAME := soulsilver
+else
+$(error GAME_VERSION must be HEARTGOLD or SOULSILVER)
+endif
+
+ifeq ($(PC_PLATFORM),win64)
+PC_BUILD ?= build/pc/win64/$(PC_GAME)
+else
+PC_BUILD ?= build/pc/$(PC_GAME)
+endif
+PC_RUN := $(abspath $(PC_BUILD))/run
+
+.PHONY: linux win64 runtime configure game assets clean
+
+linux: game
+win64: runtime
+
+runtime: game
+ifeq ($(PC_PLATFORM),win64)
+	$(MESON) compile -C $(PC_BUILD) -j $(JOBS) hg-extract
+	$(PYTHON) pc/tools/windows_runtime.py --build $(PC_BUILD) $(RUNTIME_ARGS)
+endif
+
+game: configure
+	$(MESON) compile -C $(PC_BUILD) -j $(JOBS) hg-game
+
+configure:
+	$(MESON) setup --reconfigure $(PC_BUILD) pc -Dgame_version=$(PC_GAME) -Dbuild_target=$(PC_PLATFORM) $(MESON_ARGS)
+
+assets: configure
+	$(MESON) compile -C $(PC_BUILD) -j $(JOBS) hg-extract
+	$(PYTHON) pc/tools/assets.py --game $(PC_GAME) --rom "$(ROM)" --output "$(PC_RUN)" --extractor "$(PC_BUILD)/hg-extract$(PC_EXEEXT)"
+
+clean:
+	$(NINJA) -C $(PC_BUILD) clean

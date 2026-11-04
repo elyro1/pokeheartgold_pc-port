@@ -47,7 +47,13 @@ enum PokeathlonDiscCatchInitState {
 
 s32 _s32_div_f(s32 dividend, s32 divisor);
 
+#if defined(SDK_PORT)
+// NitroSDK (no header declares it)
+#include <hg/qsort.h>
+#define MATH_QSort HG_QSort
+#else
 void MATH_QSort(void *head, u32 num, u32 size, s32 (*compare)(const void *, const void *), void *work);
+#endif
 
 // A Pokemon sprite and the y its draw order goes by.
 typedef struct PokeathlonDiscCatchDrawOrder {
@@ -674,7 +680,11 @@ void PokeathlonDiscCatch_UpdateMonSprites(PokeathlonDiscCatchSprites *sprites, P
         shift += 2;
         mon++;
     }
+#if defined(SDK_PORT)
+    HG_QSort(order, POKEATHLON_MONS, sizeof(PokeathlonDiscCatchDrawOrder), PokeathlonDiscCatch_CompareDrawOrder, NULL);
+#else
     MATH_QSort(order, POKEATHLON_MONS, sizeof(PokeathlonDiscCatchDrawOrder), PokeathlonDiscCatch_CompareDrawOrder, NULL);
+#endif
     shift = 0;
     entry = order;
     for (; shift < POKEATHLON_MONS; shift++) {

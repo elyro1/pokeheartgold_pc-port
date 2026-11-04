@@ -1,6 +1,9 @@
 #include "scrcmd_battle_castle.h"
 
 #include "global.h"
+#if defined(SDK_PORT)
+
+#endif
 
 #include "assert.h"
 #include "bag.h"
@@ -17,6 +20,10 @@
 #include "player_data.h"
 #include "pokedex_util.h"
 #include "save.h"
+#if defined(SDK_PORT)
+
+static void BattleCastle_ResetStreak(SaveData *saveData, void *castleFlags, u8 challengeType);
+#endif
 #include "save_special_ribbons.h"
 #include "scrcmd.h"
 #include "script.h"
@@ -45,7 +52,10 @@ typedef struct FrontierSelectMonsEnv {
     void **appArgs;
 } FrontierSelectMonsEnv;
 
+#if defined(SDK_PORT)
+#else
 static void BattleCastle_ResetStreak(SaveData *, u32, u8);
+#endif
 static void BattleCastle_StartTeamCheck(TaskManager *, u16, u16, u16 *);
 static BOOL Task_BattleCastleTeamCheck(TaskManager *);
 static void BattleCastle_StartSelectMons(TaskManager *, void *, BattleCastleChallengeType);
@@ -68,7 +78,11 @@ BOOL ScrCmd_BattleCastleAction(ScriptContext *ctx) {
     u16 arg1 = ScriptGetVar(ctx);
     u16 *result = ScriptGetVarPointer(ctx);
     Save_Frontier_GetCastleChallenge(ctx->fieldSystem->saveData);
+#if defined(SDK_PORT)
+    void *castleFlags = Save_Frontier_GetCastleFlags(ctx->fieldSystem->saveData);
+#else
     u32 castleFlags = Save_Frontier_GetCastleFlags(ctx->fieldSystem->saveData);
+#endif
     void *appArgs = FieldSysGetAttrAddr(ctx->fieldSystem, SCRIPTENV_RUNNING_APP_DATA);
     switch (command) {
     case 0:
@@ -104,13 +118,20 @@ BOOL ScrCmd_BattleCastleAction(ScriptContext *ctx) {
     return FALSE;
 }
 
+#if defined(SDK_PORT)
+
+#endif
 BOOL ScrCmd_BattleCastleResetStreak(ScriptContext *ctx) {
     u16 challengeType = ScriptGetVar(ctx);
     BattleCastle_ResetStreak(ctx->fieldSystem->saveData, Save_Frontier_GetCastleFlags(ctx->fieldSystem->saveData), challengeType);
     return FALSE;
 }
 
+#if defined(SDK_PORT)
+static void BattleCastle_ResetStreak(SaveData *saveData, void *castleFlags, u8 challengeType) {
+#else
 static void BattleCastle_ResetStreak(SaveData *saveData, u32 castleFlags, u8 challengeType) {
+#endif
     u8 unk;
     unk = 0;
     CastleFlags_SetField(castleFlags, 9, challengeType, 0, &unk);

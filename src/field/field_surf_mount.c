@@ -55,6 +55,21 @@ void SurfMountEffect_SetBobbing(FieldEffect *effect, BOOL bobbing);
 
 const VecFx32 sSurfMountBobbingOffset = { 0, 4 * FX32_ONE, 4 * FX32_ONE };
 const VecFx32 sSurfMountScale = { FX32_ONE, FX32_ONE, FX32_ONE };
+#if defined(SDK_PORT)
+
+static BOOL SurfMountEffect_InitNative(FieldEffect *effect, void *state) {
+    return SurfMountEffect_Init(effect, state);
+}
+static void SurfMountEffect_DestroyNative(FieldEffect *effect, void *state) {
+    SurfMountEffect_Destroy(effect, state);
+}
+static void SurfMountEffect_UpdateNative(FieldEffect *effect, void *state) {
+    SurfMountEffect_Update(effect, state);
+}
+static void SurfMountEffect_DrawNative(FieldEffect *effect, void *state) {
+    SurfMountEffect_Draw(effect, state);
+}
+#endif
 
 const FieldEffectBasicTemplate sSurfMountEffectTemplate = {
     sizeof(SurfMountEffect),

@@ -1,3 +1,7 @@
+#if defined(SDK_PORT)
+#include "port/battle_timing.h"
+#include "system.h"
+#endif
 #include "sys_task.h"
 
 #include "global.h"
@@ -84,7 +88,40 @@ void SysTaskQueue_RunTasks(SysTaskQueue *queue) {
             queue->nextTask = queue->runningTask->next;
             if (!queue->runningTask->runNow) {
                 if (queue->runningTask->func != NULL) {
+#if defined(SDK_PORT)
+                    SysTask *task = queue->runningTask;
+                    task->timingPressedKeys |= gSystem.newKeys;
+                    task->timingRepeatKeys |= gSystem.newAndRepeatedKeys;
+                    if (gSystem.touchNew) {
+                        task->timingTouchPressed = TRUE;
+                        task->timingTouchX = gSystem.touchX;
+                        task->timingTouchY = gSystem.touchY;
+                    }
+                    if (BattleTiming_ShouldTick(task->timingDomain)) {
+                        int keys = gSystem.newKeys, repeat = gSystem.newAndRepeatedKeys;
+                        u16 touch = gSystem.touchNew, x = gSystem.touchX, y = gSystem.touchY;
+                        gSystem.newKeys = task->timingPressedKeys;
+                        gSystem.newAndRepeatedKeys = task->timingRepeatKeys;
+                        if (task->timingTouchPressed) {
+                            gSystem.touchNew = TRUE;
+                            gSystem.touchX = task->timingTouchX;
+                            gSystem.touchY = task->timingTouchY;
+                        }
+                        task->timingPressedKeys = task->timingRepeatKeys = 0;
+                        task->timingTouchPressed = FALSE;
+                        BattleTimingDomain previous = BattleTiming_SetDomain(task->timingDomain);
+                        task->func(task, task->data);
+                        // The callback can destroy or reuse its task slot.
+                        BattleTiming_SetDomain(previous);
+                        gSystem.newKeys = keys;
+                        gSystem.newAndRepeatedKeys = repeat;
+                        gSystem.touchNew = touch;
+                        gSystem.touchX = x;
+                        gSystem.touchY = y;
+                    }
+#else
                     queue->runningTask->func(queue->runningTask, queue->runningTask->data);
+#endif
                 }
             } else {
                 queue->runningTask->runNow = FALSE;
@@ -111,6 +148,11 @@ SysTask *SysTaskQueue_InsertTaskCore(SysTaskQueue *queue, SysTaskFunc func, void
     ret->priority = priority;
     ret->data = data;
     ret->func = func;
+#if defined(SDK_PORT)
+    ret->timingDomain = BattleTiming_GetDomain();
+    ret->timingPressedKeys = ret->timingRepeatKeys = 0;
+    ret->timingTouchPressed = FALSE;
+#endif
 
     if (queue->runningTask->func != NULL) {
         if (queue->runningTask->priority <= priority) {

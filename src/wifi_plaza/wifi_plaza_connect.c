@@ -81,7 +81,11 @@ typedef struct WiFiPlazaConnectWork {
     WiFiPlazaConnectPaletteCycle paletteCycle;
 } WiFiPlazaConnectWork;
 
+#if defined(SDK_PORT)
+// network_communication_state_full.c and the OVY_45 lobby have no public headers.
+#else
 extern void CommState_StartWifiPlaza(SaveData *saveData, s32 profileId);
+#endif
 extern void CommState_LeaveWifiPlaza(void);
 extern int CommState_HasPlazaLobbyStarted(void);
 extern BOOL CommState_HasPlazaLobbyFailed(void);
@@ -267,7 +271,11 @@ BOOL WiFiPlazaConnect_Main(OverlayManager *man, int *state) {
         break;
     }
     case WIFI_PLAZA_CONNECT_CONNECT:
+#if defined(SDK_PORT)
+        CommState_StartWifiPlaza(work->saveData, WiFiPlazaWork_GetMyPlayer(args->work));
+#else
         CommState_StartWifiPlaza(work->saveData, (s32)WiFiPlazaWork_GetMyPlayer(args->work));
+#endif
         WiFiPlazaConnect_PrintMessage(&work->statusBox, msg_0800_00023);
         WiFiPlazaConnect_StartWaitingIcon(&work->statusBox);
         (*state)++;
@@ -753,3 +761,11 @@ static YesNoPrompt *WiFiPlazaConnect_CreateYesNoPrompt(BgConfig *bgConfig, int t
     YesNoPrompt_InitFromTemplate(prompt, &template);
     return prompt;
 }
+#if defined(SDK_PORT)
+
+/* Native tables from asm/wifi_plaza_lobby_data.s; adapters give differing originals the field signatures. */
+const OverlayManagerTemplate sWiFiPlazaDisconnectOverlayTemplate = { WiFiPlazaConnect_DisconnectInit, WiFiPlazaConnect_DisconnectMain, WiFiPlazaConnect_DisconnectExit, FS_OVERLAY_ID(OVY_46) };
+
+/* Native tables from asm/wifi_plaza_lobby_data.s; adapters give differing originals the field signatures. */
+const OverlayManagerTemplate sWiFiPlazaConnectOverlayTemplate = { WiFiPlazaConnect_Init, WiFiPlazaConnect_Main, WiFiPlazaConnect_Exit, FS_OVERLAY_ID(OVY_46) };
+#endif

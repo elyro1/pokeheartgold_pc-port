@@ -3012,3 +3012,212 @@ static BOOL SpinTrade_IsCancelled(SpinTradeApp *app) {
     }
     return FALSE;
 }
+#if defined(SDK_PORT)
+
+/* Native tables from asm/spin_trade_flow_data.s; adapters give differing originals the field signatures. */
+BOOL SpinTradeApp_Init(OverlayManager *man, int *state);
+BOOL SpinTradeApp_Main(OverlayManager *man, int *state);
+BOOL SpinTradeApp_Exit(OverlayManager *man, int *state);
+const OverlayManagerTemplate gOverlayTemplate_SpinTrade = { SpinTradeApp_Init, SpinTradeApp_Main, SpinTradeApp_Exit, FS_OVERLAY_ID(OVY_85) };
+
+/* Native tables from asm/spin_trade_data.s; adapters give differing originals the table's signature. */
+int SpinTradeEggDrop_Init(SpinTradeEggDropTask *task);
+int SpinTradeEggDrop_Fall(SpinTradeEggDropTask *task);
+int SpinTradeEggDrop_Land(SpinTradeEggDropTask *task);
+int (*const gSpinTradeEggDropStateFuncs[3])(SpinTradeEggDropTask *task) = {
+    SpinTradeEggDrop_Init,
+    SpinTradeEggDrop_Fall,
+    SpinTradeEggDrop_Land,
+};
+BOOL SpinTrade_State_Start(SpinTradeApp *app);
+BOOL SpinTrade_State_WaitFadeIn(SpinTradeApp *app);
+BOOL SpinTrade_State_WaitMembers(SpinTradeApp *app);
+BOOL SpinTrade_State_SendStart(SpinTradeApp *app);
+BOOL SpinTrade_State_WaitConnections(SpinTradeApp *app);
+BOOL SpinTrade_State_SendPlayerCount(SpinTradeApp *app);
+BOOL SpinTrade_State_SendSlots(SpinTradeApp *app);
+BOOL SpinTrade_State_SendReady(SpinTradeApp *app);
+BOOL SpinTrade_State_SendJoin(SpinTradeApp *app);
+BOOL SpinTrade_State_WaitReady(SpinTradeApp *app);
+BOOL SpinTrade_State_StartSync(SpinTradeApp *app);
+BOOL SpinTrade_State_WaitSync(SpinTradeApp *app);
+BOOL SpinTrade_State_SendTradeSlot(SpinTradeApp *app);
+BOOL SpinTrade_State_SendParty(SpinTradeApp *app);
+BOOL SpinTrade_State_CheckEggs(SpinTradeApp *app);
+BOOL SpinTrade_State_WaitConfirm(SpinTradeApp *app);
+BOOL SpinTrade_State_SetupDrop(SpinTradeApp *app);
+BOOL SpinTrade_State_DropEggs(SpinTradeApp *app);
+BOOL SpinTrade_State_WaitEggsLanded(SpinTradeApp *app);
+BOOL SpinTrade_State_WaitBeforeSpin(SpinTradeApp *app);
+BOOL SpinTrade_State_SendSpinStart(SpinTradeApp *app);
+BOOL SpinTrade_State_WaitSpinStart(SpinTradeApp *app);
+BOOL SpinTrade_State_StartSpinSync(SpinTradeApp *app);
+BOOL SpinTrade_State_WaitSpinSync(SpinTradeApp *app);
+BOOL SpinTrade_State_StartCountdown(SpinTradeApp *app);
+BOOL SpinTrade_State_ClearNames(SpinTradeApp *app);
+BOOL SpinTrade_State_BeginSpin(SpinTradeApp *app);
+BOOL SpinTrade_State_SpinHost(SpinTradeApp *app);
+BOOL SpinTrade_State_SpinClient(SpinTradeApp *app);
+BOOL SpinTrade_State_StopSpin(SpinTradeApp *app);
+BOOL SpinTrade_State_RotateToOwnEgg(SpinTradeApp *app);
+BOOL SpinTrade_State_AlignToSlot(SpinTradeApp *app);
+BOOL SpinTrade_State_StartResultSync(SpinTradeApp *app);
+BOOL SpinTrade_State_WaitResultSync(SpinTradeApp *app);
+BOOL SpinTrade_State_SendResult(SpinTradeApp *app);
+BOOL SpinTrade_State_ReceiveResult(SpinTradeApp *app);
+BOOL SpinTrade_State_ShowNames(SpinTradeApp *app);
+BOOL SpinTrade_State_ShowReceivedEgg(SpinTradeApp *app);
+BOOL SpinTrade_State_WaitEggFanfare(SpinTradeApp *app);
+BOOL SpinTrade_State_GiveBonusBerry(SpinTradeApp *app);
+BOOL SpinTrade_State_WaitBerryFanfare(SpinTradeApp *app);
+BOOL SpinTrade_State_ShowBagFull(SpinTradeApp *app);
+BOOL SpinTrade_State_Wait(SpinTradeApp *app);
+BOOL SpinTrade_State_StartSave(SpinTradeApp *app);
+BOOL SpinTrade_State_WaitSaveSync(SpinTradeApp *app);
+BOOL SpinTrade_State_Save(SpinTradeApp *app);
+BOOL SpinTrade_State_Cancel(SpinTradeApp *app);
+BOOL SpinTrade_State_WaitCancelMessage(SpinTradeApp *app);
+BOOL SpinTrade_State_StartExitSync(SpinTradeApp *app);
+BOOL SpinTrade_State_WaitExitSync(SpinTradeApp *app);
+BOOL SpinTrade_State_WaitDisconnect(SpinTradeApp *app);
+BOOL SpinTrade_State_FadeOut(SpinTradeApp *app);
+BOOL SpinTrade_State_WaitFadeOut(SpinTradeApp *app);
+int SpinTrade_State_Exit(SpinTradeApp *app);
+static int Native_SpinTrade_State_Start(SpinTradeApp * a0) { return (int)SpinTrade_State_Start((SpinTradeApp *)a0); }
+static int Native_SpinTrade_State_WaitFadeIn(SpinTradeApp * a0) { return (int)SpinTrade_State_WaitFadeIn((SpinTradeApp *)a0); }
+static int Native_SpinTrade_State_WaitMembers(SpinTradeApp * a0) { return (int)SpinTrade_State_WaitMembers((SpinTradeApp *)a0); }
+static int Native_SpinTrade_State_SendStart(SpinTradeApp * a0) { return (int)SpinTrade_State_SendStart((SpinTradeApp *)a0); }
+static int Native_SpinTrade_State_WaitConnections(SpinTradeApp * a0) { return (int)SpinTrade_State_WaitConnections((SpinTradeApp *)a0); }
+static int Native_SpinTrade_State_SendPlayerCount(SpinTradeApp * a0) { return (int)SpinTrade_State_SendPlayerCount((SpinTradeApp *)a0); }
+static int Native_SpinTrade_State_SendSlots(SpinTradeApp * a0) { return (int)SpinTrade_State_SendSlots((SpinTradeApp *)a0); }
+static int Native_SpinTrade_State_SendReady(SpinTradeApp * a0) { return (int)SpinTrade_State_SendReady((SpinTradeApp *)a0); }
+static int Native_SpinTrade_State_SendJoin(SpinTradeApp * a0) { return (int)SpinTrade_State_SendJoin((SpinTradeApp *)a0); }
+static int Native_SpinTrade_State_WaitReady(SpinTradeApp * a0) { return (int)SpinTrade_State_WaitReady((SpinTradeApp *)a0); }
+static int Native_SpinTrade_State_StartSync(SpinTradeApp * a0) { return (int)SpinTrade_State_StartSync((SpinTradeApp *)a0); }
+static int Native_SpinTrade_State_WaitSync(SpinTradeApp * a0) { return (int)SpinTrade_State_WaitSync((SpinTradeApp *)a0); }
+static int Native_SpinTrade_State_SendTradeSlot(SpinTradeApp * a0) { return (int)SpinTrade_State_SendTradeSlot((SpinTradeApp *)a0); }
+static int Native_SpinTrade_State_SendParty(SpinTradeApp * a0) { return (int)SpinTrade_State_SendParty((SpinTradeApp *)a0); }
+static int Native_SpinTrade_State_CheckEggs(SpinTradeApp * a0) { return (int)SpinTrade_State_CheckEggs((SpinTradeApp *)a0); }
+static int Native_SpinTrade_State_WaitConfirm(SpinTradeApp * a0) { return (int)SpinTrade_State_WaitConfirm((SpinTradeApp *)a0); }
+static int Native_SpinTrade_State_SetupDrop(SpinTradeApp * a0) { return (int)SpinTrade_State_SetupDrop((SpinTradeApp *)a0); }
+static int Native_SpinTrade_State_DropEggs(SpinTradeApp * a0) { return (int)SpinTrade_State_DropEggs((SpinTradeApp *)a0); }
+static int Native_SpinTrade_State_WaitEggsLanded(SpinTradeApp * a0) { return (int)SpinTrade_State_WaitEggsLanded((SpinTradeApp *)a0); }
+static int Native_SpinTrade_State_WaitBeforeSpin(SpinTradeApp * a0) { return (int)SpinTrade_State_WaitBeforeSpin((SpinTradeApp *)a0); }
+static int Native_SpinTrade_State_SendSpinStart(SpinTradeApp * a0) { return (int)SpinTrade_State_SendSpinStart((SpinTradeApp *)a0); }
+static int Native_SpinTrade_State_WaitSpinStart(SpinTradeApp * a0) { return (int)SpinTrade_State_WaitSpinStart((SpinTradeApp *)a0); }
+static int Native_SpinTrade_State_StartSpinSync(SpinTradeApp * a0) { return (int)SpinTrade_State_StartSpinSync((SpinTradeApp *)a0); }
+static int Native_SpinTrade_State_WaitSpinSync(SpinTradeApp * a0) { return (int)SpinTrade_State_WaitSpinSync((SpinTradeApp *)a0); }
+static int Native_SpinTrade_State_StartCountdown(SpinTradeApp * a0) { return (int)SpinTrade_State_StartCountdown((SpinTradeApp *)a0); }
+static int Native_SpinTrade_State_ClearNames(SpinTradeApp * a0) { return (int)SpinTrade_State_ClearNames((SpinTradeApp *)a0); }
+static int Native_SpinTrade_State_BeginSpin(SpinTradeApp * a0) { return (int)SpinTrade_State_BeginSpin((SpinTradeApp *)a0); }
+static int Native_SpinTrade_State_SpinHost(SpinTradeApp * a0) { return (int)SpinTrade_State_SpinHost((SpinTradeApp *)a0); }
+static int Native_SpinTrade_State_SpinClient(SpinTradeApp * a0) { return (int)SpinTrade_State_SpinClient((SpinTradeApp *)a0); }
+static int Native_SpinTrade_State_StopSpin(SpinTradeApp * a0) { return (int)SpinTrade_State_StopSpin((SpinTradeApp *)a0); }
+static int Native_SpinTrade_State_RotateToOwnEgg(SpinTradeApp * a0) { return (int)SpinTrade_State_RotateToOwnEgg((SpinTradeApp *)a0); }
+static int Native_SpinTrade_State_AlignToSlot(SpinTradeApp * a0) { return (int)SpinTrade_State_AlignToSlot((SpinTradeApp *)a0); }
+static int Native_SpinTrade_State_StartResultSync(SpinTradeApp * a0) { return (int)SpinTrade_State_StartResultSync((SpinTradeApp *)a0); }
+static int Native_SpinTrade_State_WaitResultSync(SpinTradeApp * a0) { return (int)SpinTrade_State_WaitResultSync((SpinTradeApp *)a0); }
+static int Native_SpinTrade_State_SendResult(SpinTradeApp * a0) { return (int)SpinTrade_State_SendResult((SpinTradeApp *)a0); }
+static int Native_SpinTrade_State_ReceiveResult(SpinTradeApp * a0) { return (int)SpinTrade_State_ReceiveResult((SpinTradeApp *)a0); }
+static int Native_SpinTrade_State_ShowNames(SpinTradeApp * a0) { return (int)SpinTrade_State_ShowNames((SpinTradeApp *)a0); }
+static int Native_SpinTrade_State_ShowReceivedEgg(SpinTradeApp * a0) { return (int)SpinTrade_State_ShowReceivedEgg((SpinTradeApp *)a0); }
+static int Native_SpinTrade_State_WaitEggFanfare(SpinTradeApp * a0) { return (int)SpinTrade_State_WaitEggFanfare((SpinTradeApp *)a0); }
+static int Native_SpinTrade_State_GiveBonusBerry(SpinTradeApp * a0) { return (int)SpinTrade_State_GiveBonusBerry((SpinTradeApp *)a0); }
+static int Native_SpinTrade_State_WaitBerryFanfare(SpinTradeApp * a0) { return (int)SpinTrade_State_WaitBerryFanfare((SpinTradeApp *)a0); }
+static int Native_SpinTrade_State_ShowBagFull(SpinTradeApp * a0) { return (int)SpinTrade_State_ShowBagFull((SpinTradeApp *)a0); }
+static int Native_SpinTrade_State_Wait(SpinTradeApp * a0) { return (int)SpinTrade_State_Wait((SpinTradeApp *)a0); }
+static int Native_SpinTrade_State_StartSave(SpinTradeApp * a0) { return (int)SpinTrade_State_StartSave((SpinTradeApp *)a0); }
+static int Native_SpinTrade_State_WaitSaveSync(SpinTradeApp * a0) { return (int)SpinTrade_State_WaitSaveSync((SpinTradeApp *)a0); }
+static int Native_SpinTrade_State_Save(SpinTradeApp * a0) { return (int)SpinTrade_State_Save((SpinTradeApp *)a0); }
+static int Native_SpinTrade_State_Cancel(SpinTradeApp * a0) { return (int)SpinTrade_State_Cancel((SpinTradeApp *)a0); }
+static int Native_SpinTrade_State_WaitCancelMessage(SpinTradeApp * a0) { return (int)SpinTrade_State_WaitCancelMessage((SpinTradeApp *)a0); }
+static int Native_SpinTrade_State_StartExitSync(SpinTradeApp * a0) { return (int)SpinTrade_State_StartExitSync((SpinTradeApp *)a0); }
+static int Native_SpinTrade_State_WaitExitSync(SpinTradeApp * a0) { return (int)SpinTrade_State_WaitExitSync((SpinTradeApp *)a0); }
+static int Native_SpinTrade_State_WaitDisconnect(SpinTradeApp * a0) { return (int)SpinTrade_State_WaitDisconnect((SpinTradeApp *)a0); }
+static int Native_SpinTrade_State_FadeOut(SpinTradeApp * a0) { return (int)SpinTrade_State_FadeOut((SpinTradeApp *)a0); }
+static int Native_SpinTrade_State_WaitFadeOut(SpinTradeApp * a0) { return (int)SpinTrade_State_WaitFadeOut((SpinTradeApp *)a0); }
+int (*const gSpinTradeStateFuncs[54])(SpinTradeApp *app) = {
+    Native_SpinTrade_State_Start,
+    Native_SpinTrade_State_WaitFadeIn,
+    Native_SpinTrade_State_WaitMembers,
+    Native_SpinTrade_State_SendStart,
+    Native_SpinTrade_State_WaitConnections,
+    Native_SpinTrade_State_SendPlayerCount,
+    Native_SpinTrade_State_SendSlots,
+    Native_SpinTrade_State_SendReady,
+    Native_SpinTrade_State_SendJoin,
+    Native_SpinTrade_State_WaitReady,
+    Native_SpinTrade_State_StartSync,
+    Native_SpinTrade_State_WaitSync,
+    Native_SpinTrade_State_SendTradeSlot,
+    Native_SpinTrade_State_SendParty,
+    Native_SpinTrade_State_CheckEggs,
+    Native_SpinTrade_State_WaitConfirm,
+    Native_SpinTrade_State_SetupDrop,
+    Native_SpinTrade_State_DropEggs,
+    Native_SpinTrade_State_WaitEggsLanded,
+    Native_SpinTrade_State_WaitBeforeSpin,
+    Native_SpinTrade_State_SendSpinStart,
+    Native_SpinTrade_State_WaitSpinStart,
+    Native_SpinTrade_State_StartSpinSync,
+    Native_SpinTrade_State_WaitSpinSync,
+    Native_SpinTrade_State_StartCountdown,
+    Native_SpinTrade_State_ClearNames,
+    Native_SpinTrade_State_BeginSpin,
+    Native_SpinTrade_State_SpinHost,
+    Native_SpinTrade_State_SpinClient,
+    Native_SpinTrade_State_StopSpin,
+    Native_SpinTrade_State_RotateToOwnEgg,
+    Native_SpinTrade_State_AlignToSlot,
+    Native_SpinTrade_State_StartResultSync,
+    Native_SpinTrade_State_WaitResultSync,
+    Native_SpinTrade_State_SendResult,
+    Native_SpinTrade_State_ReceiveResult,
+    Native_SpinTrade_State_ShowNames,
+    Native_SpinTrade_State_ShowReceivedEgg,
+    Native_SpinTrade_State_WaitEggFanfare,
+    Native_SpinTrade_State_GiveBonusBerry,
+    Native_SpinTrade_State_WaitBerryFanfare,
+    Native_SpinTrade_State_ShowBagFull,
+    Native_SpinTrade_State_Wait,
+    Native_SpinTrade_State_StartSave,
+    Native_SpinTrade_State_WaitSaveSync,
+    Native_SpinTrade_State_Save,
+    Native_SpinTrade_State_Cancel,
+    Native_SpinTrade_State_WaitCancelMessage,
+    Native_SpinTrade_State_StartExitSync,
+    Native_SpinTrade_State_WaitExitSync,
+    Native_SpinTrade_State_WaitDisconnect,
+    Native_SpinTrade_State_FadeOut,
+    Native_SpinTrade_State_WaitFadeOut,
+    SpinTrade_State_Exit,
+};
+
+/* Native pointer table from asm/spin_trade_data.s. */
+extern const WindowTemplate gSpinTradeNameWindowTemplates2P[];
+extern const WindowTemplate gSpinTradeNameWindowTemplates3P[];
+extern const WindowTemplate gSpinTradeNameWindowTemplates4P[];
+extern const WindowTemplate gSpinTradeNameWindowTemplates5P[];
+const WindowTemplate *const gSpinTradeNameWindowTemplates[6] = {
+    0,
+    0,
+    gSpinTradeNameWindowTemplates2P,
+    gSpinTradeNameWindowTemplates3P,
+    gSpinTradeNameWindowTemplates4P,
+    gSpinTradeNameWindowTemplates5P,
+};
+
+/* Native tables from asm/spin_trade_data.s; adapters give differing originals the field signatures. */
+extern const s32 gSpinTradeBonusRanges2P[];
+extern const s32 gSpinTradeBonusRanges3P[];
+extern const s32 gSpinTradeBonusRanges4P[];
+extern const s32 gSpinTradeBonusRanges5P[];
+const SpinTradeBonusAreas gSpinTradeBonusAreas[6] = {
+    { 0, 0 },
+    { 0, 0 },
+    { 1, (const SpinTradeAngleRange *)gSpinTradeBonusRanges2P },
+    { 2, (const SpinTradeAngleRange *)gSpinTradeBonusRanges3P },
+    { 2, (const SpinTradeAngleRange *)gSpinTradeBonusRanges4P },
+    { 2, (const SpinTradeAngleRange *)gSpinTradeBonusRanges5P },
+};
+#endif

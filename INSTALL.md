@@ -1,238 +1,178 @@
-# Installation
+# PC port — build & run
 
-Build the US versions of Pokémon HeartGold and SoulSilver from source.
+The PC target supports **Linux x86-64** and a native **Windows x64** build using MSYS2 UCRT64. WSL2 + WSLg remains an alternative for running the Linux version on Windows.
 
-## macOS quick start
+The PC build uses the open-source replacement libraries and does not need MWCC, Wine, or the proprietary Nitro SDK.
 
-Clone this repository, enter its directory, then follow these steps.
+## Download a CI build
 
-With Homebrew and (on Apple Silicon) Rosetta 2 installed:
+The `linux-HEARTGOLD` and `windows-HEARTGOLD` CI artifacts are ZIP files containing
+the executables, runtime libraries, a game-specific `header.bin`, blank Wi-Fi
+settings in `firmware.bin`, and a README. Extract the whole ZIP to a writable
+folder. There is no inner archive.
 
-```sh
-./scripts/setup-macos.sh
-./scripts/build.sh progress
-./scripts/build.sh GAME_VERSION=SOULSILVER progress
-```
+On Windows, double-click `hg-game.exe`. On Linux, run `hg-game` directly (or
+`./hg-game` from a terminal); bundled libraries are found automatically in `lib/`.
+If your ZIP extractor removes executable permissions, mark `hg-game` and
+`hg-extract` executable in file properties, or run `chmod +x hg-game hg-extract`
+once. The Linux artifact targets Ubuntu 24.04 or newer (glibc 2.39+) and needs
+your system's OpenGL 4.2 graphics driver. The game finds its runtime folder
+regardless of the working directory.
 
-The setup helper installs native dependencies through Homebrew, uses locally supplied compiler and SDK archives and verifies
-their SHA256 hashes. It installs Wine 11.16 inside `.local-tools/`; its Wine
-prefix also stays in this ignored directory. It does not modify system Wine
-settings. Downloaded tools, compiler licenses, ROMs, and build intermediates
-are ignored by Git.
+On first launch, accept the extraction prompt and choose your unmodified US
+HeartGold revision 0 ROM. Game assets are extracted into the package folder;
+no ROM or game assets are included in CI. The included README also explains
+command-line extraction with `hg-extract`. If startup fails, check `DbgLog.txt`
+or run the executable from a terminal to see startup errors.
+Preserve saves, extracted assets, configuration, and your existing `firmware.bin`
+when updating a downloaded build.
 
-The commands above perform matching builds and generate progress reports.
-For Linux and Windows, follow the manual setup below.
+## Linux
 
-## Manual setup
+### 1. Install dependencies
 
-### 0. Clone the repository
+Use a 64-bit Linux desktop with OpenGL 4.2 support, Meson **1.3+**, Python **3.9+**, and a C++20 compiler/library with `std::format` support (GCC/G++ 13 or newer).
 
-Using a terminal or git client, clone this repository to your local device. All the steps that followed should be performed in the directory to which you cloned this repository.
+On **Ubuntu 24.04**, install:
 
-### 1. Install MWCC compiler
-
-The build system requires the use of the Metrowerks C Compiler versions 2.0/sp2p2 to compile matching files. Supply your own legally obtained mwccarm.zip and extract it to tools/. At the end of this operation, you should have i.e. the file `tools/mwccarm/2.0/sp2p2/mwccarm.exe`. Run each of the executables so they ask for a license.dat and provide the one in the rar (it may also ask for it when compiling). This only needs to be done once.
-
-In the future, a GCC option will be available so MWCC is not required to build, however it is required for a matching ROM.
-
-(Note: if running the exe's doesn't work, you can run the .bat file. A GUI window should pop up for you to select the license.dat)
-
-### 2. Install Nitro SDK
-
-As with the compiler, the Nitro SDK is proprietary and cannot be distributed here. Supply your own legally obtained compatible Nitro SDK archive. Extract and copy the folder `tools/bin` from the Nitro SDK into the folder `tools` in your pokeheartgold clone. At the end of this operation, you should have i.e. the file `tools/bin/makelcf.exe` inside your pokeheartgold clone. Finally, copy include/nitro/specfiles/ARM7-TS.lcf.template into the subdirectory `sub`, and include/nitro/specfiles/ARM9-TS.lcf.template and include/nitro/specfiles/mwldarm.response.template into the project root.
-
-### 3. Dependencies
-
-#### Linux
-
-Building the ROM requires the following packages. If you cannot find one or more of these using your package distribution, it may be under a different name.
-
-* make
-* git
-* build-essentials (build-essential on Ubuntu)
-* binutils-arm-none-eabi
-* wine (to run the mwcc executables)
-* python3 (for asm preprocessor)
-* libpng-devel (libpng-dev on Ubuntu)
-* pkg-config
-* pugixml (libpugixml-dev on Ubuntu)
-
-NOTE: If you are using Arch/Manjaro or Void you will only need base-devel instead of build-essentials or make or git. You will still need wine.
-
-Currently WSL2 has an issue with mwldarm not being able to locate it's executable. Please use WSL1 or another build environment to mitigate this issue until a solution is found.
-
-#### Windows
-
-
-##### devkitARM
-The windows dev environment requires devkitARM. devkitARM is a specialized toolchain used to build the rom. It contains `arm-none-eabi-gcc`, which is a compiler that can compile code for the DS. 
-
-**Ensure you select the "Nintendo DS" or "NDS" workload during the devkitPro installation.** 
-
-##### A linux like environment
-The windows dev environment also uses linux-like automation. Because of this, you will need a linux style terminal. Some popular options are `Cygwin` and `Mysys2`. The environment will provide the manager tools like `make` that co-ordinate the build process.
-
-
-The following packages are required:
-* make
-* git
-* build-essentials
-* libpng-devel
-* pugixml
-* pkg-config
-
-Install them using either the Cygwin package manager or using pacman on Msys2.
-
-To install the packages on cygwin, select the following packages in the cygwin package manager
-| Requirement | Cygwin Package Name | Notes |
-| :--- | :--- | :--- |
-| **make** | `make` | The standard GNU version. |
-| **git** | `git` | You might also want `git-completion` for convenience. |
-| **build-essential** | `gcc-g++`, `binutils` | This provides your C/C++ compilers and linker. |
-| **libpng-devel** | `libpng-devel` | Includes headers for PNG manipulation. |
-| **pugixml** | `libpugixml-devel` | The development files for the XML parser. |
-| **pkg-config** | `pkg-config` | Helps your compiler find library paths automatically. |
-
-**NOTE FOR MSYS2:** You will need to compile and install [libpng](https://www.libpng.org/pub/png/libpng.html) from source.
-
-After the packages are installed, add the following variables to your .bashrc to tell your terminal where devkitARM lives:
-
-If using Msys2:
-```console
-export DEVKITPRO=C:/devkitPro
-export DEVKITARM=${DEVKITPRO}/devkitARM
-```
-
-If using Cygwin:
-```console
-export DEVKITPRO=/cygdrive/c/devkitPro
-export DEVKITARM=${DEVKITPRO}/devkitARM
-```
-
-You can verify these are set correctly by running:
 ```bash
-echo $DEVKITPRO
-# This should print out the path where devkitPro lives on your windows machine
+sudo apt update
+sudo apt install build-essential git python3 meson ninja-build nasm \
+    flex bison pkg-config libsdl2-dev libenet-dev libsoundtouch-dev
 ```
 
-#### macOS
+Other distributions need the equivalent packages. The first configuration downloads the SDK subprojects, so it needs internet access.
 
-macOS 10.15 Catalina and later is supported on Intel and ARM64 hardware configurations. On ARM64, Rosetta 2 must be installed, as well as the following dependencies:
+### 2. Clone
 
-* GNU coreutils
-* GNU make
-* GNU sed
-* LLVM clang compiler
-* arm-gcc-bin
-* git
-* libpng
-* pkg-config
-* pugixml
-* wine-crossover (includes wine32on64, required on Catalina and later to run 32-bit x86 EXEs)
-
-They can be installed with the following commands:
-
-```console
-$ brew tap osx-cross/homebrew-arm
-$ brew tap gcenx/wine
-$ brew install coreutils make gnu-sed llvm arm-gcc-bin libpng git pkg-config
-$ brew install wine-crossover
+```bash
+git clone https://github.com/ctrl-cheeb-del/pokeheartgold.git
+cd pokeheartgold
 ```
 
-### 4. Build ROM
+Already have a checkout? Run the remaining commands from its root.
 
-Run `make` to build the ROM. The ROM will be output as `build/heartgold.us/pokeheartgold.us.nds`
+### 3. Build HeartGold
 
-To build Pokemon SoulSilver, run `make soulsilver`. You do not need to clean your working tree in between compiling. Pokemon SoulSilver will be built as `build/soulsilver.us/pokesoulsilver.us.nds`.
-
-There are targets for building and testing changes to individual components without repackaging the ROM. For the ARM9 modules, run `make main`. For the ARM7 module, run `make sub`. For the filesystem, run `make filesystem`. To build these for SoulSilver, append `GAME_VERSION=SOULSILVER` to the appropriate command.
-
-At the end of building each of these, there is a checksum verification step. This makes sure that the final product is byte-for-byte equivalent to the retail ROM. To disable this, append `COMPARE=0` to your command.
-
-#### Windows
-
-If you get an error in saving configuration settings when specifying the license file, you need to add a system environment variable called LM_LICENSE_FILE and point it to the license.dat file. Alternatively, run mwccarm.exe from an Administrator command prompt, PowerShell, or WSL session.
-
-#### Docker
-
-If you find issues building the ROMs with the above methods, you can try the Docker-specific build script. It will build an Alpine-based Docker image with the system requirements above, and run the `make` scripts (any specified parameter will be passed to the `make` command):
-
-```console
-$ make clean
-$ ./contrib/docker/build_docker.sh # build pokeheartgold
-$ ./contrib/docker/build_docker.sh soulsilver # build pokesoulsilver
+```bash
+make -f Makefile.pc linux JOBS=4
 ```
 
-Note: Docker may not run at a full performance if its underlying Linux kernel is being virtualized (mainly Windows and macOS hosts).
+Executable: `build/pc/heartgold/hg-game`.
 
-#### After updating this repository
+`JOBS=4` limits parallel compilation. Increase it for faster builds or lower it if you run out of RAM.
 
-This repository is still in a volatile state, and several files may be moved around or renamed. If you update this repository and experience errors rebuilding, try the following troubleshooting steps, **one line at a time** until you get the non_npc_msg `build/heartgold.us/pokeheartgold.us.nds: OK`:
+### 4. Extract your ROM's assets
 
-```shell
-make tidy && make compare
-make clean && make compare
+Replace the example path with your own dumped US HeartGold ROM:
+
+```bash
+make -f Makefile.pc assets ROM="/absolute/path/to/HeartGold.nds"
 ```
 
-If errors persist, report them in this repository.
+This checks the ROM's revision and SHA1, then extracts assets into `build/pc/heartgold/run/`. Run it once per game, or again if the extracted files need replacing. Existing saves and configuration are retained.
 
-## Progress reports
+### 5. Play
 
-On Linux with the toolchain installed, run `make progress`. On macOS, use
-`./scripts/build.sh progress`.
-
-`progress` refreshes the selected ROM with `COMPARE=1`, checks the original
-SHA1, and generates `build/progress/treemap.svg` and `progress.json`. The
-standalone SVG opens in a browser and shows file details on hover. The JSON
-contains every object, module, CPU, byte count, source path, and category.
-The HeartGold and SoulSilver reports use the same output path by default;
-choose separate output directories when retaining both:
-
-```sh
-python3 tools/progress/progress.py --game heartgold.us --output build/progress/heartgold
-python3 tools/progress/progress.py --game soulsilver.us --output build/progress/soulsilver
+```bash
+cd build/pc/heartgold/run
+../hg-game
 ```
 
-To refresh the checked-in README snapshot after a matching HeartGold build:
+The executable automatically uses its adjacent `run/` folder when it contains extracted assets. Press **Tab** for PC settings.
 
-```sh
-python3 tools/progress/progress.py --output docs/progress
+## SoulSilver
+
+From the repository root, select SoulSilver for **both** build and extraction:
+
+```bash
+make -f Makefile.pc linux GAME_VERSION=SOULSILVER JOBS=4
+make -f Makefile.pc assets GAME_VERSION=SOULSILVER ROM="/absolute/path/to/SoulSilver.nds"
+cd build/pc/soulsilver/run
+../hg-game
 ```
 
-The GitHub build workflow is currently disabled on this fork to avoid automatic
-CI runs. If re-enabled, it builds both versions and uploads a
-`decompilation-progress` artifact with both reports. It does not upload ROMs
-or proprietary toolchain files in that artifact. The README snapshot is a deliberate checked-in update, not an
-automatically committed change on every CI run.
+Each game has its own build and run folders. No clean is needed when switching between them.
 
-## What the chart measures
+## Windows (native x64)
 
-This is **source-language coverage by mapped code-section bytes**, not an
-official upstream progress metric or a per-function matching score.
+Install [MSYS2](https://www.msys2.org/), open its **UCRT64** terminal, and update it:
 
-- Green: an object attributed to a C file without detected assembly syntax.
-- Amber: a C object whose source contains assembly, including conditional
-  nonmatching fallbacks. The entire object is excluded from the green total.
-- Slate: an object attributed to assembly source.
-- Purple: the source mapping is unresolved or ambiguous.
+```bash
+pacman -Syu
+```
 
-Rectangles are grouped by CPU and linker module, then sized by object bytes.
-ARM7, ARM9, libraries, and all mapped overlays are included. Modules that load
-at the same address remain separate. Aliases and enclosing section symbols
-are merged by interval so their bytes are not counted twice. Sections `.text`,
-`.init`, `.itcm`, `.sinit`, and `.wram` count as code; literal pools inside
-these sections count too. Assets, other data sections, BSS, and padding with
-no mapped symbol coverage are excluded.
+If the update closes the terminal, reopen **MSYS2 UCRT64** and run the command again. Then install the build dependencies:
 
-The source mapping uses the linker specification to disambiguate C/assembly
-files with the same basename. Generated protection objects and archive
-members can remain unresolved. Source classification is conservative and
-lexical; it is not a C preprocessor or proof of portable behavior. Assembly
-needed for hardware or runtime operations is not necessarily work that
-should be converted to C.
+```bash
+pacman -S --needed git make flex bison \
+    mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-python \
+    mingw-w64-ucrt-x86_64-meson mingw-w64-ucrt-x86_64-ninja \
+    mingw-w64-ucrt-x86_64-nasm mingw-w64-ucrt-x86_64-pkgconf \
+    mingw-w64-ucrt-x86_64-SDL2 mingw-w64-ucrt-x86_64-enet \
+    mingw-w64-ucrt-x86_64-soundtouch
+```
 
-The generator verifies the ROM hash but cannot by itself establish that an
-old build corresponds to newly edited source. Use `build.sh progress` to
-refresh the build first. The report records the Git commit, tracked working
-tree state, and map hashes for provenance. A passing ROM checksum establishes
-retail binary equivalence, not complete decompilation or portability.
+Clone the repository as above, then build from its root in the UCRT64 terminal:
+
+```bash
+make -f Makefile.pc win64 JOBS=4
+make -f Makefile.pc assets PC_PLATFORM=win64 ROM="C:/Games/HeartGold.nds"
+cd build/pc/win64/heartgold/run
+../hg-game.exe
+```
+
+This creates `build/pc/win64/heartgold/hg-game.exe` and `hg-extract.exe`, and copies their required MinGW DLLs beside them. Keep those DLLs with the executables when moving the build to another Windows computer. Extracted assets, saves, and settings live in `run/`; the executable finds this folder automatically. You can double-click `hg-game.exe` or use it as a Windows shortcut target.
+
+For SoulSilver, add `GAME_VERSION=SOULSILVER` to both make commands and use `build/pc/win64/soulsilver/run`. Windows and Linux builds have separate folders. Rebuild with the same `win64` command after source changes.
+
+Use the UCRT64 toolchain consistently; MSVC and 32-bit Windows builds are not supported. The Windows CI workflow stages a HeartGold runtime package with DLLs and startup files, without needing a ROM. See **Download a CI build** above for using the downloaded artifact.
+
+## Windows (WSL2)
+
+This builds a Linux executable and runs its window through WSLg. It does not produce an `.exe`.
+
+### 1. Set up Ubuntu
+
+In **PowerShell as Administrator**:
+
+```powershell
+wsl --install -d Ubuntu-24.04
+wsl --update
+```
+
+Restart if prompted, then open **Ubuntu 24.04** and finish creating your Linux user. Ensure the distribution uses WSL2 (`wsl --list --verbose` in PowerShell).
+
+GUI apps require Windows 10 build 19044+ or Windows 11, WSL2, and a compatible graphics driver. See Microsoft's [WSL installation guide](https://learn.microsoft.com/en-us/windows/wsl/install) and [GUI app setup](https://learn.microsoft.com/en-us/windows/wsl/tutorials/gui-apps).
+
+### 2. Build inside Ubuntu
+
+Follow the **Linux** steps above in the Ubuntu terminal. Clone under your Linux home directory, for example `~/pokeheartgold`.
+
+You can reference a ROM stored on Windows with its WSL path:
+
+```bash
+make -f Makefile.pc assets ROM="/mnt/c/Users/YourName/Games/HeartGold.nds"
+cd build/pc/heartgold/run
+../hg-game
+```
+
+The game window should open on your Windows desktop through WSLg. Saves stay in the Linux `run/` folder. Add `GAME_VERSION=SOULSILVER` and use the SoulSilver paths when building that version.
+
+## Quick fixes
+
+- **ROM rejected?** Use an unmodified US revision 0 dump of the selected game. Other regions, revisions, and patched ROMs fail validation.
+- **Missing assets?** Run the `assets` command; the executable automatically finds that game's `run/` directory.
+- **Missing `<format>` / `std::format`?** Check your C++ compiler and standard library; use GCC/G++ 13+.
+- **Build failed?** Compiler/linker output is saved to `build/pc/<game>/game-link.log`.
+- **Windows DLL missing?** Re-run `make -f Makefile.pc win64` from the UCRT64 terminal to stage runtime DLLs. Keep all generated DLLs beside `hg-game.exe`.
+- **WSL window won't open?** Check WSLg, update WSL and your Windows GPU driver, then retry. This port's WSL runtime remains untested here.
+
+Accepted ROM SHA1s:
+
+| Game | US code | SHA1 |
+| --- | --- | --- |
+| HeartGold | IPKE | `4fcded0e2713dc03929845de631d0932ea2b5a37` |
+| SoulSilver | IPGE | `f8dc38ea20c17541a43b58c5e6d18c1732c7e582` |
+
+To rebuild after source changes, return to the repository root and rerun the relevant `make -f Makefile.pc linux` command. You do not need to extract the ROM again.

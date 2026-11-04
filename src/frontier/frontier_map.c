@@ -73,6 +73,9 @@ typedef struct FrontierMapMainBgTemplates {
     BgTemplate bg2;
     BgTemplate bg3;
 } FrontierMapMainBgTemplates;
+#if defined(SDK_PORT)
+_Static_assert(sizeof(FrontierMapMainBgTemplates) == 84, "literal data: FrontierMapMainBgTemplates");
+#endif
 
 static const Field2DBgLayerTemplate sFrontierMapLayerTemplate = {
     .screen = 0,

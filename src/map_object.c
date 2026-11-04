@@ -852,7 +852,11 @@ static void MapObject_SetFlag25FromObjectEvent(LocalMapObject *object, u32 mapNo
 }
 
 u32 MapObject_GetPriorityPlusValue(LocalMapObject *object, u32 value) {
+#if defined(SDK_PORT)
+    return MapObject_GetPriority(object) + value;
+#else
     return (u32)((void *)MapObject_GetPriority(object) + value); // MUST be cast to void * to match
+#endif
 }
 
 BOOL MapObject_CheckIDAndMap(LocalMapObject *object, u32 objectId, u32 mapId) {
@@ -2049,3 +2053,198 @@ SavedMapObject *SaveMapObject_GetFirstObjectWithSpriteID(SavedMapObject *objects
 
     return NULL;
 }
+#if defined(SDK_PORT)
+
+/* Native movement callback structs and table from asm/map_object_movement_tables.s. */
+void AlternatingSpinMovement_Init(LocalMapObject *object);
+void AlternatingSpinMovement_Update(LocalMapObject *object);
+void BackAndForthMovement_Init(LocalMapObject *object);
+void BackAndForthMovement_Update(LocalMapObject *object);
+void FaceDirectionMovement_InitDown(LocalMapObject *object);
+void FaceDirectionMovement_InitLeft(LocalMapObject *object);
+void FaceDirectionMovement_InitRight(LocalMapObject *object);
+void FaceDirectionMovement_InitUp(LocalMapObject *object);
+void FaceDirectionMovement_Update(LocalMapObject *object);
+void FollowPartnerMovement_Delete(LocalMapObject *object);
+void FollowPartnerMovement_Init(LocalMapObject *object);
+void FollowPartnerMovement_Resume(LocalMapObject *object);
+void FollowPartnerMovement_Update(LocalMapObject *object);
+void FollowPlayerMovement_Delete(LocalMapObject *object);
+void FollowPlayerMovement_Init(LocalMapObject *object);
+void FollowPlayerMovement_Update(LocalMapObject *object);
+void FollowPlayerMovement_UpdateFollowMon(LocalMapObject *object);
+void FollowPlayerMovement_UpdateMirror(LocalMapObject *object);
+void HiddenObjectMovement_Delete(LocalMapObject *object);
+void HiddenObjectMovement_InitCover0(LocalMapObject *object);
+void HiddenObjectMovement_InitCover1(LocalMapObject *object);
+void HiddenObjectMovement_InitCover2(LocalMapObject *object);
+void HiddenObjectMovement_InitCover3(LocalMapObject *object);
+void HiddenObjectMovement_Resume(LocalMapObject *object);
+void HiddenObjectMovement_Update(LocalMapObject *object);
+void PathMovement_InitNorthEastWestSouth(LocalMapObject *object);
+void PathMovement_InitEastWestSouthNorth(LocalMapObject *object);
+void PathMovement_InitSouthNorthEastWest(LocalMapObject *object);
+void PathMovement_InitWestSouthNorthEast(LocalMapObject *object);
+void PathMovement_InitWestEastSouthNorth(LocalMapObject *object);
+void PathMovement_InitWestEastSouthNorth2(LocalMapObject *object);
+void PathMovement_InitSouthNorthWestEast(LocalMapObject *object);
+void PathMovement_InitEastSouthNorthWest(LocalMapObject *object);
+void PathMovement_InitWestNorthSouthEast(LocalMapObject *object);
+void PathMovement_InitNorthSouthEastWest(LocalMapObject *object);
+void PathMovement_InitEastWestNorthSouth(LocalMapObject *object);
+void PathMovement_InitSouthEastWestNorth(LocalMapObject *object);
+void PathMovement_InitEastNorthSouthWest(LocalMapObject *object);
+void PathMovement_InitNorthSouthWestEast(LocalMapObject *object);
+void PathMovement_InitWestEastNorthSouth(LocalMapObject *object);
+void PathMovement_InitSouthWestEastNorth(LocalMapObject *object);
+void PathMovement_InitNorthWestSouthEast(LocalMapObject *object);
+void PathMovement_InitSouthEastNorthWest(LocalMapObject *object);
+void PathMovement_InitWestSouthEastNorth(LocalMapObject *object);
+void PathMovement_InitEastNorthWestSouth(LocalMapObject *object);
+void PathMovement_InitNorthEastSouthWest(LocalMapObject *object);
+void PathMovement_InitSouthWestNorthEast(LocalMapObject *object);
+void PathMovement_InitWestNorthEastSouth(LocalMapObject *object);
+void PathMovement_InitEastSouthWestNorth(LocalMapObject *object);
+void PathMovement_Update(LocalMapObject *object);
+void RandomLookMovement_Delete(LocalMapObject *object);
+void RandomLookMovement_InitAnyDirection(LocalMapObject *object);
+void RandomLookMovement_InitDownLeft(LocalMapObject *object);
+void RandomLookMovement_InitDownLeftRight(LocalMapObject *object);
+void RandomLookMovement_InitDownRight(LocalMapObject *object);
+void RandomLookMovement_InitLeftRight(LocalMapObject *object);
+void RandomLookMovement_InitUpDown(LocalMapObject *object);
+void RandomLookMovement_InitUpDownLeft(LocalMapObject *object);
+void RandomLookMovement_InitUpDownRight(LocalMapObject *object);
+void RandomLookMovement_InitUpLeft(LocalMapObject *object);
+void RandomLookMovement_InitUpLeftRight(LocalMapObject *object);
+void RandomLookMovement_InitUpRight(LocalMapObject *object);
+void RandomLookMovement_Update(LocalMapObject *object);
+void RandomWalkMovement_InitAnyDirection(LocalMapObject *object);
+void RandomWalkMovement_InitLeftRight(LocalMapObject *object);
+void RandomWalkMovement_InitUpDown(LocalMapObject *object);
+void RandomWalkMovement_Update(LocalMapObject *object);
+void SpinMovement_InitClockwise(LocalMapObject *object);
+void SpinMovement_InitCounterclockwise(LocalMapObject *object);
+void SpinMovement_Update(LocalMapObject *object);
+static MapObjectMovementCallbacks sHiddenObjectCover1MovementCallbacks = { 0x00000034, HiddenObjectMovement_InitCover1, HiddenObjectMovement_Update, HiddenObjectMovement_Delete, HiddenObjectMovement_Resume };
+static MapObjectMovementCallbacks sPathTable15MovementCallbacks = { 0x00000003, PathMovement_InitEastWestSouthNorth, PathMovement_Update, MapObjectMovement_NoOpDelete, MapObjectMovement_NoOpRestore };
+static MapObjectMovementCallbacks sHiddenObjectCover3MovementCallbacks = { 0x00000036, HiddenObjectMovement_InitCover3, HiddenObjectMovement_Update, HiddenObjectMovement_Delete, HiddenObjectMovement_Resume };
+static MapObjectMovementCallbacks sFollowPlayer55MovementCallbacks = { 0x00000003, FollowPlayerMovement_Init, FollowPlayerMovement_Update, FollowPlayerMovement_Delete, MapObjectMovement_NoOpRestore };
+static MapObjectMovementCallbacks sPathTable14MovementCallbacks = { 0x00000003, PathMovement_InitNorthEastWestSouth, PathMovement_Update, MapObjectMovement_NoOpDelete, MapObjectMovement_NoOpRestore };
+static MapObjectMovementCallbacks sHiddenObjectCover2MovementCallbacks = { 0x00000035, HiddenObjectMovement_InitCover2, HiddenObjectMovement_Update, HiddenObjectMovement_Delete, HiddenObjectMovement_Resume };
+static MapObjectMovementCallbacks sSpinClockwiseMovementCallbacks = { 0x00000003, SpinMovement_InitClockwise, SpinMovement_Update, MapObjectMovement_NoOpDelete, MapObjectMovement_NoOpRestore };
+static MapObjectMovementCallbacks sHiddenObjectCover0MovementCallbacks = { 0x00000033, HiddenObjectMovement_InitCover0, HiddenObjectMovement_Update, HiddenObjectMovement_Delete, HiddenObjectMovement_Resume };
+static MapObjectMovementCallbacks sPathTable19MovementCallbacks = { 0x00000003, PathMovement_InitWestEastSouthNorth2, PathMovement_Update, MapObjectMovement_NoOpDelete, MapObjectMovement_NoOpRestore };
+static MapObjectMovementCallbacks sFollowPlayer56MovementCallbacks = { 0x00000003, FollowPlayerMovement_Init, FollowPlayerMovement_UpdateMirror, FollowPlayerMovement_Delete, MapObjectMovement_NoOpRestore };
+static MapObjectMovementCallbacks sPathTable20MovementCallbacks = { 0x00000003, PathMovement_InitSouthNorthWestEast, PathMovement_Update, MapObjectMovement_NoOpDelete, MapObjectMovement_NoOpRestore };
+static MapObjectMovementCallbacks sPathTable21MovementCallbacks = { 0x00000003, PathMovement_InitEastSouthNorthWest, PathMovement_Update, MapObjectMovement_NoOpDelete, MapObjectMovement_NoOpRestore };
+static MapObjectMovementCallbacks sPathTable22MovementCallbacks = { 0x00000003, PathMovement_InitWestNorthSouthEast, PathMovement_Update, MapObjectMovement_NoOpDelete, MapObjectMovement_NoOpRestore };
+static MapObjectMovementCallbacks sPathTable23MovementCallbacks = { 0x00000003, PathMovement_InitNorthSouthEastWest, PathMovement_Update, MapObjectMovement_NoOpDelete, MapObjectMovement_NoOpRestore };
+static MapObjectMovementCallbacks sPathTable25MovementCallbacks = { 0x00000003, PathMovement_InitSouthEastWestNorth, PathMovement_Update, MapObjectMovement_NoOpDelete, MapObjectMovement_NoOpRestore };
+static MapObjectMovementCallbacks sPathTable26MovementCallbacks = { 0x00000003, PathMovement_InitEastNorthSouthWest, PathMovement_Update, MapObjectMovement_NoOpDelete, MapObjectMovement_NoOpRestore };
+static MapObjectMovementCallbacks sPathTable27MovementCallbacks = { 0x00000003, PathMovement_InitNorthSouthWestEast, PathMovement_Update, MapObjectMovement_NoOpDelete, MapObjectMovement_NoOpRestore };
+static MapObjectMovementCallbacks sPathTable28MovementCallbacks = { 0x00000003, PathMovement_InitWestEastNorthSouth, PathMovement_Update, MapObjectMovement_NoOpDelete, MapObjectMovement_NoOpRestore };
+static MapObjectMovementCallbacks sPathTable29MovementCallbacks = { 0x00000003, PathMovement_InitSouthWestEastNorth, PathMovement_Update, MapObjectMovement_NoOpDelete, MapObjectMovement_NoOpRestore };
+static MapObjectMovementCallbacks sPathTable30MovementCallbacks = { 0x00000003, PathMovement_InitNorthWestSouthEast, PathMovement_Update, MapObjectMovement_NoOpDelete, MapObjectMovement_NoOpRestore };
+static MapObjectMovementCallbacks sNoMovementCallbacks = {
+    0,
+    MapObjectMovement_NoOpInit,
+    MapObjectMovement_NoOpUpdate,
+    MapObjectMovement_NoOpDelete,
+    MapObjectMovement_NoOpRestore,
+};
+static MapObjectMovementCallbacks sPlayerMovementCallbacks = { 0x00000001, MapObjectMovement_NoOpInit, MapObjectMovement_NoOpUpdate, MapObjectMovement_NoOpDelete, MapObjectMovement_NoOpRestore };
+static MapObjectMovementCallbacks sPathTable31MovementCallbacks = { 0x00000003, PathMovement_InitSouthEastNorthWest, PathMovement_Update, MapObjectMovement_NoOpDelete, MapObjectMovement_NoOpRestore };
+static MapObjectMovementCallbacks sPathTable24MovementCallbacks = { 0x00000003, PathMovement_InitEastWestNorthSouth, PathMovement_Update, MapObjectMovement_NoOpDelete, MapObjectMovement_NoOpRestore };
+static MapObjectMovementCallbacks sPathTable32MovementCallbacks = { 0x00000003, PathMovement_InitWestSouthEastNorth, PathMovement_Update, MapObjectMovement_NoOpDelete, MapObjectMovement_NoOpRestore };
+static MapObjectMovementCallbacks sRandomWalkLeftRightMovementCallbacks = { 0x00000003, RandomWalkMovement_InitLeftRight, RandomWalkMovement_Update, MapObjectMovement_NoOpDelete, MapObjectMovement_NoOpRestore };
+static MapObjectMovementCallbacks sPathTable33MovementCallbacks = { 0x00000003, PathMovement_InitEastNorthWestSouth, PathMovement_Update, MapObjectMovement_NoOpDelete, MapObjectMovement_NoOpRestore };
+static MapObjectMovementCallbacks sPathTable34MovementCallbacks = { 0x00000003, PathMovement_InitNorthEastSouthWest, PathMovement_Update, MapObjectMovement_NoOpDelete, MapObjectMovement_NoOpRestore };
+static MapObjectMovementCallbacks sRandomLookDownLeftMovementCallbacks = { 0x00000003, RandomLookMovement_InitDownLeft, RandomLookMovement_Update, RandomLookMovement_Delete, MapObjectMovement_NoOpRestore };
+static MapObjectMovementCallbacks sPathTable18MovementCallbacks = { 0x00000003, PathMovement_InitWestEastSouthNorth, PathMovement_Update, MapObjectMovement_NoOpDelete, MapObjectMovement_NoOpRestore };
+static MapObjectMovementCallbacks sPathTable17MovementCallbacks = { 0x00000003, PathMovement_InitWestSouthNorthEast, PathMovement_Update, MapObjectMovement_NoOpDelete, MapObjectMovement_NoOpRestore };
+static MapObjectMovementCallbacks sPathTable16MovementCallbacks = { 0x00000003, PathMovement_InitSouthNorthEastWest, PathMovement_Update, MapObjectMovement_NoOpDelete, MapObjectMovement_NoOpRestore };
+static MapObjectMovementCallbacks sRandomLookDownRightMovementCallbacks = { 0x00000003, RandomLookMovement_InitDownRight, RandomLookMovement_Update, RandomLookMovement_Delete, MapObjectMovement_NoOpRestore };
+static MapObjectMovementCallbacks sPathTable35MovementCallbacks = { 0x00000003, PathMovement_InitSouthWestNorthEast, PathMovement_Update, MapObjectMovement_NoOpDelete, MapObjectMovement_NoOpRestore };
+static MapObjectMovementCallbacks sBackAndForthMovementCallbacks = { 0x00000003, BackAndForthMovement_Init, BackAndForthMovement_Update, MapObjectMovement_NoOpDelete, MapObjectMovement_NoOpRestore };
+static MapObjectMovementCallbacks sAlternatingSpinMovementCallbacks = { 0x00000003, AlternatingSpinMovement_Init, AlternatingSpinMovement_Update, MapObjectMovement_NoOpDelete, MapObjectMovement_NoOpRestore };
+static MapObjectMovementCallbacks sPathTable36MovementCallbacks = { 0x00000003, PathMovement_InitWestNorthEastSouth, PathMovement_Update, MapObjectMovement_NoOpDelete, MapObjectMovement_NoOpRestore };
+static MapObjectMovementCallbacks sSpinCounterclockwiseMovementCallbacks = { 0x00000003, SpinMovement_InitCounterclockwise, SpinMovement_Update, MapObjectMovement_NoOpDelete, MapObjectMovement_NoOpRestore };
+static MapObjectMovementCallbacks sFaceDirectionRightMovementCallbacks = { 0x00000003, FaceDirectionMovement_InitRight, FaceDirectionMovement_Update, MapObjectMovement_NoOpDelete, MapObjectMovement_NoOpRestore };
+static MapObjectMovementCallbacks sFaceDirectionLeftMovementCallbacks = { 0x00000003, FaceDirectionMovement_InitLeft, FaceDirectionMovement_Update, MapObjectMovement_NoOpDelete, MapObjectMovement_NoOpRestore };
+static MapObjectMovementCallbacks sRandomLookDownLeftRightMovementCallbacks = { 0x00000003, RandomLookMovement_InitDownLeftRight, RandomLookMovement_Update, RandomLookMovement_Delete, MapObjectMovement_NoOpRestore };
+static MapObjectMovementCallbacks sPathTable37MovementCallbacks = { 0x00000003, PathMovement_InitEastSouthWestNorth, PathMovement_Update, MapObjectMovement_NoOpDelete, MapObjectMovement_NoOpRestore };
+static MapObjectMovementCallbacks sRandomLookUpDownMovementCallbacks = { 0x00000003, RandomLookMovement_InitUpDown, RandomLookMovement_Update, RandomLookMovement_Delete, MapObjectMovement_NoOpRestore };
+static MapObjectMovementCallbacks sRandomLookLeftRightMovementCallbacks = { 0x00000003, RandomLookMovement_InitLeftRight, RandomLookMovement_Update, RandomLookMovement_Delete, MapObjectMovement_NoOpRestore };
+static MapObjectMovementCallbacks sFollowPlayer48MovementCallbacks = { 0x00000003, FollowPlayerMovement_Init, FollowPlayerMovement_UpdateFollowMon, FollowPlayerMovement_Delete, MapObjectMovement_NoOpRestore };
+static MapObjectMovementCallbacks sRandomLookUpLeftRightMovementCallbacks = { 0x00000003, RandomLookMovement_InitUpLeftRight, RandomLookMovement_Update, RandomLookMovement_Delete, MapObjectMovement_NoOpRestore };
+static MapObjectMovementCallbacks sRandomLookUpDownRightMovementCallbacks = { 0x00000003, RandomLookMovement_InitUpDownRight, RandomLookMovement_Update, RandomLookMovement_Delete, MapObjectMovement_NoOpRestore };
+static MapObjectMovementCallbacks sRandomLookUpDownLeftMovementCallbacks = { 0x00000003, RandomLookMovement_InitUpDownLeft, RandomLookMovement_Update, RandomLookMovement_Delete, MapObjectMovement_NoOpRestore };
+static MapObjectMovementCallbacks sFaceDirectionUpMovementCallbacks = { 0x00000003, FaceDirectionMovement_InitUp, FaceDirectionMovement_Update, MapObjectMovement_NoOpDelete, MapObjectMovement_NoOpRestore };
+static MapObjectMovementCallbacks sFaceDirectionDownMovementCallbacks = { 0x00000003, FaceDirectionMovement_InitDown, FaceDirectionMovement_Update, MapObjectMovement_NoOpDelete, MapObjectMovement_NoOpRestore };
+static MapObjectMovementCallbacks sRandomLookUpRightMovementCallbacks = { 0x00000003, RandomLookMovement_InitUpRight, RandomLookMovement_Update, RandomLookMovement_Delete, MapObjectMovement_NoOpRestore };
+static MapObjectMovementCallbacks sRandomLookUpLeftMovementCallbacks = { 0x00000003, RandomLookMovement_InitUpLeft, RandomLookMovement_Update, RandomLookMovement_Delete, MapObjectMovement_NoOpRestore };
+static MapObjectMovementCallbacks sFollowPartnerMovementCallbacks = { 0x00000003, FollowPartnerMovement_Init, FollowPartnerMovement_Update, FollowPartnerMovement_Delete, FollowPartnerMovement_Resume };
+static MapObjectMovementCallbacks sRandomWalkUpDownMovementCallbacks = { 0x00000003, RandomWalkMovement_InitUpDown, RandomWalkMovement_Update, MapObjectMovement_NoOpDelete, MapObjectMovement_NoOpRestore };
+static MapObjectMovementCallbacks sRandomWalkAnyDirectionMovementCallbacks = { 0x00000003, RandomWalkMovement_InitAnyDirection, RandomWalkMovement_Update, MapObjectMovement_NoOpDelete, MapObjectMovement_NoOpRestore };
+static MapObjectMovementCallbacks sRandomLookAnyDirectionMovementCallbacks = { 0x00000002, RandomLookMovement_InitAnyDirection, RandomLookMovement_Update, RandomLookMovement_Delete, MapObjectMovement_NoOpRestore };
+MapObjectMovementCallbacks *gMapObjectMovementCallbacks[57] = {
+    &sNoMovementCallbacks,
+    &sPlayerMovementCallbacks,
+    &sRandomLookAnyDirectionMovementCallbacks,
+    &sRandomWalkAnyDirectionMovementCallbacks,
+    &sRandomWalkUpDownMovementCallbacks,
+    &sRandomWalkLeftRightMovementCallbacks,
+    &sRandomLookUpLeftMovementCallbacks,
+    &sRandomLookUpRightMovementCallbacks,
+    &sRandomLookDownLeftMovementCallbacks,
+    &sRandomLookDownRightMovementCallbacks,
+    &sRandomLookUpDownLeftMovementCallbacks,
+    &sRandomLookUpDownRightMovementCallbacks,
+    &sRandomLookUpLeftRightMovementCallbacks,
+    &sRandomLookDownLeftRightMovementCallbacks,
+    &sFaceDirectionUpMovementCallbacks,
+    &sFaceDirectionDownMovementCallbacks,
+    &sFaceDirectionLeftMovementCallbacks,
+    &sFaceDirectionRightMovementCallbacks,
+    &sSpinCounterclockwiseMovementCallbacks,
+    &sSpinClockwiseMovementCallbacks,
+    &sBackAndForthMovementCallbacks,
+    &sPathTable14MovementCallbacks,
+    &sPathTable15MovementCallbacks,
+    &sPathTable16MovementCallbacks,
+    &sPathTable17MovementCallbacks,
+    &sPathTable18MovementCallbacks,
+    &sPathTable19MovementCallbacks,
+    &sPathTable20MovementCallbacks,
+    &sPathTable21MovementCallbacks,
+    &sPathTable22MovementCallbacks,
+    &sPathTable23MovementCallbacks,
+    &sPathTable24MovementCallbacks,
+    &sPathTable25MovementCallbacks,
+    &sPathTable26MovementCallbacks,
+    &sPathTable27MovementCallbacks,
+    &sPathTable28MovementCallbacks,
+    &sPathTable29MovementCallbacks,
+    &sPathTable30MovementCallbacks,
+    &sPathTable31MovementCallbacks,
+    &sPathTable32MovementCallbacks,
+    &sPathTable33MovementCallbacks,
+    &sPathTable34MovementCallbacks,
+    &sPathTable35MovementCallbacks,
+    &sPathTable36MovementCallbacks,
+    &sPathTable37MovementCallbacks,
+    &sRandomLookUpDownMovementCallbacks,
+    &sRandomLookLeftRightMovementCallbacks,
+    0,
+    &sFollowPlayer48MovementCallbacks,
+    &sAlternatingSpinMovementCallbacks,
+    &sFollowPartnerMovementCallbacks,
+    &sHiddenObjectCover0MovementCallbacks,
+    &sHiddenObjectCover1MovementCallbacks,
+    &sHiddenObjectCover2MovementCallbacks,
+    &sHiddenObjectCover3MovementCallbacks,
+    &sFollowPlayer55MovementCallbacks,
+    &sFollowPlayer56MovementCallbacks,
+};
+#endif

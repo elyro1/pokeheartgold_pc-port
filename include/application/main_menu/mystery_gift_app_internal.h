@@ -78,6 +78,10 @@ struct MysteryGiftAppData {
     void (*callback)(struct MysteryGiftAppData *data); // run every frame while set
     int saveCancelled;
     struct WaitingIcon *waitingIcon;
+#if defined(SDK_PORT)
+    MysteryGiftMenuFunc menuCallbacks[4];
+    int menuCallbackCount;
+#endif
     int animStatus; // gift animation task: 1 running, 2 may finish, 0 done
 };
 

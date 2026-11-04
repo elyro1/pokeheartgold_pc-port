@@ -1,16 +1,37 @@
-# Pokémon HeartGold and SoulSilver
+# Pokémon HeartGold / SoulSilver — PC Port
 
-**Not affiliated with pret.**
+Johto, on PC. A work-in-progress native port built from [ctrl-cheeb-del's decompilation](https://github.com/ctrl-cheeb-del/pokeheartgold), powered by [libntr](https://github.com/cybervisi0n/libntr).
 
-This is a fork of pret's pokeheartgold repo, and the original tooling is all theirs. pret doesn't accept AI-generated code and doesn't want to be associated with this, so don't send anything from here upstream or bother them about it; keep everything here.
+> **Warning: this port is experimental** Save often. If a crash costs you progress, you can restore an available backup from the `autosave/` folder beside your save files. Close the game, keep a copy of your manual save, then copy the backup over its matching save file (for example, `save1.bin`), removing the timestamp and `.bak` suffix. See [autosave and restore instructions](pc/README.md).
 
-Fully decompiled: everything's C/C++ and both ROMs build byte-for-byte. Built with LLM agents.
+**Bring your own dumped US HeartGold or SoulSilver ROM (revision 0).** Assets are extracted locally. No ROMs or game assets are provided.
 
-Setup is in [INSTALL.md](INSTALL.md).
+## Start here
 
-[![Source-language coverage treemap](docs/progress/treemap.svg)](INSTALL.md#progress-reports)
+**[Build & run: Linux / Windows](INSTALL.md)**
 
-This repository builds the following ROMs:
+- **Linux x86-64:** native build.
+- **Windows x86-64:** native `.exe` build with MSYS2 UCRT64, or a Linux build through WSL2.
 
-* **pokeheartgold.us.nds** `sha1: 4fcded0e2713dc03929845de631d0932ea2b5a37`
-* **pokesoulsilver.us.nds** `sha1: f8dc38ea20c17541a43b58c5e6d18c1732c7e582`
+## Features
+
+- **HeartGold + SoulSilver** — choose either at build time.
+- **30 / 60 FPS** — 60 FPS enabled by default.
+- **PC controls** — keyboard, controller, mouse touch input, fullscreen, fast-forward.
+- **Autosave backups** — every two minutes when safe; keeps the newest ten per slot.
+
+## Controls, quickly
+
+| Key | Action |
+| --- | --- |
+| Arrow keys | Move |
+| Z / X | Confirm / back (DS A / B) |
+| C / V | Menu / registered item (DS X / Y) |
+| Q / E | L / R |
+| Enter / Right Shift | Start / Select |
+| **Tab** | **PC settings & tools** |
+| Hold Left Shift | Fast-forward |
+| F11 | Fullscreen |
+| Left mouse button | Touch input |
+
+Remap controls in the PC settings. Existing configs keep your saved bindings.

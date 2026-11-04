@@ -1,6 +1,10 @@
 #include "comm_wireless.h"
 
+#if defined(SDK_PORT)
+#include <nitro/wm.h>
+#else
 #include <nitro/wm/wm_internal.h>
+#endif
 #include <stddef.h>
 
 #include "global.h"
@@ -78,7 +82,10 @@ typedef struct CommWirelessWork {
     u8 unk_D96[2];
 } CommWirelessWork;
 
+#if defined(SDK_PORT)
+#else
 typedef char CommWirelessWorkSizeCheck[sizeof(CommWirelessWork) == 0xD98 ? 1 : -1];
+#endif
 typedef char CommWirelessTimerCheck[offsetof(CommWirelessWork, parentTimers) == 0xD44 ? 1 : -1];
 typedef char CommBeaconSizeCheck[sizeof(CommBeacon) == 0x5C ? 1 : -1];
 
@@ -112,14 +119,21 @@ typedef struct CommBssid {
     u8 data[6];
 } CommBssid;
 
+#if defined(SDK_PORT)
+#else
 int WVR_StartUpAsync(int mode, void (*callback)(void *, int), void *arg);
 int WVR_TerminateAsync(void (*callback)(void *), void *arg);
+#endif
 
 int CommState_GetLinkMode(void);
 u8 CommState_GetBeaconId(void);
 void CommState_ShowErrorAndHalt(u32);
 void Comm_RecvChildFrameCallback(int netId, const u8 *data, int size);
 void Comm_RecvParentFrameCallback(int netId, const u8 *data, int size);
+#if defined(SDK_PORT)
+static void CommWireless_RecvChildNative(u16 aid, void *data, u16 size) { Comm_RecvChildFrameCallback(aid, data, size); }
+static void CommWireless_RecvParentNative(u16 aid, void *data, u16 size) { Comm_RecvParentFrameCallback(aid, data, size); }
+#endif
 
 u32 Wireless_GetWorkSize(void);
 BOOL Wireless_Init(void *buffer, int mode);
@@ -182,7 +196,11 @@ void CommWireless_Init(PlayerProfile *profile, int mode) {
         sCommWireless.work = allocation;
         MI_CpuFill8(allocation, 0, sizeof(CommWirelessWork));
 
+#if defined(SDK_PORT)
+        allocation = Heap_Alloc(HEAP_ID_15, Wireless_GetWorkSize() + 32);
+#else
         allocation = Heap_Alloc(HEAP_ID_15, Wireless_GetWorkSize());
+#endif
         sCommWireless.work->managerBuffer = allocation;
         MI_CpuFill8(sCommWireless.work->managerBuffer, 0, Wireless_GetWorkSize());
 
@@ -194,9 +212,17 @@ void CommWireless_Init(PlayerProfile *profile, int mode) {
         sCommWireless.work->beaconBuffer = allocation;
         work = sCommWireless.work;
         raw = work->beaconBuffer;
+#if defined(SDK_PORT)
+        remainder = (uintptr_t)raw & 0x1F;
+#else
         remainder = (u32)raw & 0x1F;
+#endif
         adjustment = 0x20 - remainder;
+#if defined(SDK_PORT)
+        work->beacon = (CommBeacon *)(raw + adjustment);
+#else
         work->beacon = (CommBeacon *)(adjustment + (u32)raw);
+#endif
         sCommWireless.work->ggid = 0x333;
         sCommWireless.work->profile = profile;
         MailMsg_Init(&sCommWireless.work->mail);
@@ -293,10 +319,27 @@ static void CommWireless_OnTerminated(void *unused) {
     Sys_ClearSleepDisableFlag(4);
 }
 
+#if defined(SDK_PORT)
+static void CommWireless_OnNativeStartedUp(void *arg, WVRResult result) {
+    CommWireless_OnStartedUp(arg, result != WVR_RESULT_SUCCESS);
+}
+
+static void CommWireless_OnNativeTerminated(void *arg, WVRResult result) {
+    if (result != WVR_RESULT_SUCCESS) {
+        OS_Terminate();
+    }
+    CommWireless_OnTerminated(arg);
+}
+
+#endif
 void CommWireless_StartUp(void) {
     Sys_SetSleepDisableFlag(4);
     sCommWireless.state = COMM_WIRELESS_STARTING_UP;
+#if defined(SDK_PORT)
+    if (WVR_StartUpAsync(GX_VRAM_ARM7_128_C, CommWireless_OnNativeStartedUp, NULL) != 1) {
+#else
     if (WVR_StartUpAsync(8, CommWireless_OnStartedUp, NULL) != 1) {
+#endif
         OS_Terminate();
     }
 }
@@ -310,7 +353,11 @@ BOOL CommWireless_IsOn(void) {
 }
 
 void CommWireless_Terminate(void) {
+#if defined(SDK_PORT)
+    WVR_TerminateAsync(CommWireless_OnNativeTerminated, NULL);
+#else
     WVR_TerminateAsync(CommWireless_OnTerminated, NULL);
+#endif
 }
 
 static void CommWireless_InitManager(int mode) {
@@ -319,7 +366,11 @@ static void CommWireless_InitManager(int mode) {
 
     sCommWireless.work->unk_D70 = 0;
     buffer = sCommWireless.work->managerBuffer;
+#if defined(SDK_PORT)
+    misalignment = (uintptr_t)buffer & 0x1F;
+#else
     misalignment = (u32)buffer & 0x1F;
+#endif
     Wireless_Init(buffer + (0x20 - misalignment), mode);
     Wireless_SetGgid(sCommWireless.work->ggid);
 }
@@ -353,7 +404,11 @@ BOOL CommWireless_StartParent(int unused, BOOL renewTgid, BOOL entryFlag) {
     CommWireless_SetRenewTgid(renewTgid);
     Wireless_ClearBeaconCount();
     if (sCommWireless.work->portCallbackSet == 0) {
+#if defined(SDK_PORT)
+        Wireless_SetReceiveCallback(CommWireless_RecvChildNative, 14);
+#else
         Wireless_SetReceiveCallback(Comm_RecvChildFrameCallback, 14);
+#endif
         sCommWireless.work->portCallbackSet = 1;
     }
     sCommWireless.work->entryFlag = entryFlag;
@@ -371,7 +426,11 @@ BOOL CommWireless_StartScan(int unused, BOOL clearParents) {
         CommWireless_ClearParents();
     }
     if (sCommWireless.work->portCallbackSet == 0) {
+#if defined(SDK_PORT)
+        Wireless_SetReceiveCallback(CommWireless_RecvParentNative, 14);
+#else
         Wireless_SetReceiveCallback(Comm_RecvParentFrameCallback, 14);
+#endif
         sCommWireless.work->portCallbackSet = 1;
     }
     if (Wireless_GetState() == 1) {
@@ -713,14 +772,22 @@ BOOL CommWireless_Exists(void) {
 
 int CommWireless_IsIdle(void) {
     if (sCommWireless.work != NULL) {
+#if defined(SDK_PORT)
+        return Wireless_IsIdle();
+#else
         return Wireless_IsIdle(sCommWireless.work);
+#endif
     }
     return 1;
 }
 
 int CommWireless_GetConnectedChildren(void) {
     if (sCommWireless.work != NULL) {
+#if defined(SDK_PORT)
+        return Wireless_GetConnectedBitmap() & 0xFFFE;
+#else
         return Wireless_GetConnectedBitmap(sCommWireless.work) & 0xFFFE;
+#endif
     }
     return 0;
 }

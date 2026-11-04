@@ -373,7 +373,11 @@ void EasyChatAppView_Cmd_Unload(SysTask *task, EasyChatViewCommand *command) {
         FreeBgTilemapBuffer(view->bgConfig, GF_BG_LYR_MAIN_3);
         FreeBgTilemapBuffer(view->bgConfig, GF_BG_LYR_SUB_0);
         FreeBgTilemapBuffer(view->bgConfig, GF_BG_LYR_SUB_1);
+#if defined(SDK_PORT)
+        reg_GX_POWCNT |= (1 << REG_GX_POWCNT_DSEL_SHIFT);
+#else
         reg_GX_POWCNT |= (u32)&reg_GX_POWCNT >> 11;
+#endif
         EasyChatAppView_EndCommand(command);
         return;
     }
@@ -903,3 +907,73 @@ Sprite *EasyChatAppView_CreateSprite(EasyChatAppView *view, SpriteResourcesHeade
     }
     return sprite;
 }
+#if defined(SDK_PORT)
+
+/* Native tables from asm/easy_chat_app_data.s; adapters give differing originals the table's signature. */
+void EasyChatAppView_Cmd_Load(SysTask *task, EasyChatViewCommand *command);
+void EasyChatAppView_Cmd_Unload(SysTask *task, EasyChatViewCommand *command);
+void EasyChatAppView_Cmd_FadeIn(SysTask *task, EasyChatViewCommand *command);
+void EasyChatAppView_Cmd_RedrawSentence(SysTask *task, EasyChatViewCommand *command);
+void EasyChatAppView_Cmd_Nop(SysTask *task, EasyChatViewCommand *command);
+void EasyChatAppView_Cmd_ShowCategoryCursor(SysTask *task, EasyChatViewCommand *command);
+void EasyChatAppView_Cmd_ShowWordListCursor(SysTask *task, EasyChatViewCommand *command);
+void EasyChatAppView_Cmd_FocusMenu(SysTask *task, EasyChatViewCommand *command);
+void EasyChatAppView_Cmd_FocusSentence(SysTask *task, EasyChatViewCommand *command);
+void EasyChatAppView_Cmd_OpenCategories(SysTask *task, EasyChatViewCommand *command);
+void EasyChatAppView_Cmd_CloseCategories(SysTask *task, EasyChatViewCommand *command);
+void EasyChatAppView_Cmd_OpenWordList(SysTask *task, EasyChatViewCommand *command);
+void EasyChatAppView_Cmd_WordListToCategories(SysTask *task, EasyChatViewCommand *command);
+void EasyChatAppView_Cmd_CloseWordList(SysTask *task, EasyChatViewCommand *command);
+void EasyChatAppView_Cmd_WordListToMenu(SysTask *task, EasyChatViewCommand *command);
+void EasyChatAppView_Cmd_MoveMenuCursor(SysTask *task, EasyChatViewCommand *command);
+void EasyChatAppView_Cmd_SetMenuCursor(SysTask *task, EasyChatViewCommand *command);
+void EasyChatAppView_Cmd_SetCategoryCursor(SysTask *task, EasyChatViewCommand *command);
+void EasyChatAppView_Cmd_SetWordListCursor(SysTask *task, EasyChatViewCommand *command);
+void EasyChatAppView_Cmd_ScrollWordList(SysTask *task, EasyChatViewCommand *command);
+void EasyChatAppView_Cmd_HideMessage(SysTask *task, EasyChatViewCommand *command);
+void EasyChatAppView_Cmd_ConfirmFinish(SysTask *task, EasyChatViewCommand *command);
+void EasyChatAppView_Cmd_ConfirmQuit(SysTask *task, EasyChatViewCommand *command);
+void EasyChatAppView_Cmd_ShowIncompleteMessage(SysTask *task, EasyChatViewCommand *command);
+void EasyChatAppView_Cmd_DrawYesNoCursor(SysTask *task, EasyChatViewCommand *command);
+void EasyChatAppView_Cmd_CloseYesNo(SysTask *task, EasyChatViewCommand *command);
+void EasyChatAppView_Cmd_SwitchMode(SysTask *task, EasyChatViewCommand *command);
+void EasyChatAppView_Cmd_SwitchListMode(SysTask *task, EasyChatViewCommand *command);
+void EasyChatAppView_Cmd_PressPageUp(SysTask *task, EasyChatViewCommand *command);
+void EasyChatAppView_Cmd_PressPageDown(SysTask *task, EasyChatViewCommand *command);
+void EasyChatAppView_Cmd_ReleasePageUp(SysTask *task, EasyChatViewCommand *command);
+void EasyChatAppView_Cmd_ReleasePageDown(SysTask *task, EasyChatViewCommand *command);
+const EasyChatViewCommandFunc gEasyChatViewCommandFuncs[] = {
+    EasyChatAppView_Cmd_Load,
+    EasyChatAppView_Cmd_Unload,
+    EasyChatAppView_Cmd_FadeIn,
+    EasyChatAppView_Cmd_RedrawSentence,
+    EasyChatAppView_Cmd_Nop,
+    EasyChatAppView_Cmd_ShowCategoryCursor,
+    EasyChatAppView_Cmd_ShowWordListCursor,
+    EasyChatAppView_Cmd_FocusMenu,
+    EasyChatAppView_Cmd_FocusSentence,
+    EasyChatAppView_Cmd_OpenCategories,
+    EasyChatAppView_Cmd_CloseCategories,
+    EasyChatAppView_Cmd_OpenWordList,
+    EasyChatAppView_Cmd_WordListToCategories,
+    EasyChatAppView_Cmd_CloseWordList,
+    EasyChatAppView_Cmd_WordListToMenu,
+    EasyChatAppView_Cmd_MoveMenuCursor,
+    EasyChatAppView_Cmd_SetMenuCursor,
+    EasyChatAppView_Cmd_SetCategoryCursor,
+    EasyChatAppView_Cmd_SetWordListCursor,
+    EasyChatAppView_Cmd_ScrollWordList,
+    EasyChatAppView_Cmd_HideMessage,
+    EasyChatAppView_Cmd_ConfirmFinish,
+    EasyChatAppView_Cmd_ConfirmQuit,
+    EasyChatAppView_Cmd_ShowIncompleteMessage,
+    EasyChatAppView_Cmd_DrawYesNoCursor,
+    EasyChatAppView_Cmd_CloseYesNo,
+    EasyChatAppView_Cmd_SwitchMode,
+    EasyChatAppView_Cmd_SwitchListMode,
+    EasyChatAppView_Cmd_PressPageUp,
+    EasyChatAppView_Cmd_PressPageDown,
+    EasyChatAppView_Cmd_ReleasePageUp,
+    EasyChatAppView_Cmd_ReleasePageDown,
+};
+#endif

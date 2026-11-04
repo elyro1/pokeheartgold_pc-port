@@ -160,7 +160,15 @@ BOOL FieldMap_Init(OverlayManager *man, int *state) {
 
         offset += DSProt_DetectFlashcart(&FieldMapInit_DSProtFlashcartCallback) * 0x3A1;
 
+#if defined(SDK_PORT)
+        u32 fieldHeapSize = fieldSystem->mapLoadMode->fieldHeapSize;
+        // Native sprite/animation records and heap headers exceed the DS budget.
+        // Route 34 otherwise runs out of space creating the weather sprite pool.
+        fieldHeapSize += 0x10000;
+        Heap_Create(HEAP_ID_3, HEAP_ID_FIELD1, fieldHeapSize);
+#else
         Heap_Create(HEAP_ID_3, HEAP_ID_FIELD1, fieldSystem->mapLoadMode->fieldHeapSize);
+#endif
         GF_ASSERT(fieldSystem->mapSystems == NULL);
 
         FS_UnloadOverlay(MI_PROCESSOR_ARM9, FS_OVERLAY_ID(ds_protect));
@@ -772,8 +780,13 @@ static void FieldMap_InitCameraAndEnvironment(FieldSystem *fieldSystem) {
 }
 
 static BOOL FieldMap_DSProtCardSpiCheck(void) {
+#if defined(SDK_PORT)
+    /* The native host has no cartridge IR SPI device to probe. */
+    return TRUE;
+#else
     CARD_SpiWaitGetStatus();
     return CARD_SpiWaitGetStatus() == 170;
+#endif
 }
 
 static MapObjectsToPreload *FetchMapObjectsToPreload(enum HeapID heapID, u16 modelBank) {

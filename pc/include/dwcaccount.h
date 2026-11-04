@@ -1,0 +1,4 @@
+#ifndef POKEHEARTGOLD_DWCACCOUNT_H
+#define POKEHEARTGOLD_DWCACCOUNT_H
+#include <dwc.h>
+#endif

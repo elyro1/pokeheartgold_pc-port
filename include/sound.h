@@ -10,7 +10,12 @@
 
 typedef struct SND_WORK SND_WORK;
 
+#if defined(SDK_PORT)
+// The native SDAT file table and sound-heap metadata need wider pointers.
+#define SND_HEAP_SIZE (0xBEAE0 + 0x10000)
+#else
 #define SND_HEAP_SIZE 0xBEAE0
+#endif
 
 enum SoundHandleNo {
     SND_HANDLE_FIELD,

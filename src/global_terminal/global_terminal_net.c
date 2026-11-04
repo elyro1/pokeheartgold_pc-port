@@ -746,8 +746,13 @@ static void *GlobalTerminalNet_CreateOsHeap(enum HeapID heapID) {
     void *arenaLo = OS_InitAlloc(OS_ARENA_MAIN, memory, end, 1);
 
     OS_SetArenaLo(OS_ARENA_MAIN, arenaLo);
+#if defined(SDK_PORT)
+    arenaLo = (void *)(((uintptr_t)arenaLo + 31) & ~(uintptr_t)31);
+    end = (void *)(((uintptr_t)end + 31) & ~(uintptr_t)31);
+#else
     arenaLo = (void *)(((u32)arenaLo + 31) & ~31);
     end = (void *)(((u32)end + 31) & ~31);
+#endif
     sGlobalTerminalNetOsHeap = OS_CreateHeap(OS_ARENA_MAIN, arenaLo, end);
     OS_SetCurrentHeap(OS_ARENA_MAIN, sGlobalTerminalNetOsHeap);
     return memory;
@@ -994,7 +999,11 @@ u32 GlobalTerminalNet_GetDownloadedVideo(GlobalTerminalNet *net, u8 **out) {
     GlobalTerminalNetVideoResponse *response = GlobalTerminalServer_GetResponse();
     GlobalTerminalNetVideoView *view = (GlobalTerminalNetVideoView *)((u8 *)response + 4);
 
+#if defined(SDK_PORT)
+    *out = (u8 *)view + 12;
+#else
     *out = (u8 *)((u32)view + 12);
+#endif
     if (*(u64 *)view->savedNumber != response->number) {
         *(u64 *)view->savedNumber = response->number;
         *(u16 *)(*out + 0xE0) = SaveArray_CalcCRC16(net->saveData, *out + 0x80, 0x58);

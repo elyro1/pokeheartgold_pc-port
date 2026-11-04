@@ -377,7 +377,12 @@ BOOL PokemonSummary_Init(OverlayManager *manager, int *state) {
     reg_G2_BLDCNT = 0;
     reg_G2S_DB_BLDCNT = 0;
     SetKeyRepeatTimers(4, 8);
+#if defined(SDK_PORT)
+    // Native sprite/animation records and heap headers exceed the DS budget.
+    Heap_Create(HEAP_ID_3, HEAP_ID_19, 0x55000);
+#else
     Heap_Create(HEAP_ID_3, HEAP_ID_19, 0x45000);
+#endif
     ribbonNarc = NARC_New(NARC_a_0_3_9, HEAP_ID_19);
     graphicsNarc = NARC_New(NARC_a_1_6_2, HEAP_ID_19);
     summary = OverlayManager_CreateAndGetData(manager, sizeof(PokemonSummary), HEAP_ID_19);
@@ -2944,3 +2949,9 @@ static void PokemonSummary_AnimateRibbonSprite66(PokemonSummary *summary) {
         Sprite_UpdateAnim(summary->sprites[66], FX32_ONE);
     }
 }
+#if defined(SDK_PORT)
+
+OverlayManagerTemplate gOverlayTemplate_PokemonSummary = {
+    PokemonSummary_Init, PokemonSummary_Main, PokemonSummary_Exit, FS_OVERLAY_ID_NONE
+};
+#endif

@@ -839,7 +839,11 @@ void WiFiPlazaLobbyClient_Free(void);
 int WiFiPlazaLobbyClient_Update(void);
 u32 WiFiPlazaLobbyClient_GetLastError(void);
 u32 WiFiPlazaLobbyClient_ToErrorCode(u32 error);
+#if defined(SDK_PORT)
+BOOL WiFiPlazaLobbyClient_Initialize(void *value);
+#else
 void WiFiPlazaLobbyClient_Initialize(int value);
+#endif
 BOOL WiFiPlazaLobbyClient_IsInLobby(void);
 void WiFiPlazaLobbyClient_Shutdown(void);
 BOOL WiFiPlazaLobbyClient_IsDisconnected(void);
@@ -995,10 +999,13 @@ BOOL WiFiPlazaSurvey_Exit(OverlayManager *man, int *state);
 void WiFiPlazaMap_PosToVecFx32(const s16 *gridPos, s32 *position);
 void WiFiPlazaMap_LoadModelFile(NNSG3dResFileHeader **file, NARC *narc, int fileId, enum HeapID heapID);
 // billboards
+#if defined(SDK_PORT)
+#else
 u32 NNS_G3dMdlGetMdlLightEnableFlag(const NNSG3dResMdl *pResMdl, u32 matID);
 void NNS_G3dMdlSetMdlLightEnableFlagAll(NNSG3dResMdl *pResMdl, u32 light);
 void NNS_G3dMdlSetMdlPolygonIDAll(NNSG3dResMdl *pResMdl, u32 polygonID);
 void NNS_G3dMdlSetMdlAlphaAll(NNSG3dResMdl *pResMdl, u32 alpha);
+#endif
 WiFiPlazaPlayerInfo *WiFiPlazaPlayerInfo_New(PlayerProfile *profile, enum HeapID heapID);
 void WiFiPlazaPlayerInfo_Free(WiFiPlazaPlayerInfo *info);
 

@@ -528,9 +528,22 @@ static void PalPadGfx_CreateSprites(PalPadGfx *gfx, enum HeapID heapId) {
     animSeq = 5;
     header = &gfx->spriteHeader;
     for (; i < 2; i++) {
+#if defined(SDK_PORT)
+        template = &gPalPadArrowSpriteTemplates[i];
+#endif
         template->spriteList = gfx->spriteList;
+#if defined(SDK_PORT)
+        template->header = &gfx->spriteHeader;
+#else
         template->header = header;
+#endif
         template->heapID = heapId;
+#if defined(SDK_PORT)
+        gfx->arrows[i] = Sprite_CreateAffine(template);
+        Sprite_SetAnimActiveFlag(gfx->arrows[i], TRUE);
+        Sprite_SetDrawFlag(gfx->arrows[i], FALSE);
+        Sprite_SetAnimCtrlSeq(gfx->arrows[i], 5 + i * 2);
+#else
         arrowSlot->arrows[0] = Sprite_CreateAffine(create);
         Sprite_SetAnimActiveFlag(arrowSlot->arrows[0], TRUE);
         Sprite_SetDrawFlag(arrowSlot->arrows[0], FALSE);
@@ -539,10 +552,17 @@ static void PalPadGfx_CreateSprites(PalPadGfx *gfx, enum HeapID heapId) {
         create++;
         arrowSlot = (PalPadGfx *)((u8 *)arrowSlot + sizeof(Sprite *));
         animSeq += 2;
+#endif
     }
+#if defined(SDK_PORT)
+    gPalPadCursorSpriteTemplate.spriteList = gfx->spriteList;
+    gPalPadCursorSpriteTemplate.header = &gfx->spriteHeader;
+    gPalPadCursorSpriteTemplate.heapID = heapId;
+#else
     ((SpriteTemplate *)(gPalPadArrowTemplateScale + 0x4C))->spriteList = gfx->spriteList;
     ((SpriteTemplate *)(gPalPadArrowTemplateScale + 0x4C))->header = &gfx->spriteHeader;
     ((SpriteTemplate *)(gPalPadArrowTemplateScale + 0x4C))->heapID = heapId;
+#endif
     gfx->cursor = Sprite_CreateAffine(&gPalPadCursorSpriteTemplate);
     Sprite_SetDrawFlag(gfx->cursor, FALSE);
     Sprite_SetAnimCtrlSeq(gfx->cursor, 1);
@@ -624,3 +644,14 @@ YesNoResponse PalPadGfx_HandleYesNo(u32 *inputState, PalPadGfx *gfx) {
     }
     return result;
 }
+#if defined(SDK_PORT)
+
+SpriteTemplate gPalPadArrowSpriteTemplates[2] = {
+    {.position = {32768, 401408, 0}, .scale = {FX32_ONE, FX32_ONE, FX32_ONE}, .drawPriority = 8, .whichScreen = 1},
+    {.position = {1015808, 401408, 0}, .scale = {FX32_ONE, FX32_ONE, FX32_ONE}, .drawPriority = 8, .whichScreen = 1}
+};
+
+SpriteTemplate gPalPadCursorSpriteTemplate = {
+    .scale = {FX32_ONE, FX32_ONE, FX32_ONE}, .drawPriority = 9, .whichScreen = 1
+};
+#endif

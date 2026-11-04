@@ -1,4 +1,7 @@
 #include "global.h"
+#if defined(SDK_PORT)
+#include "hg/offline_features.h"
+#endif
 
 #include "constants/game_stats.h"
 #include "constants/pokemon.h"
@@ -192,6 +195,11 @@ static const WiFiPlazaLobbyCommand sWiFiPlazaLobbyCommands[] = {
 };
 
 BOOL WiFiPlaza_Init(OverlayManager *man, int *state) {
+#if defined(SDK_PORT)
+    (void)man;
+    (void)state;
+    PC_ShowUnavailableFeature(PC_FEATURE_WIFI_PLAZA);
+#else
     WiFiPlaza *plaza;
     WiFiPlazaArgs *args;
     HandleLoadOverlay(FS_OVERLAY_ID(OVY_42), OVY_LOAD_ASYNC);
@@ -219,6 +227,7 @@ BOOL WiFiPlaza_Init(OverlayManager *man, int *state) {
     HBlankInterruptDisable();
     plaza->vblankTask = SysTask_CreateOnVWaitQueue(WiFiPlaza_VBlankTask, plaza, 0);
     WiFiPlazaApps_StartFirst(plaza->apps);
+#endif
     return TRUE;
 }
 
@@ -233,6 +242,10 @@ BOOL WiFiPlaza_Main(OverlayManager *man, int *state) {
 }
 
 BOOL WiFiPlaza_Exit(OverlayManager *man, int *state) {
+#if defined(SDK_PORT)
+    (void)man;
+    (void)state;
+#else
     WiFiPlaza *plaza;
     OverlayManager *manager = man;
     plaza = OverlayManager_GetData(man);
@@ -246,6 +259,7 @@ BOOL WiFiPlaza_Exit(OverlayManager *man, int *state) {
     UnloadOverlayByID(FS_OVERLAY_ID(OVY_42));
     UnloadOVY38();
     UnloadDwcOverlay();
+#endif
     return TRUE;
 }
 

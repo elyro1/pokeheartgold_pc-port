@@ -545,7 +545,11 @@ static int PartyMenu_Subtask_HandleSubcontextMenuInput(PartyMenu *partyMenu) {
         return PARTY_MENU_STATE_1;
     default: {
         int result;
+#if defined(SDK_PORT)
+        PartyMenu_GetContextMenuAction(func)(partyMenu, &result);
+#else
         ((PartyMonContextMenuActionFunc)func)(partyMenu, &result);
+#endif
         return result;
     }
     case LIST_NOTHING_CHOSEN:
@@ -2165,7 +2169,11 @@ static BOOL PartyMenu_Subtask_HandleContextMenuInput(PartyMenu *partyMenu, int *
     case LIST_NOTHING_CHOSEN:
         break;
     default:
+#if defined(SDK_PORT)
+        PartyMenu_GetContextMenuAction(func)(partyMenu, (int *)pState);
+#else
         ((PartyMonContextMenuActionFunc)func)(partyMenu, (int *)pState);
+#endif
         break;
     }
 

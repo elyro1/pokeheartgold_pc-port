@@ -25,6 +25,11 @@
 #include "pokedex_resume_state.h"
 #include "gear_phone_ring_manager.h"
 
+#if defined(SDK_PORT)
+#include "autosave.h"
+#include "port/cheats.h"
+
+#endif
 FS_EXTERN_OVERLAY(intro_title);
 FS_EXTERN_OVERLAY(OVY_124);
 FS_EXTERN_OVERLAY(field);
@@ -44,6 +49,11 @@ const OverlayManagerTemplate gApplication_ContinueFieldsys = {
 };
 
 static FieldSystem *sFieldSysPtr;
+#if defined(SDK_PORT)
+FieldSystem *PC_Cheats_GetFieldSystem(void) {
+    return sFieldSysPtr;
+}
+#endif
 
 typedef struct FieldSystemInitWork {
     int unk0;
@@ -153,6 +163,10 @@ FieldSystem *FieldSystem_New(OverlayManager *man) {
 
     FieldSystem_Init(man, fieldSystem);
 
+#if defined(SDK_PORT)
+    PC_AutosaveReset();
+
+#endif
     UnloadOverlayByID(FS_OVERLAY_ID(OVY_124));
 
     return fieldSystem;
@@ -160,6 +174,9 @@ FieldSystem *FieldSystem_New(OverlayManager *man) {
 
 void FieldSystem_Delete(OverlayManager *man) {
     FieldSystem *fieldSystem = OverlayManager_GetData(man);
+#if defined(SDK_PORT)
+    sFieldSysPtr = NULL;
+#endif
     MapMatrix_Free(fieldSystem->mapMatrix);
     Field_FreeMapEvents(fieldSystem);
     Heap_Free(fieldSystem->bagCursor);
@@ -194,6 +211,9 @@ static BOOL FieldSystem_Main(FieldSystem *fieldSystem) {
     } else if (fieldSystem->processManager->child) {
         ppOverlayManager_RunFrame_DeleteIfFinished(&fieldSystem->processManager->child);
     }
+#if defined(SDK_PORT)
+    PC_AutosaveUpdate(fieldSystem);
+#endif
     if (fieldSystem->processManager->isDone && !fieldSystem->taskman && !fieldSystem->processManager->parent && !fieldSystem->processManager->child) {
         return TRUE;
     }
@@ -298,7 +318,11 @@ int FieldSystem_GetBottomScreenState() {
     if (sFieldSysPtr->mapSystems == NULL) {
         return 0;
     }
+#if defined(SDK_PORT)
+    return sFieldSysPtr->mapSystems->unk14 != NULL;
+#else
     return sFieldSysPtr->mapSystems->unk14;
+#endif
 }
 
 void FieldSystem_SetSavedBottomScreenAppId(FieldSystem *fieldSystem, int appId) {

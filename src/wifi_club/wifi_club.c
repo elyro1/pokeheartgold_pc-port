@@ -1,6 +1,9 @@
 #include "wifi_club.h"
 
 #include "global.h"
+#if defined(SDK_PORT)
+#include <hg/offline_features.h>
+#endif
 
 #include "application/plaza_game.h"
 #include "application/plaza_game_mime_jr_top.h"
@@ -194,10 +197,15 @@ static BOOL Task_WifiClub(TaskManager *taskManager) {
         task->state = WIFI_CLUB_TASK_OPEN_CLUB;
         break;
     case WIFI_CLUB_TASK_WIFI_SETTINGS:
+#if defined(SDK_PORT)
+        PC_ShowUnavailableFeature(PC_FEATURE_WIFI_SETUP);
+        task->state = 2;
+#else
         Heap_Create(HEAP_ID_3, HEAP_ID_53, 0x40100);
         LoadOVY13();
         RunWifiSetupApp(HEAP_ID_53);
         OS_ResetSystem(0);
+#endif
         break;
     case WIFI_CLUB_TASK_EXIT:
     case WIFI_CLUB_TASK_EXIT_EARLY:

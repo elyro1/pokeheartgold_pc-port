@@ -62,13 +62,25 @@ void PokeathlonDiscCatchCpu_Update(PokeathlonDiscCatchCpu *cpu) {
     int j = 0;
     if (j < cpu->count) {
         u16 average;
+#if defined(SDK_PORT)
+        PokeathlonDiscCatchCpuMon *team = cpu->teams[0];
+#else
         i = (u32)cpu->teams[0];
+#endif
         average = total / POKEATHLON_PARTICIPANTS;
         do {
             int score = PokeathlonDiscCatch_GetTeamScore(work, (u8)j);
+#if defined(SDK_PORT)
+            PokeathlonDiscCatchCpuTeam_Update(team, average, score);
+#else
             PokeathlonDiscCatchCpuTeam_Update((PokeathlonDiscCatchCpuMon *)i, average, score);
+#endif
             j++;
+#if defined(SDK_PORT)
+            team += NELEMS(cpu->teams[0]);
+#else
             i += sizeof(cpu->teams[0]);
+#endif
         } while (j < cpu->count);
     }
 }

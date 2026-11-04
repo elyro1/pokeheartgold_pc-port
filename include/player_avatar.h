@@ -6,6 +6,9 @@
 #include "constants/player_avatar.h"
 
 #include "field_types_def.h"
+#if defined(SDK_PORT)
+#include "field_surf_mount.h"
+#endif
 #include "save.h"
 
 struct FieldEffect;

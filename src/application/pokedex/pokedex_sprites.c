@@ -515,29 +515,49 @@ void PokedexApp_CreateTypeIconSprites(PokedexAppData *pokedexApp, int index) {
 // Hides the shown type icon pair and draws species' types into the other one (the second icon only for a
 // dual-type species).
 void PokedexApp_UpdateTypeIcons(PokedexAppData *pokedexApp, u32 species, int entry, int index) {
+#if defined(SDK_PORT)
+#else
     int offset;
+#endif
     u8 swap;
     int form;
     u16 type1;
     u16 type2;
 
     if (pokedexApp->language != GAME_LANGUAGE || species == SPECIES_NONE || pokedexApp->listEntries[entry].caughtState == 1) {
+#if defined(SDK_PORT)
+        ManagedSprite_SetDrawFlag(pokedexApp->sprites[index], FALSE);
+        ManagedSprite_SetDrawFlag(pokedexApp->sprites[index + 1], FALSE);
+        ManagedSprite_SetDrawFlag(pokedexApp->sprites[index + 2], FALSE);
+        ManagedSprite_SetDrawFlag(pokedexApp->sprites[index + 3], FALSE);
+#else
         index *= 4;
         ManagedSprite_SetDrawFlag(*(ManagedSprite **)((u8 *)pokedexApp->sprites + index), FALSE);
         ManagedSprite_SetDrawFlag(*(ManagedSprite **)((u8 *)&pokedexApp->sprites[1] + index), FALSE);
         ManagedSprite_SetDrawFlag(*(ManagedSprite **)((u8 *)&pokedexApp->sprites[2] + index), FALSE);
         ManagedSprite_SetDrawFlag(*(ManagedSprite **)((u8 *)&pokedexApp->sprites[3] + index), FALSE);
+#endif
         return;
     }
     if (pokedexApp->typeIconSwap == 0) {
+#if defined(SDK_PORT)
+        ManagedSprite_SetDrawFlag(pokedexApp->sprites[index], FALSE);
+        ManagedSprite_SetDrawFlag(pokedexApp->sprites[index + 1], FALSE);
+#else
         offset = index * 4;
         ManagedSprite_SetDrawFlag(*(ManagedSprite **)((u8 *)pokedexApp->sprites + offset), FALSE);
         ManagedSprite_SetDrawFlag(*(ManagedSprite **)((u8 *)&pokedexApp->sprites[1] + offset), FALSE);
+#endif
         index += 2;
     } else {
+#if defined(SDK_PORT)
+        ManagedSprite_SetDrawFlag(pokedexApp->sprites[index + 2], FALSE);
+        ManagedSprite_SetDrawFlag(pokedexApp->sprites[index + 3], FALSE);
+#else
         offset = index * 4;
         ManagedSprite_SetDrawFlag(*(ManagedSprite **)((u8 *)&pokedexApp->sprites[2] + offset), FALSE);
         ManagedSprite_SetDrawFlag(*(ManagedSprite **)((u8 *)&pokedexApp->sprites[3] + offset), FALSE);
+#endif
     }
     swap = pokedexApp->typeIconSwap ^ 1;
     pokedexApp->typeIconSwap = swap;
@@ -551,14 +571,26 @@ void PokedexApp_UpdateTypeIcons(PokedexAppData *pokedexApp, u32 species, int ent
     }
     type1 = GetMonBaseStat_HandleAlternateForm(species, form, BASE_TYPE1);
     PokedexApp_SetTypeIconGraphics(pokedexApp, index, type1);
+#if defined(SDK_PORT)
+    ManagedSprite_SetDrawFlag(pokedexApp->sprites[index], TRUE);
+#else
     offset = index * 4;
     ManagedSprite_SetDrawFlag(*(ManagedSprite **)((u8 *)pokedexApp->sprites + offset), TRUE);
+#endif
     type2 = GetMonBaseStat_HandleAlternateForm(species, form, BASE_TYPE2);
     if (type2 == 0 || type1 == type2) {
+#if defined(SDK_PORT)
+        ManagedSprite_SetDrawFlag(pokedexApp->sprites[index + 1], FALSE);
+#else
         ManagedSprite_SetDrawFlag(*(ManagedSprite **)((u8 *)&pokedexApp->sprites[1] + offset), FALSE);
+#endif
     } else {
         PokedexApp_SetTypeIconGraphics(pokedexApp, index + 1, type2);
+#if defined(SDK_PORT)
+        ManagedSprite_SetDrawFlag(pokedexApp->sprites[index + 1], TRUE);
+#else
         ManagedSprite_SetDrawFlag(*(ManagedSprite **)((u8 *)&pokedexApp->sprites[1] + offset), TRUE);
+#endif
     }
 }
 

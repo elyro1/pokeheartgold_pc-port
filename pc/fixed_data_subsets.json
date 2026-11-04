@@ -1,0 +1,73 @@
+{
+  "asm/nitrocrypto_data.s": [
+    "gNitroCryptoExpP16",
+    "gNitroCryptoExpP2",
+    "gNitroCryptoExpP4",
+    "shift"
+  ],
+  "asm/footprint_stamp_data.s": [
+    "gFootprintStampCameraChainLengths",
+    "gFootprintStampBoardYs",
+    "gFootprintStampBoardXs",
+    "gFootprintStampPartyHitboxes",
+    "gFootprintStampInkColors",
+    "gFootprintStampSpeciesFootprints",
+    "gFootprintStampSizeBounds",
+    "gFootprintStampNatureEffects"
+  ],
+  "asm/hall_of_fame_showcase_data.s": [
+    "gHallOfFameShowcaseGraphicsBanks"
+  ],
+  "asm/lock_capsule_card_data.s": [],
+  "asm/main_menu_data.s": [
+    "gGiftCartridgePublicKey",
+    "gAgbSpeciesMap",
+    "gGiftCartridgeGameCodes"
+  ],
+  "asm/overlay_01_sprite_data.s": [],
+  "asm/wifi_plaza_map_rodata.s": [
+    "gWiFiPlazaInstrumentStartSEs",
+    "gWiFiPlazaInstrumentModelDescs",
+    "gWiFiPlazaLight1Colors",
+    "gWiFiPlazaLightColorSets",
+    "gWiFiPlazaMoverMarkerTags",
+    "gWiFiPlazaMoverSounds",
+    "gWiFiPlazaInstrumentBalloonHeights",
+    "gWiFiPlazaInstrumentBursts_Bell01",
+    "gWiFiPlazaInstrumentBursts_Cymbal02",
+    "gWiFiPlazaInstrumentBursts_Drum01",
+    "gWiFiPlazaInstrumentBursts_Bell02",
+    "gWiFiPlazaInstrumentBursts_Cymbal03",
+    "gWiFiPlazaInstrumentBursts_Cymbal01",
+    "gWiFiPlazaInstrumentBursts_Drum02",
+    "gWiFiPlazaInstrumentBursts_Bell03",
+    "gWiFiPlazaInstrumentBursts_Drum03",
+    "gWiFiPlazaInstrumentSparkleStarts",
+    "gWiFiPlazaInstrumentSparkleFalls",
+    "gWiFiPlazaInstrumentSignalSteps",
+    "gWiFiPlazaInstrumentSignalNextSteps",
+    "gWiFiPlazaInstrumentPopModel1",
+    "gWiFiPlazaInstrumentPopModel2",
+    "gWiFiPlazaInstrumentPopModel3",
+    "gWiFiPlazaInstrumentPopModel0",
+    "gWiFiPlazaInstrumentBalloonModel0",
+    "gWiFiPlazaInstrumentBalloonModel1",
+    "gWiFiPlazaInstrumentBalloonModel2",
+    "gWiFiPlazaInstrumentBurstModels01",
+    "gWiFiPlazaInstrumentBurstModels02",
+    "gWiFiPlazaInstrumentBurstModels03",
+    "gWiFiPlazaEventModelIds3",
+    "gWiFiPlazaEventModelIds4",
+    "gWiFiPlazaEventModelIds2",
+    "gWiFiPlazaEventModelIds5",
+    "gWiFiPlazaEventModelIds1",
+    "gWiFiPlazaEventModelIds6",
+    "gWiFiPlazaEventModelIds0",
+    "gWiFiPlazaEventPhase4Steps",
+    "gWiFiPlazaEventPhase4HideSteps",
+    "gWiFiPlazaEventPhase5Thresholds",
+    "gWiFiPlazaEventPhase5AnimSpeeds",
+    "gWiFiPlazaEventPhase3PropGroups",
+    "gWiFiPlazaEventPhase3PropIds"
+  ]
+}

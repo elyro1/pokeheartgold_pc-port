@@ -2,7 +2,12 @@
 #define POKEHEARTGOLD_TRAINER_CARD_DATA_H
 
 #include "field_system.h"
+#if defined(SDK_PORT)
+#include "igt.h"
+typedef struct TrainerCardAppArgs TrainerCardAppArgs;
+#else
 #include "overlay_trainer_card.h"
+#endif
 
 // The trainer card as it is shown by the trainer card app and exchanged over a link.
 typedef struct TrainerCardData {
